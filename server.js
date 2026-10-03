@@ -3,11 +3,26 @@
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const { WebSocketServer } = require('ws');
 
-const page = () => fs.readFileSync(path.join(__dirname, 'public', 'index.html'));
+const PUB = path.join(__dirname, 'public');
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml',
+  '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.ogg': 'audio/ogg', '.m4a': 'audio/mp4', '.aac': 'audio/aac', '.webm': 'audio/webm' };
 const server = http.createServer((req, res) => {
-  if (req.url === '/healthz') { res.writeHead(200); return res.end('ok'); }
-  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
-  res.end(page());
+  const url = decodeURIComponent((req.url || '/').split('?')[0]);
+  if (url === '/healthz') { res.writeHead(200); return res.end('ok'); }
+  let file = path.join(PUB, url === '/' ? 'index.html' : url);
+  if (!file.startsWith(PUB + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) file = path.join(PUB, 'index.html');
+  const size = fs.statSync(file).size, type = MIME[path.extname(file).toLowerCase()] || 'application/octet-stream';
+  const range = /bytes=(\d*)-(\d*)/.exec(req.headers.range || '');   // iPhones need Range support to play audio
+  const hdr = { 'Content-Type': type, 'Accept-Ranges': 'bytes', 'Cache-Control': file.endsWith('index.html') ? 'no-cache' : 'public, max-age=86400' };
+  if (range && (range[1] || range[2])) {
+    let start = range[1] ? +range[1] : Math.max(0, size - +range[2]), end = range[1] && range[2] ? +range[2] : size - 1;
+    end = Math.min(end, size - 1);
+    if (start > end) { res.writeHead(416, { 'Content-Range': 'bytes */' + size }); return res.end(); }
+    res.writeHead(206, { ...hdr, 'Content-Range': `bytes ${start}-${end}/${size}`, 'Content-Length': end - start + 1 });
+    return fs.createReadStream(file, { start, end }).pipe(res);
+  }
+  res.writeHead(200, { ...hdr, 'Content-Length': size });
+  fs.createReadStream(file).pipe(res);
 });
 
 const wss = new WebSocketServer({ server, maxPayload: 32 * 1024 });
