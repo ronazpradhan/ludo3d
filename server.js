@@ -7,13 +7,13 @@ const PUB = path.join(__dirname, 'public');
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml',
   '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.ogg': 'audio/ogg', '.m4a': 'audio/mp4', '.aac': 'audio/aac', '.webm': 'audio/webm' };
 const server = http.createServer((req, res) => {
-  const url = decodeURIComponent((req.url || '/').split('?')[0]);
+  let url = '/'; try { url = decodeURIComponent((req.url || '/').split('?')[0]); } catch (e) {}
   if (url === '/healthz') { res.writeHead(200); return res.end('ok'); }
   let file = path.join(PUB, url === '/' ? 'index.html' : url);
   if (!file.startsWith(PUB + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) file = path.join(PUB, 'index.html');
   const size = fs.statSync(file).size, type = MIME[path.extname(file).toLowerCase()] || 'application/octet-stream';
   const range = /bytes=(\d*)-(\d*)/.exec(req.headers.range || '');   // iPhones need Range support to play audio
-  const hdr = { 'Content-Type': type, 'Accept-Ranges': 'bytes', 'Cache-Control': file.endsWith('index.html') ? 'no-cache' : 'public, max-age=86400' };
+  const hdr = { 'Content-Type': type, 'Accept-Ranges': 'bytes', 'Cache-Control': /\.(html|js|css)$/.test(file) ? 'no-cache' : 'public, max-age=86400' };
   if (range && (range[1] || range[2])) {
     let start = range[1] ? +range[1] : Math.max(0, size - +range[2]), end = range[1] && range[2] ? +range[2] : size - 1;
     end = Math.min(end, size - 1);
@@ -49,6 +49,7 @@ wss.on('connection', ws => {
 
   ws.on('message', raw => {
     let m; try { m = JSON.parse(raw); } catch { return; }
+    if (m && m.t === 'ping') return send(ws, { t: 'pong' });   // client heartbeat: lets phones notice a dead connection fast
     if (!m || typeof m.room !== 'string' || !NAME.test(m.room)) return;
     if (m.t === 'join') {
       if (ws.rooms.has(m.room) || ws.rooms.size >= MAX_ROOMS_PER_CLIENT) return;
