@@ -102,3 +102,5 @@ body.online.chat-off{--cw:0px}body.online.chat-off #chat{display:none}body.onlin
 .card .cp.bump{animation:bump .45s var(--sp)}@keyframes bump{0%{transform:scale(.5)}60%{transform:scale(1.35)}100%{transform:scale(1)}}
 .card.ph{visibility:hidden;padding:6px 0 9px;min-height:22px}
 @media(min-aspect-ratio:1/1){.card.ph{display:none}.card:nth-child(3){order:-1}}
+/* ---- back to games link on the Ludo landing ---- */
+.back{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));left:14px;z-index:2;padding:9px 16px;border-radius:999px;background:rgba(255,255,255,.12);color:#fff;font:600 14px inherit;font-family:inherit;text-decoration:none}.back:active{transform:scale(.94)}

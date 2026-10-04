@@ -1,0 +1,30 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Ludo 3D</title>
+<link rel="icon" type="image/svg+xml" href="img/logo.svg">
+<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"></head><body>
+<div id="stage"><canvas id="cv"></canvas>
+<div id="cards"></div><div id="msg" class="glass"></div>
+<button id="roll" disabled>Roll</button><button id="snd" class="glass">🔊</button><button id="qbtn" class="glass" aria-label="Quit game">✕</button></div>
+<div class="ov" id="qconf" style="display:none"><div class="box glass"><h1 style="font-size:26px">Quit game?</h1><div class="sub">Your current game will end.</div><div class="row"><button class="pill" id="qno">Keep playing</button><button class="go" id="qyes" style="padding:12px">Quit</button></div></div></div>
+<div class="ov" id="menu" style="display:none"><div class="box glass"><h1>Ludo</h1><div class="sub">Tap a player to switch You · CPU · Off</div><div class="seats" id="seats"></div><button class="go" id="start">Start Game</button><button class="pill" id="mback" style="margin-top:12px">Back</button></div></div>
+<div class="ov" id="landing"><a class="back" href="index.html">‹ Games</a><div class="blobs"><i style="--c:#fbc916;top:-10vmax;left:-8vmax"></i><i style="--c:#22c55e;top:-6vmax;right:-10vmax"></i><i style="--c:#ef4444;bottom:-12vmax;right:-6vmax"></i><i style="--c:#3b82f6;bottom:-10vmax;left:-10vmax"></i></div>
+<div class="box glass land"><img class="logo" src="img/logo.svg" alt="" width="84" height="84"><h1>Ludo</h1><div class="dots"><b style="--c:#fbc916"></b><b style="--c:#22c55e;animation-delay:.2s"></b><b style="--c:#ef4444;animation-delay:.4s"></b><b style="--c:#3b82f6;animation-delay:.6s"></b></div>
+<div class="rm" id="resume"><span id="rtxt"></span><button class="pill" id="rgo">Rejoin</button><button class="pill" id="rno" aria-label="Forget">✕</button></div>
+<input class="in" id="nick" maxlength="14" placeholder="Your name"><button class="go" id="bQuick">Play vs Computer</button>
+<div class="or">PLAY WITH FRIENDS</div><button class="go alt" id="bCreate" disabled>Create Room</button>
+<div class="row" style="margin-top:10px"><input class="in" id="code" maxlength="5" placeholder="CODE" style="margin:0;text-transform:uppercase;letter-spacing:4px"><button class="go alt" id="bJoin" disabled style="margin:0;width:auto;padding:0 26px">Join</button></div>
+<div id="rooms"></div><div class="sub" id="onl" style="margin:14px 0 0">Connecting…</div></div></div>
+<div class="ov" id="lobby" style="display:none"><div class="box glass"><div class="sub" style="margin:0">Room code</div><div id="rcode">-----</div>
+<div class="row"><button class="pill" id="cCode">Copy code</button><button class="pill" id="cLink">Copy invite link</button></div>
+<div class="seats" id="lseats" style="margin-top:14px"></div><button class="go" id="lstart">Start Game</button><button class="pill" id="lleave" style="margin-top:12px">Leave</button><div class="sub" id="lnote" style="margin:14px 0 0"></div></div></div>
+<div id="chat" class="glass"><div class="ch">Chat<small id="cinfo"></small><button id="cclose" type="button" aria-label="Close chat">✕</button></div><div id="clog"></div><div id="emo"><div class="etabs"><button class="on" data-t="e">😀 Emoji</button><button data-t="w">💬 Quick</button><button data-t="s">🔊 Sounds</button></div><div id="egrid"></div><div id="wgrid"></div><div id="sgrid"></div></div><div class="cin"><button id="ebtn" aria-label="Emojis">😀</button><input id="ctext" maxlength="200" placeholder="Message…"><button id="csend">➤</button></div></div>
+<button id="ctog" class="glass">💬<b id="cbadge"></b></button><div id="float"></div><div id="toast"></div>
+<div class="ov" id="end" style="display:none"><div class="box glass endbox"><div class="trophy">🏆</div><h1 id="etitle">Game over</h1><div id="ranks"></div><div class="endbtns"><button class="go" id="again">Play again</button><button class="pill" id="home">Home</button></div><div class="sub" id="enote"></div></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/realtime.js"></script>
+<script src="js/config.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/game.js"></script>
+<script src="js/online.js"></script>
+</body></html>

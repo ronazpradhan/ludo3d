@@ -1,30 +1,42 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Ludo 3D</title>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Games</title>
 <link rel="icon" type="image/svg+xml" href="img/logo.svg">
-<link rel="stylesheet" href="css/style.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"></head><body>
-<div id="stage"><canvas id="cv"></canvas>
-<div id="cards"></div><div id="msg" class="glass"></div>
-<button id="roll" disabled>Roll</button><button id="snd" class="glass">🔊</button><button id="qbtn" class="glass" aria-label="Quit game">✕</button></div>
-<div class="ov" id="qconf" style="display:none"><div class="box glass"><h1 style="font-size:26px">Quit game?</h1><div class="sub">Your current game will end.</div><div class="row"><button class="pill" id="qno">Keep playing</button><button class="go" id="qyes" style="padding:12px">Quit</button></div></div></div>
-<div class="ov" id="menu" style="display:none"><div class="box glass"><h1>Ludo</h1><div class="sub">Tap a player to switch You · CPU · Off</div><div class="seats" id="seats"></div><button class="go" id="start">Start Game</button><button class="pill" id="mback" style="margin-top:12px">Back</button></div></div>
-<div class="ov" id="landing"><div class="blobs"><i style="--c:#fbc916;top:-10vmax;left:-8vmax"></i><i style="--c:#22c55e;top:-6vmax;right:-10vmax"></i><i style="--c:#ef4444;bottom:-12vmax;right:-6vmax"></i><i style="--c:#3b82f6;bottom:-10vmax;left:-10vmax"></i></div>
-<div class="box glass land"><img class="logo" src="img/logo.svg" alt="" width="84" height="84"><h1>Ludo</h1><div class="dots"><b style="--c:#fbc916"></b><b style="--c:#22c55e;animation-delay:.2s"></b><b style="--c:#ef4444;animation-delay:.4s"></b><b style="--c:#3b82f6;animation-delay:.6s"></b></div>
-<div class="rm" id="resume"><span id="rtxt"></span><button class="pill" id="rgo">Rejoin</button><button class="pill" id="rno" aria-label="Forget">✕</button></div>
-<input class="in" id="nick" maxlength="14" placeholder="Your name"><button class="go" id="bQuick">Play vs Computer</button>
-<div class="or">PLAY WITH FRIENDS</div><button class="go alt" id="bCreate" disabled>Create Room</button>
-<div class="row" style="margin-top:10px"><input class="in" id="code" maxlength="5" placeholder="CODE" style="margin:0;text-transform:uppercase;letter-spacing:4px"><button class="go alt" id="bJoin" disabled style="margin:0;width:auto;padding:0 26px">Join</button></div>
-<div id="rooms"></div><div class="sub" id="onl" style="margin:14px 0 0">Connecting…</div></div></div>
-<div class="ov" id="lobby" style="display:none"><div class="box glass"><div class="sub" style="margin:0">Room code</div><div id="rcode">-----</div>
-<div class="row"><button class="pill" id="cCode">Copy code</button><button class="pill" id="cLink">Copy invite link</button></div>
-<div class="seats" id="lseats" style="margin-top:14px"></div><button class="go" id="lstart">Start Game</button><button class="pill" id="lleave" style="margin-top:12px">Leave</button><div class="sub" id="lnote" style="margin:14px 0 0"></div></div></div>
-<div id="chat" class="glass"><div class="ch">Chat<small id="cinfo"></small><button id="cclose" type="button" aria-label="Close chat">✕</button></div><div id="clog"></div><div id="emo"><div class="etabs"><button class="on" data-t="e">😀 Emoji</button><button data-t="w">💬 Quick</button><button data-t="s">🔊 Sounds</button></div><div id="egrid"></div><div id="wgrid"></div><div id="sgrid"></div></div><div class="cin"><button id="ebtn" aria-label="Emojis">😀</button><input id="ctext" maxlength="200" placeholder="Message…"><button id="csend">➤</button></div></div>
-<button id="ctog" class="glass">💬<b id="cbadge"></b></button><div id="float"></div><div id="toast"></div>
-<div class="ov" id="end" style="display:none"><div class="box glass endbox"><div class="trophy">🏆</div><h1 id="etitle">Game over</h1><div id="ranks"></div><div class="endbtns"><button class="go" id="again">Play again</button><button class="pill" id="home">Home</button></div><div class="sub" id="enote"></div></div></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="js/storage.js"></script>
-<script src="js/realtime.js"></script>
-<script src="js/config.js"></script>
-<script src="js/audio.js"></script>
-<script src="js/game.js"></script>
-<script src="js/online.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--sp:cubic-bezier(.32,1.5,.5,1)}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:radial-gradient(ellipse at 50% 20%,#262e63,#05060e 75%) fixed;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Inter,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+body{display:flex;align-items:center;justify-content:center;min-height:100vh;min-height:100dvh;padding:calc(24px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px));overflow-x:hidden}
+.blobs{position:fixed;inset:0;overflow:hidden;pointer-events:none}
+.blobs i{position:absolute;width:42vmax;height:42vmax;border-radius:50%;background:var(--c);filter:blur(100px);opacity:.28;animation:fl 12s ease-in-out infinite alternate}@keyframes fl{to{transform:translate(8vmax,6vmax) scale(1.2)}}
+main{position:relative;width:min(440px,100%);text-align:center}
+h1{margin:0;font-size:44px;font-weight:800;letter-spacing:-1.8px;background:linear-gradient(180deg,#fff,#9aa0c0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{opacity:.55;margin:6px 0 26px;font-size:15px}
+.grid{display:flex;flex-direction:column;gap:14px}
+.game{display:flex;align-items:center;gap:16px;padding:16px;text-align:left;color:inherit;text-decoration:none;position:relative;background:rgba(28,30,46,.5);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);border:.5px solid rgba(255,255,255,.2);border-radius:24px;box-shadow:0 12px 40px rgba(0,0,0,.4),inset 0 .5px 0 rgba(255,255,255,.25);transition:transform .35s var(--sp);animation:up .7s var(--sp) both}
+.game:nth-child(2){animation-delay:.08s}
+@keyframes up{from{transform:translateY(30px) scale(.95);opacity:0}}
+a.game:active{transform:scale(.97)}
+.art{flex:none;width:84px;height:84px;border-radius:22px;display:flex;align-items:center;justify-content:center;overflow:hidden;filter:drop-shadow(0 8px 18px rgba(0,0,0,.4))}
+.art img,.art svg{width:100%;height:100%;display:block}
+.info{flex:1;min-width:0}
+h2{margin:0;font-size:22px;font-weight:800;letter-spacing:-.5px}
+p{margin:4px 0 0;font-size:13px;line-height:1.35;opacity:.6}
+.act{flex:none;border-radius:999px;padding:9px 18px;background:#0a84ff;font-weight:600;font-size:14px;box-shadow:0 6px 18px rgba(10,132,255,.45)}
+.tag{flex:none;border-radius:999px;padding:6px 12px;background:rgba(255,255,255,.12);font-weight:600;font-size:12px;opacity:.85}
+
+@media(min-width:720px){
+ main{width:min(760px,100%)}h1{font-size:56px}
+ .grid{flex-direction:row;gap:18px}
+ .game{flex:1;flex-direction:column;text-align:center;padding:30px 20px 24px;gap:14px}
+ .art{width:104px;height:104px;border-radius:26px}
+}
+</style></head><body>
+<div class="blobs"><i style="--c:#fbc916;top:-10vmax;left:-8vmax"></i><i style="--c:#22c55e;top:-6vmax;right:-10vmax"></i><i style="--c:#ef4444;bottom:-12vmax;right:-6vmax"></i><i style="--c:#3b82f6;bottom:-10vmax;left:-10vmax"></i></div>
+<main>
+<h1>Pick a game</h1><div class="sub">Play with friends or against the computer</div>
+<div class="grid">
+ <a class="game" href="ludo.html"><div class="art"><img src="img/logo.svg" alt=""></div><div class="info"><h2>Ludo</h2></div><span class="act">Play</span></a>
+ 
+</div>
+</main>
 </body></html>
