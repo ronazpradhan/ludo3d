@@ -14,3 +14,7 @@ const AUDIO={
   {label:'Faaa',src:'sounds/faaa.mp3'},{label:'Sound 2',src:''},{label:'Sound 3',src:''},{label:'Sound 4',src:''},
   {label:'Sound 5',src:''},{label:'Sound 6',src:''},{label:'Sound 7',src:''},{label:'Sound 8',src:''}]};
 // ===================================================================================
+
+// Quick chat words: tap one in Chat > Quick tab to send it instantly. Edit, add or remove freely (max 200 characters each).
+const QUICK=['Good game! 🎉','GG','Well played 👏','Nice move!','Good luck 🍀','Oh no 😭','Unlucky 😅','Hurry up ⏰',
+ 'Your turn!','Lucky six! 🎲','Revenge incoming 😈','Thanks 🙏','One more game?','Be nice 😂','Wow! 😱','Oops 😬'];

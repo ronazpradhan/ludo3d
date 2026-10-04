@@ -13,7 +13,9 @@ function dec(n,o){o.n=n;o.g=gameNo;put(o);if(net){lastDec=[...lastDec,o].slice(-
 function take(n,c,fb){return new Promise(r=>{if(inbox[n])return r(inbox[n]);waiters[n]=r;
  if(net&&host&&seats[c]==1&&owner[c]!==me){const iv=setInterval(()=>{if(inbox[n]||!started){clearInterval(iv);return}if(!net.peers().some(p=>p.presence&&p.presence.id===owner[c])){clearInterval(iv);dec(n,fb())}},1200)}})}
 setInterval(()=>{if(net&&started)lastDec.forEach(o=>net.emit('g',o))},2500);
-function addChat(who,txt,col,sys){const d=document.createElement('div');d.className='cm'+(sys?' sys':'');if(!sys){const b=document.createElement('b');b.textContent=who;b.style.color=col||'#fff';d.append(b)}d.append(document.createTextNode((sys?'':' ')+txt));$('clog').append(d);$('clog').scrollTop=1e9;if(!sys&&chatHidden()){unread++;$('cbadge').textContent=unread}}
+function addChat(who,txt,col,sys){const d=document.createElement('div');d.className='cm'+(sys?' sys':'');if(!sys){const b=document.createElement('b');b.textContent=who;b.style.color=col||'#fff';d.append(b)}d.append(document.createTextNode((sys?'':' ')+txt));$('clog').append(d);$('clog').scrollTop=1e9;if(!sys&&chatHidden()){unread++;$('cbadge').textContent=unread;floatMsg(who,txt,col)}}
+// floating chat: new messages pop up over the board (like a live stream) while the chat panel is closed
+function floatMsg(who,txt,col){const f=$('float');if(!f)return;const d=document.createElement('div');d.className='fm';const b=document.createElement('b');b.textContent=who;b.style.color=col||'#fff';d.append(b,document.createTextNode(' '+txt));f.append(d);while(f.children.length>3)f.firstChild.remove();setTimeout(()=>{d.classList.add('out');setTimeout(()=>d.remove(),500)},6000)}
 function sendChat(){const t=$('ctext').value.trim().slice(0,200);if(!t||!net)return;$('ctext').value='';const s=lo.indexOf(me);addChat(nick,t,CS[s],0);net.emit('chat',{u:nick,t,s})}
 (()=>{const E='😀😂🤣😍😎🥳😅😭😡🤔🙌👏👍👎🙏💪🔥🎉🎲🏆👑💀😱🤯😏😴🤝❤️💔🍀✨😈🫡😬🥲'.match(/\p{Extended_Pictographic}\uFE0F?/gu),P=$('emo'),G=$('egrid'),I=$('ctext');
  E.forEach(e=>{const b=document.createElement('button');b.type='button';b.textContent=e;b.onclick=()=>{const a=I.selectionStart??I.value.length,z=I.selectionEnd??a;I.value=(I.value.slice(0,a)+e+I.value.slice(z)).slice(0,200);I.selectionStart=I.selectionEnd=Math.min(200,a+e.length)};G.append(b)});
@@ -21,7 +23,8 @@ function sendChat(){const t=$('ctext').value.trim().slice(0,200);if(!t||!net)ret
  {const mb=document.createElement('button');mb.type='button';mb.className='mute';const paint=()=>{mb.textContent=boardOn?'🔔 Soundboard on · tap to mute':'🔕 Soundboard muted · tap to unmute';mb.classList.toggle('off',!boardOn)};mb.onclick=()=>{boardOn=!boardOn;store.set('ludo3d.board',boardOn?'1':'0');paint()};paint();$('sgrid').append(mb)}
  AUDIO.board.forEach((x,i)=>{const b=document.createElement('button');b.type='button';b.textContent=x.label;if(!x.src)b.className='empty';
   b.onclick=()=>{if(!x.src){toast('Empty slot — add an audio file first');return}if(!boardOn){toast('Soundboard is muted — tap the 🔕 button to unmute');return}if(Date.now()-lastSnd<1500)return;lastSnd=Date.now();playBoard(i);if(net)net.emit('snd',{i,u:nick})};$('sgrid').append(b)});
- P.querySelectorAll('.etabs button').forEach(b=>b.onclick=()=>{P.querySelectorAll('.etabs button').forEach(x=>x.classList.toggle('on',x==b));const sd=b.dataset.t=='s';$('sgrid').classList.toggle('on',sd);G.classList.toggle('off',sd)});
+ QUICK.forEach(w=>{const b=document.createElement('button');b.type='button';b.textContent=w;b.onclick=()=>{I.value=w;sendChat();P.classList.remove('on')};$('wgrid').append(b)});
+ P.querySelectorAll('.etabs button').forEach(b=>b.onclick=()=>{P.querySelectorAll('.etabs button').forEach(x=>x.classList.toggle('on',x==b));const t=b.dataset.t;$('sgrid').classList.toggle('on',t=='s');$('wgrid').classList.toggle('on',t=='w');G.classList.toggle('off',t!='e')});
  $('ebtn').onclick=()=>P.classList.toggle('on');$('csend').addEventListener('click',()=>P.classList.remove('on'))})();
 let lastSnd=0;
 function renderRooms(){const L=$('rooms');L.textContent='';if(!lob)return;const a=lob.peers().filter(p=>!p.isMe&&p.presence&&/^[A-Z0-9]{5}$/.test(p.presence.lr||''));if(a.length)L.append(Object.assign(document.createElement('div'),{className:'sub',textContent:'Open rooms',style:'margin:14px 0 0'}));
@@ -75,7 +78,7 @@ $('lstart').onclick=()=>{if(ls.filter(x=>x==1||x==2).length<2)return;const d={ls
 $('csend').onclick=sendChat;$('ctext').onkeydown=e=>{if(e.key=='Enter')sendChat()};
 // chat: ✕ closes it (side panel on desktop, slide-over on phones), 💬 button brings it back
 const chatHidden=()=>innerWidth<900?!chatOpen:document.body.classList.contains('chat-off');
-function setChat(open){if(innerWidth<900){chatOpen=open;$('chat').classList.toggle('open',open)}else document.body.classList.toggle('chat-off',!open);if(open){unread=0;$('cbadge').textContent=''}}
+function setChat(open){if(innerWidth<900){chatOpen=open;$('chat').classList.toggle('open',open)}else document.body.classList.toggle('chat-off',!open);if(open){unread=0;$('cbadge').textContent='';$('float').textContent=''}}
 $('ctog').onclick=()=>setChat(chatHidden());$('cclose').onclick=()=>setChat(false);
 // ---------- rejoin: remember the room + every dice/pick decision in this browser ----------
 // The game is deterministic: same decisions in = same board out. So saving the decision log is enough

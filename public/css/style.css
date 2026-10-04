@@ -77,4 +77,28 @@ body.online.chat-off{--cw:0px}body.online.chat-off #chat{display:none}body.onlin
 #sgrid .mute{flex:1 0 100%;background:rgba(255,255,255,.18)}#sgrid .mute.off{background:rgba(255,69,58,.85)}
 #resume{display:none;background:rgba(10,132,255,.2);box-shadow:inset 0 0 0 1px rgba(10,132,255,.6);margin:0 0 14px}
 .logo{display:block;width:84px;height:84px;margin:-4px auto 6px;filter:drop-shadow(0 8px 20px rgba(0,0,0,.45))}
-
+/* ---- phone layout: player cards top-left, bigger board ---- */
+#cards{top:calc(10px + env(safe-area-inset-top,0px));left:10px;transform:none}
+@media(max-aspect-ratio:1/1){
+ #cards{display:grid;grid-template-columns:repeat(2,max-content);justify-content:start;gap:6px}
+ #msg{top:calc(100px + env(safe-area-inset-top,0px))}
+}
+/* ---- floating chat, quick words, no-overlap layout ---- */
+#float{position:fixed;left:14px;bottom:calc(92px + env(safe-area-inset-bottom,0px));max-width:min(78vw,320px);display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none;z-index:4}
+.fm{padding:7px 13px;border-radius:16px;background:rgba(0,0,0,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);font-size:14px;line-height:1.3;word-break:break-word;animation:fmin .35s var(--sp) both;transition:opacity .5s,transform .5s}
+.fm.out{opacity:0;transform:translateY(-8px)}@keyframes fmin{from{opacity:0;transform:translateY(12px) scale(.9)}}
+#wgrid{display:none;flex-wrap:wrap;gap:6px}#wgrid.on{display:flex}
+#wgrid button{flex:1 0 44%;border:0;border-radius:12px;padding:10px 6px;background:rgba(255,255,255,.12);color:#fff;font:600 13px inherit;font-family:inherit;cursor:pointer}#wgrid button:active{background:#0a84ff}
+@media(max-aspect-ratio:1/1){#toast{bottom:auto;top:calc(150px + env(safe-area-inset-top,0px))}}
+@media(min-aspect-ratio:1/1){
+ #msg{top:calc(12px + env(safe-area-inset-top,0px));left:auto;right:calc(var(--cw,0px) + 14px);transform:none;white-space:normal;max-width:220px;text-align:center;border-radius:18px;padding:9px 16px}
+ #msg.pop{animation-name:popR}
+ #toast{bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+ #float{max-width:230px}
+}
+@keyframes popR{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+/* ---- capture count chip + cards placed like the board ---- */
+.card .cp{font-style:normal;font-size:11px;font-weight:700;padding:1px 6px;border-radius:999px;background:rgba(255,255,255,.16);white-space:nowrap}.card .cp.z{display:none}
+.card .cp.bump{animation:bump .45s var(--sp)}@keyframes bump{0%{transform:scale(.5)}60%{transform:scale(1.35)}100%{transform:scale(1)}}
+.card.ph{visibility:hidden;padding:6px 0 9px;min-height:22px}
+@media(min-aspect-ratio:1/1){.card.ph{display:none}.card:nth-child(3){order:-1}}

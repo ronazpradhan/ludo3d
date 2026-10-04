@@ -65,17 +65,19 @@ addEventListener('pointermove',e=>{if(!dr)return;const dx=e.clientX-dr.x,dy=e.cl
 addEventListener('pointerup',e=>{if(dr&&dr.m<28)pick(e);dr=null});addEventListener('pointercancel',()=>{dr=null});
 cv.addEventListener('wheel',e=>{});
 // game state
-let seats=[2,2,1,2],active=0,movable=[],pickRes=null,rollRes=null,rank=[],started=false;
+let seats=[2,2,1,2],active=0,movable=[],pickRes=null,rollRes=null,rank=[],caps=[0,0,0,0],started=false;
 const $=id=>document.getElementById(id),rollBtn=$('roll');
 function say(t){const m=$('msg');m.textContent=t;m.classList.remove('pop');void m.offsetWidth;m.classList.add('pop')}
 const pct=c=>Math.round(T[c].reduce((a,t)=>a+(t.p<0?0:t.p),0)/224*100),cardTxt=c=>rank.includes(c)?['🥇','🥈','🥉'][rank.indexOf(c)]||'✔':pct(c)+'%';
-function ui(){const box=$('cards'),act=seats.map((s,c)=>s?c:-1).filter(c=>c>=0),sig=act.map(c=>c+':'+seats[c]).join();
- if(box.dataset.sig===sig&&box.children.length==act.length){act.forEach((c,k)=>{const d=box.children[k];d.classList.toggle('on',c==active);d.querySelector('b').textContent=PN(c);d.querySelector('span').textContent=cardTxt(c);d.style.setProperty('--p',pct(c)+'%')})}
- else{box.dataset.sig=sig;box.innerHTML=act.map(c=>`<div class="card glass ${c==active?'on':''}" style="--c:${CS[c]};--p:${pct(c)}%"><i></i><b>${PN(c)}</b><small>${seats[c]==2?'CPU':net?(owner[c]===me?'You':''):'You'}</small><span>${cardTxt(c)}</span></div>`).join('')}}
+function ui(){const box=$('cards'),vp=((3-Math.round(sph.taz/(Math.PI/2)))%4+4)%4,ord=[(vp+1)%4,(vp+2)%4,vp,(vp+3)%4],sig=ord.map(c=>c+':'+seats[c]).join();   // cards sit where each colour is on screen: me bottom-left, then clockwise
+ const cell=c=>seats[c]?`<div class="card glass ${c==active?'on':''}" style="--c:${CS[c]};--p:${pct(c)}%"><i></i><b>${PN(c)}</b><small>${seats[c]==2?'CPU':net?(owner[c]===me?'You':''):'You'}</small><span>${cardTxt(c)}</span><em class="cp${caps[c]?'':' z'}">⚔${caps[c]}</em></div>`:'<div class="card ph"></div>';
+ if(box.dataset.sig===sig&&box.children.length==4){ord.forEach((c,k)=>{if(!seats[c])return;const d=box.children[k];d.classList.toggle('on',c==active);d.querySelector('b').textContent=PN(c);d.querySelector('span').textContent=cardTxt(c);d.style.setProperty('--p',pct(c)+'%');
+  const e=d.querySelector('.cp'),t='⚔'+caps[c];if(e.textContent!==t){e.textContent=t;e.classList.toggle('z',!caps[c]);e.classList.remove('bump');void e.offsetWidth;e.classList.add('bump')}})}
+ else{box.dataset.sig=sig;box.innerHTML=ord.map(cell).join('')}}
 function drawSeats(){$('seats').innerHTML=seats.map((s,c)=>`<button class="seat ${s?'':'off'}" style="--c:${CS[c]}" onclick="seats[${c}]=(seats[${c}]+1)%3;sfx.tick();drawSeats()"><i></i><span>${CN[c]}</span><em>${['Off','You','CPU'][s]}</em></button>`).join('')}
 drawSeats();
 $('snd').textContent=snd?'🔊':'🔇';$('snd').onclick=()=>{snd=!snd;store.set('ludo3d.sfx',snd?'1':'0');$('snd').textContent=snd?'🔊':'🔇'};
-function startGame(){sfx.start();
+function startGame(){caps=[0,0,0,0];sfx.start();
  ALL.forEach(t=>{t.g.visible=seats[t.pl]>0;t.g.position.copy(wv(t));t.g.position.y=8;t.g.scale.setScalar(.01)});
  ALL.filter(t=>t.g.visible).forEach((t,k)=>sleep(k*60).then(()=>{beep(300+k*40,.08);tween(.5,k2=>{t.g.position.y=BY+8*(1-k2)*(1-k2);t.g.scale.setScalar(Math.max(.01,k2))},ease)}));
  faceTo(Math.max(0,net?seats.findIndex((x,i)=>x==1&&owner[i]===me):(seats.indexOf(1)>=0?seats.indexOf(1):seats.findIndex(x=>x))),true);started=true;sleep(1400).then(play)}
@@ -91,8 +93,8 @@ async function moveToken(t,v){let cap=0;
  if(t.p<0){t.p=0;await hop(t,cellRC(t.pl,t.i,0),1.1,.28);sfx.out();wave(t.g.position.x,t.g.position.z,C[t.pl])}
  else for(let s=0;s<v;s++){t.p++;await hop(t,cellRC(t.pl,t.i,t.p))}
  if(t.p<=50&&!SAFE.has(abs(t.pl,t.p))){const a=abs(t.pl,t.p);
-  for(const o of ALL){if(o.pl!=t.pl&&o.g.visible&&o.p>=0&&o.p<=50&&abs(o.pl,o.p)==a){cap++;const q=o.g.position;burst(q.x,.5,q.z,[C[o.pl],0xffffff],34,7);wave(q.x,q.z,C[o.pl]);if(!ff)shake=.5;sfx.faah();
-   o.p=-1;const f=q.clone(),b=wv(o);await tween(.4,k=>{o.g.position.lerpVectors(f,b,k);o.g.position.y=.3+Math.sin(k*Math.PI)*3.5;o.g.rotation.y=k*12},ease);o.g.rotation.y=0}}}
+  for(const o of ALL){if(o.pl!=t.pl&&o.g.visible&&o.p>=0&&o.p<=50&&abs(o.pl,o.p)==a){cap++;caps[t.pl]++;const q=o.g.position;burst(q.x,.5,q.z,[C[o.pl],0xffffff],34,7);wave(q.x,q.z,C[o.pl]);if(!ff)shake=.5;sfx.faah();
+   o.p=-1;ui();const f=q.clone(),b=wv(o);await tween(.4,k=>{o.g.position.lerpVectors(f,b,k);o.g.position.y=.3+Math.sin(k*Math.PI)*3.5;o.g.rotation.y=k*12},ease);o.g.rotation.y=0}}}
  if(t.p==56){const q=t.g.position;burst(q.x,.5,q.z,[C[t.pl],0xffffff,0xffd740],40,6);sfx.home()}
  await settle();return{cap,fin:t.p==56}}
 let gameNo=0,ended=false,againPend=false;
@@ -145,6 +147,6 @@ const clk=new THREE.Clock();let tm=0;
  movable.forEach(t=>{t.g.position.y=(t.p<0?BY:.1)+Math.abs(Math.sin(tm*5))*.3;t.m.material.emissiveIntensity=.3+Math.sin(tm*6)*.25;t.ring.scale.setScalar(1+Math.sin(tm*6)*.12)});
  
  sph.az+=(sph.taz-sph.az)*.16;sph.pol+=(sph.tpol-sph.pol)*.16;sph.r+=(sph.tr-sph.r)*.16;{const sa=Math.sin(sph.az),ca=Math.cos(sph.az);ALL.forEach(t=>{t.m.rotation.set(-1.36,sph.az,0,'YXZ');t.m.position.set(sa*.4,.3,ca*.4)})}shake*=.9;
- const r=sph.r*Math.max(1,1.05/aspect),sx=(Math.random()-.5)*shake,sz=(Math.random()-.5)*shake;
+ const r=sph.r*Math.max(1,.88/aspect),sx=(Math.random()-.5)*shake,sz=(Math.random()-.5)*shake;
  cam.position.set(r*Math.sin(sph.pol)*Math.sin(sph.az)+sx,r*Math.cos(sph.pol),r*Math.sin(sph.pol)*Math.cos(sph.az)+sz);cam.lookAt(0,0,0);
  dsh.position.set(dice.position.x+.08+(dice.position.y-.3)*.3,.2,dice.position.z+.1+(dice.position.y-.3)*.3);dsh.rotation.z=dice.rotation.z;dsh.scale.copy(dice.scale);R.render(S,cam)})();
