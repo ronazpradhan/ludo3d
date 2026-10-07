@@ -36,7 +36,7 @@ function createJutpattiServer({ send, now = Date.now, log = defaultLog, randInt 
   // Public event log: written to the server log and kept (last HISTORY) for players to see.
   // Callers only pass public data; stock-drawn cards never reach here (engine events omit them).
   function record(room, e) {
-    const entry = { ...e, at: now() };
+    const entry = { ...e, id: room.seq = (room.seq || 0) + 1, at: now() };   // id: lets clients animate each event once
     room.history.push(entry); if (room.history.length > HISTORY) room.history.shift();
     log({ room: room.code, gameNo: room.gameNo, ...e });
   }

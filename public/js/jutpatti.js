@@ -17,7 +17,8 @@ const ERR = {
 const net = window.claude && window.claude.raw;
 
 let S = null, me = null, sel = null, pending = null, kicked = false, wantResume = true;
-let lastTurnKey = '', lastHistLen = 0, lastStatus = '';
+let lastTurnKey = '', lastStatus = '', lastEvId = null;
+let drag = null, deferred = false, noClick = false, skipMine = false, hideCard = null;   // gesture state
 
 // ---------- small helpers ----------
 const toast = t => { const e = $('toast'); e.textContent = t; e.classList.remove('on'); void e.offsetWidth; e.classList.add('on'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('on'), 2400); };
@@ -53,7 +54,7 @@ function act(move) {
   const g = S && S.game; if (!g || pending) return;
   pending = rid(); render();
   send({ t: 'jp:act', v: g.version, aid: pending, move });
-  setTimeout(() => { if (pending) { pending = null; send({ t: 'jp:sync' }); render(); } }, 4000);   // never get stuck
+  setTimeout(() => { if (pending) { pending = null; hideCard = null; send({ t: 'jp:sync' }); render(); } }, 4000);   // never get stuck
 }
 
 function onMsg(m) {
@@ -71,24 +72,26 @@ function onMsg(m) {
   } else if (m.t == 'jp:state') {
     const prevVer = S && S.game && S.game.version;
     S = m; me = m.you;
-    if (pending && (!S.game || S.game.version !== prevVer)) pending = null;
+    if (pending && (!S.game || S.game.version !== prevVer)) { pending = null; hideCard = null; }
     if (sel && !(S.game && S.game.you && S.game.you.hand.includes(sel))) sel = null;
     render();
   } else if (m.t == 'jp:err') {
     if (m.code == 'SESSION_EXPIRED') { clearSess(); S = null; render(); toast('That room is no longer available'); return; }
     if (m.code == 'STALE') return;   // the fresh state follows right after
-    pending = null; toast(ERR[m.code] || 'Error: ' + m.code); render();
+    pending = null; hideCard = null; skipMine = false; toast(ERR[m.code] || 'Error: ' + m.code); render();
   } else if (m.t == 'jp:kicked') {
     kicked = true; S = null; render(); toast('This room was opened in another tab'); tabStore.del(SKEY); const s = anySess(); if (s) showResume(s);
   } else if (m.t == 'jp:left') { S = null; render(); }
 }
 
 // ---------- rendering ----------
+function flushRender() { if (deferred) { deferred = false; render(); } }
 function render() {
+  if (drag && drag.ghost) { deferred = true; return; }   // don't rebuild the hand under the player's finger
   const st = S ? S.room.status : 'none';
   show('landing', !S); show('lobby', st == 'lobby'); show('end', st == 'over');
   $('jtable').style.visibility = S && S.game ? 'visible' : 'hidden';
-  if (!S) { lastStatus = ''; return; }
+  if (!S) { lastStatus = ''; lastEvId = null; return; }
   if (st == 'lobby') renderLobby();
   renderTable();
   if (st == 'over') renderEnd();
@@ -130,7 +133,7 @@ function renderTable() {
   others.forEach((p, i) => {
     const a = Math.PI + (i + 1) / (others.length + 1) * Math.PI, x = 50 + 44 * Math.cos(a), y = 54 + 44 * Math.sin(a);
     const d = document.createElement('div'); d.className = 'st' + (g.current === p.pid && g.status == 'playing' ? ' on' : '') + (!p.active || conn[p.pid] === false ? ' off' : '');
-    d.style.left = x + '%'; d.style.top = y + '%'; d.style.setProperty('--c', colorOf(p.pid));
+    d.dataset.pid = p.pid; d.style.left = x + '%'; d.style.top = y + '%'; d.style.setProperty('--c', colorOf(p.pid));
     const nm = document.createElement('b'), dot = document.createElement('i'); nm.append(dot, document.createTextNode(nameOf(p.pid)));
     const fan = document.createElement('div'); fan.className = 'fan'; for (let k = 0; k < Math.min(p.cards, 8); k++) fan.append(document.createElement('span'));
     const info = document.createElement('small'); info.textContent = !p.active ? 'left' : p.cards + ' cards' + (conn[p.pid] === false ? ' · offline' : '');
@@ -150,7 +153,7 @@ function renderTable() {
   // status line
   const cur = g.current, js = $('jstatus'); let txt;
   if (g.status != 'playing') txt = 'Game over';
-  else if (myTurn) txt = g.phase == 'draw' ? 'Your turn · draw from the stock or take the discard' : 'Your turn · pick a card to discard';
+  else if (myTurn) txt = g.phase == 'draw' ? 'Your turn · take a card' : 'Your turn · throw a card away';
   else txt = 'Waiting for ' + nameOf(cur) + (conn[cur] === false ? ' (offline — they have 2 min to return)' : '…');
   js.textContent = txt; js.classList.toggle('me', myTurn);
   const tk = g.turn + ':' + cur; if (tk !== lastTurnKey) { js.classList.remove('pop'); void js.offsetWidth; js.classList.add('pop'); if (myTurn && lastTurnKey) sfx.chime(); lastTurnKey = tk; }
@@ -162,18 +165,19 @@ function renderTable() {
     groups.forEach(gr => {
       const w = document.createElement('div'); w.className = 'grp' + (gr.pair ? ' pair' : '');
       gr.cards.forEach(c => {
+        if (c === hideCard) return;   // already thrown, waiting for the server to confirm
         const e = cardEl(c, 'button'); if (c === sel) e.classList.add('sel'); if (c === ld) e.classList.add('new');
-        e.onclick = () => pickCard(c); w.append(e);
+        e.onclick = () => pickCard(c); e.onpointerdown = ev => beginDrag(ev, 'hand', c, e); w.append(e);
       });
-      H.append(w);
+      if (w.children.length) H.append(w);
     });
     $('mylabel').textContent = you.pairs.length + ' pair' + (you.pairs.length == 1 ? '' : 's') + ' · ' + you.singles.length + ' unpaired' + (R.players.length ? ' · score ' + ((R.players.find(p => p.pid === me) || {}).score || 0) : '');
   } else $('mylabel').textContent = 'You are watching this game';
-  const canThrow = myTurn && !pending && g.phase == 'discard' && sel && you.validMoves.some(m => m.type == 'discard' && m.card === sel);
-  $('aStock').disabled = !canStock; $('aDisc').disabled = !canDisc; $('aThrow').disabled = !canThrow;
-  $('aStock').style.display = $('aDisc').style.display = myTurn && g.phase == 'discard' ? 'none' : '';
-  $('aThrow').style.display = myTurn && g.phase == 'discard' ? '' : 'none';
+  $('hint').textContent = !myTurn || pending ? '' : g.phase == 'draw'
+    ? 'Drag a card from the stock or the discard pile into your hand'
+    : sel ? 'Tap it again — or drag it up onto the table — to throw it' : 'Drag a card up onto the table to throw it away';
   renderLog();
+  animateEvents();
 }
 
 function logLine(e) {
@@ -195,7 +199,6 @@ function renderLog() {
   const h = S.room.history, L = $('jlog'); L.textContent = '';
   h.map(logLine).filter(Boolean).slice(-12).forEach(t => { const d = document.createElement('div'); d.textContent = t; L.append(d); });
   L.scrollTop = 1e9;
-  if (h.length !== lastHistLen) { const e = h[h.length - 1]; if (e && e.pid !== me && (e.type == 'CARD_PLAYED' || e.type == 'CARD_DRAWN')) sfx.tick(); lastHistLen = h.length; }
 }
 
 function renderEnd() {
@@ -214,15 +217,110 @@ function renderEnd() {
   $('enote').textContent = R.players.length < R.minPlayers ? 'Waiting for more players to join (code ' + R.code + ')' : 'The next game starts when everyone taps Rematch';
 }
 
-// ---------- input ----------
+// ---------- input: gestures ----------
+// Draw: drag a card from the stock or discard pile down into your hand (or flick it down).
+// Discard: drag a card from your hand up onto the table (or flick it up).
+// Taps still work: tap a pile to draw, tap a card to lift it and tap it again to throw it.
+// These only send an intent; the server decides whether the move is allowed.
+const FLICK = 0.6;   // px per ms: a quick swipe counts even if it doesn't reach the drop zone
+const canDraw = src => { const g = S && S.game; return !!(g && g.status == 'playing' && g.current === me && !pending && g.you && g.you.validMoves.some(m => m.source == src)); };
+const canThrow = c => { const g = S && S.game; return !!(g && g.status == 'playing' && g.current === me && !pending && g.you && g.you.validMoves.some(m => m.type == 'discard' && m.card === c)); };
+const handTop = () => $('mine').getBoundingClientRect().top;
+
+function beginDrag(e, kind, card, el) {
+  if (drag || (e.pointerType == 'mouse' && e.button !== 0)) return;
+  if (kind != 'hand' && !canDraw(kind)) return;   // nothing to pick up from a pile unless you may draw
+  drag = { kind, card, el, id: e.pointerId, x0: e.clientX, y0: e.clientY, pts: [[e.clientX, e.clientY, e.timeStamp]], ghost: null };
+}
+function startGhost() {
+  const r = drag.el.getBoundingClientRect(), g = drag.kind == 'stock' ? document.createElement('div') : cardEl(drag.card);
+  if (drag.kind == 'stock') g.className = 'pc down';
+  g.classList.add('ghost'); g.style.left = r.left + 'px'; g.style.top = r.top + 'px'; g.style.width = r.width + 'px'; g.style.height = r.height + 'px';
+  document.body.append(g); drag.ghost = g; drag.r = r;
+  if (drag.kind != 'stock') drag.el.classList.add('lift');
+  sel = null; drag.el.classList.remove('sel');
+}
+addEventListener('pointermove', e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+  if (!drag.ghost) { if (Math.hypot(dx, dy) < 8) return; if (!drag.el.isConnected) { drag = null; return; } startGhost(); }
+  drag.pts.push([e.clientX, e.clientY, e.timeStamp]); if (drag.pts.length > 5) drag.pts.shift();
+  drag.ghost.style.left = drag.r.left + dx + 'px'; drag.ghost.style.top = drag.r.top + dy + 'px';
+  drag.ghost.style.transform = 'rotate(' + Math.max(-12, Math.min(12, dx / 25)) + 'deg) scale(1.08)';
+  const ht = handTop();
+  $('felt').classList.toggle('hot', drag.kind == 'hand' && e.clientY < ht - 10 && canThrow(drag.card));
+  $('mine').classList.toggle('hot', drag.kind != 'hand' && e.clientY > ht - 30);
+}, { passive: true });
+function endDrag(e) {
+  if (!drag || e.pointerId !== drag.id) return;
+  const d = drag; drag = null;
+  $('felt').classList.remove('hot'); $('mine').classList.remove('hot');
+  if (!d.ghost) return flushRender();   // just a tap: the click handler takes it from here
+  noClick = true; setTimeout(() => { noClick = false; }, 50);
+  const a = d.pts[0], b = d.pts[d.pts.length - 1], vy = (b[1] - a[1]) / Math.max(1, b[2] - a[2]), ht = handTop();
+  const aimed = e.type == 'pointerup' && (d.kind == 'hand' ? e.clientY < ht - 10 || vy < -FLICK : e.clientY > ht - 30 || vy > FLICK);
+  const ok = aimed && (d.kind == 'hand' ? canThrow(d.card) : canDraw(d.kind));
+  if (ok) {
+    const to = (d.kind == 'hand' ? $('disc') : $('hand')).getBoundingClientRect();
+    glide(d.ghost, to, d.kind != 'hand');
+    skipMine = true; sfx.tick();
+    if (d.kind == 'hand') { hideCard = d.card; act({ type: 'discard', card: d.card }); }
+    else act({ type: 'draw', source: d.kind });
+  } else {
+    glide(d.ghost, d.r, false, () => d.el.classList.remove('lift'));   // snap back
+    if (aimed && d.kind == 'hand') { const g = S && S.game; toast(!g || g.current !== me ? 'Wait for your turn' : g.phase == 'draw' ? 'Draw a card first' : "You can't do that now"); }
+  }
+  flushRender();
+}
+addEventListener('pointerup', endDrag); addEventListener('pointercancel', endDrag);
+
+// moves a fixed-position card to the centre of a target rect, then removes it
+function glide(el, to, fade, done) {
+  const r = el.getBoundingClientRect(), tx = to.left + to.width / 2 - (r.left + r.width / 2), ty = to.top + to.height / 2 - (r.top + r.height / 2);
+  const an = el.animate([{ transform: el.style.transform || 'none', opacity: 1 }, { transform: `translate(${tx}px,${ty}px) scale(${fade ? .7 : 1})`, opacity: fade ? 0 : 1 }],
+    { duration: 220, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
+  an.onfinish = () => { el.remove(); if (done) done(); };
+}
+
 function pickCard(c) {
+  if (noClick) return;
   const g = S && S.game; if (!g || g.current !== me || g.phase != 'discard' || pending) return;
-  if (sel === c) { act({ type: 'discard', card: c }); sel = null; return; }   // second tap on the same card discards it
+  if (sel === c) { sel = null; hideCard = c; act({ type: 'discard', card: c }); return; }   // second tap on the same card throws it
   sel = c; sfx.tick(); render();
 }
-$('stock').onclick = $('aStock').onclick = () => { if (!$('aStock').disabled) { sfx.tick(); act({ type: 'draw', source: 'stock' }); } };
-$('disc').onclick = $('aDisc').onclick = () => { if (!$('aDisc').disabled) { sfx.tick(); act({ type: 'draw', source: 'discard' }); } };
-$('aThrow').onclick = () => { if (sel) { const c = sel; sel = null; act({ type: 'discard', card: c }); } };
+$('stock').onclick = () => { if (!noClick && canDraw('stock')) { sfx.tick(); act({ type: 'draw', source: 'stock' }); } };
+$('disc').onclick = () => { if (!noClick && canDraw('discard')) { sfx.tick(); act({ type: 'draw', source: 'discard' }); } };
+$('stock').onpointerdown = e => beginDrag(e, 'stock', null, $('stock'));
+$('disc').onpointerdown = e => beginDrag(e, 'discard', S && S.game && S.game.discardTop, $('disc'));
+
+// ---------- other players' moves: cards fly between their seat and the piles ----------
+function animateEvents() {
+  const h = S.room.history; if (!h.length) return;
+  const newest = h[h.length - 1].id;
+  if (lastEvId == null || newest - lastEvId > 8 || newest < lastEvId) { lastEvId = newest; return; }   // first view / rejoin: don't replay
+  const fresh = h.filter(e => e.id > lastEvId); lastEvId = newest;
+  fresh.forEach((e, i) => setTimeout(() => flyEvent(e), i * 140));
+}
+function flyEvent(e) {
+  if (!S || !S.game || (e.type != 'CARD_DRAWN' && e.type != 'CARD_PLAYED')) return;
+  if (e.pid === me && skipMine) { skipMine = false; return; }   // you already moved this card with your finger
+  const seat = e.pid === me ? $('hand') : document.querySelector('.st[data-pid="' + e.pid + '"]');
+  if (!seat) return;
+  const pile = $(e.type == 'CARD_PLAYED' || e.source == 'discard' ? 'disc' : 'stock').getBoundingClientRect(), sr = seat.getBoundingClientRect();
+  const face = e.type == 'CARD_PLAYED' || e.source == 'discard' ? e.card : null;
+  if (e.type == 'CARD_PLAYED') fly(face, sr, pile, e.pid !== me); else fly(face, pile, sr, false, true);
+  if (e.pid !== me) sfx.tick();
+}
+function fly(card, from, to, growIn, shrinkOut) {
+  const w = $('disc').getBoundingClientRect().width, el = card ? cardEl(card) : document.createElement('div');
+  if (!card) el.className = 'pc down';
+  el.classList.add('fly'); el.style.width = w + 'px'; el.style.height = w * 1.4 + 'px';
+  el.style.left = from.left + from.width / 2 - w / 2 + 'px'; el.style.top = from.top + from.height / 2 - w * .7 + 'px';
+  document.body.append(el);
+  const tx = to.left + to.width / 2 - (from.left + from.width / 2), ty = to.top + to.height / 2 - (from.top + from.height / 2);
+  el.animate([{ transform: `scale(${growIn ? .5 : 1})`, opacity: growIn ? .4 : 1 }, { transform: `translate(${tx}px,${ty}px) scale(${shrinkOut ? .5 : 1})`, opacity: shrinkOut ? .3 : 1 }],
+    { duration: 380, easing: 'cubic-bezier(.3,.7,.2,1)', fill: 'forwards' }).onfinish = () => el.remove();
+}
 
 const nickOk = () => { const v = $('nick').value.trim(); if (v) { store.set('ludo3d.nick', v); return v; } toast('Enter your name first'); $('nick').focus(); return null; };
 $('nick').value = store.get('ludo3d.nick') || '';
