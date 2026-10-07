@@ -21,14 +21,7 @@ function harness(opts = {}) {
 }
 
 // Creates a room with n players, everyone ready, game started. Returns sockets in seat order.
-// Retries until the first player's stock draw does not instantly win, so tests can count on a discard phase.
-function startedRoom(n = 3) {
-  for (;;) {
-    const r = startedRoomOnce(n), g = r.room.game;
-    if (!rules.isWinningHand([...g.hands[g.current], g.stock[g.stock.length - 1]], g.jokerRank)) return r;
-  }
-}
-function startedRoomOnce(n, h = harness()) {
+function startedRoom(n = 3, h = harness()) {
   const host = h.client(); host.msg({ t: 'jp:create', name: 'P0' });
   const code = host.last('jp:joined').code, socks = [host];
   for (let i = 1; i < n; i++) { const c = h.client(); c.msg({ t: 'jp:join', code, name: 'P' + i }); c.msg({ t: 'jp:ready', ready: true }); socks.push(c); }
@@ -36,15 +29,18 @@ function startedRoomOnce(n, h = harness()) {
   return { ...h, code, socks, room: h.srv.rooms.get(code) };
 }
 
-// Simple bot: take the discard if it pairs an unpaired card, else the stock; throw a random unpaired non-joker.
+// Simple bot: works out its own pairs (the server no longer does that for players), Shows when
+// every card is paired, otherwise takes the discard if it pairs an unpaired card, else the stock,
+// and throws a random unpaired non-joker.
 function botMove(view, rnd = Math.random) {
-  const g = view.game, y = g.you;
+  const g = view.game, y = g.you, { pairs, singles } = rules.groupHand(y.hand, g.jokerRank);
   if (g.phase === 'draw') {
     const d = g.discardTop, canD = y.validMoves.some(m => m.source === 'discard'), canS = y.validMoves.some(m => m.source === 'stock');
-    const helps = d && (d.slice(0, -1) === g.jokerRank || y.singles.some(c => c.slice(0, -1) === d.slice(0, -1)));
+    const helps = d && (d.slice(0, -1) === g.jokerRank || singles.some(c => c.slice(0, -1) === d.slice(0, -1)));
     return (helps && canD) || !canS ? { type: 'draw', source: 'discard' } : { type: 'draw', source: 'stock' };
   }
-  const pool = y.singles.filter(c => c.slice(0, -1) !== g.jokerRank);
+  if (!singles.length) return { type: 'show', pairs };
+  const pool = singles.filter(c => c.slice(0, -1) !== g.jokerRank);
   const choice = pool.length ? pool : y.hand;
   return { type: 'discard', card: choice[Math.floor(rnd() * choice.length)] };
 }

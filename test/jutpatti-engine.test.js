@@ -71,20 +71,64 @@ test('illegal moves are rejected and change nothing', () => {
   assert.strictEqual(engine.applyMove(g, 'a', { type: 'discard', card: ['7H'] }).error, 'BAD_REQUEST');
 });
 
-test('drawing the card that completes all pairs wins immediately', () => {
+test('completing the pairs does NOT win by itself: the player has to Show', () => {
   const g = fixed({ hands: { a: ['7H', '7S', '9D', '9C', 'KH'], b: ['2H', '3S', '4D', 'QC', 'JH'] }, stock: ['2C', 'KS'] });
-  const r = engine.applyMove(g, 'a', { type: 'draw', source: 'stock' });
+  assert.ok(engine.applyMove(g, 'a', { type: 'draw', source: 'stock' }).ok);
+  assert.strictEqual(g.status, 'playing'); assert.strictEqual(g.phase, 'discard');
+  assert.ok(engine.getValidMoves(g, 'a').some(m => m.type === 'show'));
+  const r = engine.applyMove(g, 'a', { type: 'show', pairs: [['7H', '7S'], ['KS', 'KH'], ['9C', '9D']] });
   assert.ok(r.ok);
   assert.strictEqual(g.status, 'over'); assert.strictEqual(g.winner, 'a');
-  assert.ok(engine.isGameOver(g));
-  assert.ok(r.events.some(e => e.type === 'PLAYER_WON' && e.pid === 'a'));
+  assert.deepStrictEqual(g.winningPairs, [['7H', '7S'], ['KS', 'KH'], ['9C', '9D']]);   // shown the way the player laid them out
+  assert.ok(r.events.some(e => e.type === 'PLAYER_SHOWED') && r.events.some(e => e.type === 'PLAYER_WON'));
   assert.strictEqual(engine.applyMove(g, 'b', { type: 'draw', source: 'stock' }).error, 'GAME_NOT_RUNNING');
 });
 
-test('a joker completes a winning hand', () => {
+test('a joker can complete a shown pair', () => {
   const g = fixed({ hands: { a: ['7H', '7S', '9D', '9C', 'KH'], b: ['2H', '3S', '4D', 'QC', 'JH'] }, stock: ['6D'], shown: '5H' });
   engine.applyMove(g, 'a', { type: 'draw', source: 'stock' });
+  assert.ok(engine.applyMove(g, 'a', { type: 'show', pairs: [['7H', '7S'], ['9D', '9C'], ['KH', '6D']] }).ok);
   assert.strictEqual(g.winner, 'a');
+});
+
+test('a wrong Show is rejected, names the bad pairs, and the game goes on', () => {
+  const g = fixed({ hands: { a: ['7H', '7S', '9D', '9C', 'KH'], b: ['2H', '3S', '4D', 'QC', 'JH'] }, stock: ['QS'] });
+  engine.applyMove(g, 'a', { type: 'draw', source: 'stock' });   // hand is NOT all pairs now
+  const before = JSON.stringify(g);
+  const r = engine.applyMove(g, 'a', { type: 'show', pairs: [['7H', '7S'], ['9D', 'KH'], ['9C', 'QS']] });
+  assert.strictEqual(r.error, 'INVALID_SHOW'); assert.deepStrictEqual(r.bad, [1, 2]);
+  const cheats = [
+    [['7H', '7S'], ['9D', '9C'], ['KH', 'KS']],          // KS is not in the hand
+    [['7H', '7S'], ['9D', '9C']],                         // leaves cards out
+    [['7H', '7S'], ['7H', '7S'], ['9D', '9C']],           // same cards twice
+    [['7H', '7H'], ['9D', '9C'], ['KH', 'QS']],           // one card used as both halves
+    [['2H', '3S'], ['9D', '9C'], ['KH', 'QS']],           // opponent's cards
+  ];
+  for (const pairs of cheats) assert.strictEqual(engine.applyMove(g, 'a', { type: 'show', pairs }).error, 'INVALID_SHOW', JSON.stringify(pairs));
+  for (const pairs of [null, 'all', [['7H']], [['7H', '7S', '9D']], [[1, 2]], Array(20).fill(['7H', '7S'])])
+    assert.strictEqual(engine.applyMove(g, 'a', { type: 'show', pairs }).error, 'BAD_REQUEST', JSON.stringify(pairs));
+  assert.strictEqual(JSON.stringify(g), before);
+  assert.strictEqual(g.status, 'playing');
+});
+
+test('Show is only allowed on your turn, after drawing', () => {
+  const g = fixed({ hands: { a: ['7H', '7S', '9D', '9C', 'KH'], b: ['2H', '2S', '4D', '4C', 'JH'] } });
+  assert.strictEqual(engine.applyMove(g, 'a', { type: 'show', pairs: [['7H', '7S'], ['9D', '9C']] }).error, 'WRONG_PHASE');
+  assert.strictEqual(engine.applyMove(g, 'b', { type: 'show', pairs: [['2H', '2S'], ['4D', '4C']] }).error, 'NOT_YOUR_TURN');
+});
+
+test('autoWin: true restores the old behaviour (game ends on the winning draw)', () => {
+  const g = fixed({ hands: { a: ['7H', '7S', '9D', '9C', 'KH'], b: ['2H', '3S', '4D', 'QC', 'JH'] }, stock: ['KS'] });
+  g.config = { ...g.config, autoWin: true };
+  engine.applyMove(g, 'a', { type: 'draw', source: 'stock' });
+  assert.strictEqual(g.winner, 'a');
+});
+
+test('players are not handed a ready-made pairing of their cards', () => {
+  const g = engine.createGame({ players: ['a', 'b'], handSize: 7, dealerIndex: 1 });
+  const v = engine.viewFor(g, 'a');
+  assert.deepStrictEqual(Object.keys(v.you).sort(), ['hand', 'validMoves']);
+  assert.deepStrictEqual(v.you.hand, g.hands.a);   // in deal order, untouched
 });
 
 test('empty stock is rebuilt from the discard pile, keeping its top card', () => {

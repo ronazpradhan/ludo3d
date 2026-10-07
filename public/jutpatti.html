@@ -13,12 +13,15 @@
    <div class="pile"><button id="disc" class="pc empty" aria-label="Take from discard pile"></button><small id="discN"></small></div>
    <div class="pile shown"><div id="shownCard" class="pc sm"></div><small id="jokerTxt"></small></div>
   </div>
+  <div id="reveal"></div>
  </div>
  <div id="mine">
-  <div id="mylabel"></div>
+  <div id="mybar"><span id="mylabel"></span><button id="sortBtn" class="pill" type="button" aria-label="Sort cards by rank">⇅ Sort</button></div>
+  <button id="showBtn" class="go" type="button">Show my pairs 🃏</button>
   <div id="hand"></div>
   <div id="hint"></div>
  </div>
+ <div id="caret"></div>
  <div id="jlog" class="glass"></div>
  <button id="qbtn" class="glass" aria-label="Leave game">✕</button><button id="snd" class="glass" aria-label="Sound">🔊</button>
 </div>
@@ -34,7 +37,8 @@
   <div class="row" style="margin-top:10px"><input class="in" id="code" maxlength="5" placeholder="CODE" style="margin:0;text-transform:uppercase;letter-spacing:4px"><button class="go alt" id="bJoin" disabled style="margin:0;width:auto;padding:0 26px">Join</button></div>
   <details class="how"><summary>How to play</summary>
    <p>Everyone gets an odd number of cards. The card turned face up in the middle picks the <b>Joker</b>: every card one rank higher is a Joker and pairs with anything.</p>
-   <p>On your turn take the top card of the <b>stock</b> or the <b>discard pile</b>, then discard one card. The first player whose whole hand is pairs wins.</p>
+   <p>On your turn drag a card from the <b>stock</b> or the <b>discard pile</b> into your hand, then drag one card back onto the table.</p>
+   <p>Pair your cards by dragging one onto another. When every card is in a pair right after you draw, tap <b>Show</b> to win.</p>
   </details>
   <div class="sub" id="onl" style="margin:14px 0 0">Connecting…</div>
  </div>

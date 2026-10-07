@@ -190,9 +190,9 @@ function createJutpattiServer({ send, now = Date.now, log = defaultLog, randInt 
       if (p.aids.includes(aid)) return send(ws, roomView(room, p.pid));          // duplicate: ignore, resend truth
       if (m.v !== g.version) { err(ws, 'STALE'); return send(ws, roomView(room, p.pid)); }
       // 3-5. turn, ownership and legality are checked by the rule engine against server state
-      const move = m.move && typeof m.move === 'object' ? { type: m.move.type, source: m.move.source, card: m.move.card } : null;
+      const move = m.move && typeof m.move === 'object' ? { type: m.move.type, source: m.move.source, card: m.move.card, pairs: m.move.pairs } : null;
       const r = engine.applyMove(g, p.pid, move, randInt);
-      if (!r.ok) { log({ room: room.code, gameNo: room.gameNo, type: 'MOVE_REJECTED', pid: p.pid, error: r.error }); err(ws, r.error); return send(ws, roomView(room, p.pid)); }
+      if (!r.ok) { log({ room: room.code, gameNo: room.gameNo, type: 'MOVE_REJECTED', pid: p.pid, error: r.error }); err(ws, r.error, r.bad && r.bad.length ? { bad: r.bad } : undefined); return send(ws, roomView(room, p.pid)); }
       p.aids.push(aid); if (p.aids.length > 50) p.aids.shift();
       for (const e of r.events) record(room, e);
       afterMove(room);

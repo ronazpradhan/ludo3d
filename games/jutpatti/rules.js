@@ -5,7 +5,7 @@
 //     (e.g. 5 shown -> all 6s are Jokers; K shown -> all Aces; A shown -> all 2s)
 //   - a Joker pairs with any card (including another Joker); otherwise a pair is two cards of the same rank
 //   - on your turn: take the top card of the stock OR the top card of the discard pile, then
-//     discard one card. If after taking a card your whole hand is pairs, you win.
+//     discard one card. If after taking a card your whole hand is pairs, lay them down (Show) to win.
 //   - when the stock runs out, the discard pile (except its top card) is shuffled into a new stock
 //   - 1 point per game won
 // Nothing in the UI or networking code knows these rules; it all comes from here.
@@ -20,6 +20,8 @@ const CONFIG = Object.freeze({
   drawSources: ['stock', 'discard'],
   allowDiscardTakenCard: true,  // may you throw back the card you just took from the discard pile?
   reshuffleDiscard: true,       // rebuild the stock from the discard pile when the stock is empty
+  autoWin: false,               // false: after drawing, the player must arrange their pairs and press Show to win
+                                // true: the game ends by itself as soon as a drawn card completes the pairs
   maxTurns: 600,                // safety net: game ends with no winner after this many turns
   pointsPerWin: 1,
 });
@@ -62,4 +64,20 @@ const unpairedCount = (hand, jokerRank) => groupHand(hand, jokerRank).singles.le
 // A winning hand: non-empty, and every card is in a pair.
 const isWinningHand = (hand, jokerRank) => hand.length > 0 && unpairedCount(hand, jokerRank) === 0;
 
-module.exports = { CONFIG, validHandSize, jokerRankFor, isJoker, groupHand, unpairedCount, isWinningHand };
+const isPair = (a, b, jokerRank) => isJoker(a, jokerRank) || isJoker(b, jokerRank) || rankOf(a) === rankOf(b);
+
+// Checks the pairs a player laid down when they press Show. They must use every card in their
+// hand exactly once, and each pair must be valid. Returns { ok, bad: [indexes of wrong pairs] }.
+function checkShow(hand, pairs, jokerRank) {
+  if (!Array.isArray(pairs) || pairs.length * 2 !== hand.length || !hand.length) return { ok: false, bad: [] };
+  const left = new Set(hand), bad = [];
+  for (let i = 0; i < pairs.length; i++) {
+    const p = pairs[i];
+    if (!Array.isArray(p) || p.length !== 2 || !left.has(p[0]) || !left.has(p[1]) || p[0] === p[1]) return { ok: false, bad: [] };
+    left.delete(p[0]); left.delete(p[1]);
+    if (!isPair(p[0], p[1], jokerRank)) bad.push(i);
+  }
+  return { ok: bad.length === 0, bad };
+}
+
+module.exports = { CONFIG, validHandSize, jokerRankFor, isJoker, isPair, groupHand, unpairedCount, isWinningHand, checkShow };

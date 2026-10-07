@@ -28,7 +28,7 @@ function createGame({ players, handSize, dealerIndex, config = rules.CONFIG, ran
     status: 'playing', phase: 'draw', turn: 1,
     takenFromDiscard: null,   // card taken from the discard pile this turn (public)
     lastDraw: null,           // { pid, source, card } - card is private when source is 'stock'
-    winner: null, winningHand: null, endReason: null,
+    winner: null, winningHand: null, winningPairs: null, endReason: null,
     version: 1,
   };
 }
@@ -51,9 +51,11 @@ function getValidMoves(state, pid) {
     if (state.config.drawSources.includes('discard') && state.discard.length) m.push({ type: 'draw', source: 'discard' });
     return m;
   }
-  return state.hands[pid]
+  const m = state.hands[pid]
     .filter(c => state.config.allowDiscardTakenCard || c !== state.takenFromDiscard)
     .map(card => ({ type: 'discard', card }));
+  if (!state.config.autoWin) m.push({ type: 'show' });   // always offered: the server checks the pairs when it's used
+  return m;
 }
 
 // Checks shape first (the move comes from an untrusted client), then legality. Returns { ok, error }.
@@ -61,13 +63,20 @@ function isValidMove(state, pid, move) {
   if (!move || typeof move !== 'object') return { ok: false, error: 'BAD_REQUEST' };
   if (move.type === 'draw' && !['stock', 'discard'].includes(move.source)) return { ok: false, error: 'BAD_REQUEST' };
   if (move.type === 'discard' && !cards.isCard(move.card)) return { ok: false, error: 'BAD_REQUEST' };
-  if (move.type !== 'draw' && move.type !== 'discard') return { ok: false, error: 'BAD_REQUEST' };
+  if (move.type === 'show' && (!Array.isArray(move.pairs) || move.pairs.length > 16 ||
+      !move.pairs.every(p => Array.isArray(p) && p.length === 2 && p.every(cards.isCard)))) return { ok: false, error: 'BAD_REQUEST' };
+  if (move.type !== 'draw' && move.type !== 'discard' && move.type !== 'show') return { ok: false, error: 'BAD_REQUEST' };
   if (state.status !== 'playing') return { ok: false, error: 'GAME_NOT_RUNNING' };
   if (!state.active.includes(pid)) return { ok: false, error: 'NOT_IN_GAME' };
   if (pid !== state.current) return { ok: false, error: 'NOT_YOUR_TURN' };
   if (move.type === 'draw' && state.phase !== 'draw') return { ok: false, error: 'WRONG_PHASE' };
-  if (move.type === 'discard' && state.phase !== 'discard') return { ok: false, error: 'WRONG_PHASE' };
+  if ((move.type === 'discard' || move.type === 'show') && state.phase !== 'discard') return { ok: false, error: 'WRONG_PHASE' };
   if (move.type === 'discard' && !state.hands[pid].includes(move.card)) return { ok: false, error: 'NOT_OWNED' };
+  if (move.type === 'show') {
+    if (state.config.autoWin) return { ok: false, error: 'ILLEGAL_MOVE' };
+    const c = rules.checkShow(state.hands[pid], move.pairs, state.jokerRank);
+    return c.ok ? { ok: true } : { ok: false, error: 'INVALID_SHOW', bad: c.bad };
+  }
   const legal = getValidMoves(state, pid).some(m => m.type === move.type && m.source === move.source && m.card === move.card);
   return legal ? { ok: true } : { ok: false, error: 'ILLEGAL_MOVE' };
 }
@@ -76,9 +85,13 @@ const isRoundOver = s => s.status === 'over';
 const isGameOver = isRoundOver;   // one deal = one game; scores across games are kept by the room
 
 // ---------- state changes ----------
-function end(state, reason, winner, events) {
+function end(state, reason, winner, events, pairs) {
   state.status = 'over'; state.phase = 'over'; state.endReason = reason; state.winner = winner || null;
-  if (winner) { state.winningHand = state.hands[winner].slice(); events.push({ type: 'PLAYER_WON', pid: winner }); }
+  if (winner) {
+    state.winningHand = state.hands[winner].slice();
+    state.winningPairs = pairs || rules.groupHand(state.winningHand, state.jokerRank).pairs;
+    events.push({ type: 'PLAYER_WON', pid: winner });
+  }
   events.push({ type: 'GAME_ENDED', reason, winner: winner || null });
 }
 
@@ -96,7 +109,7 @@ function nextTurn(state, events = []) {
 // Events are PUBLIC: they never contain a card drawn from the stock.
 function applyMove(state, pid, move, randInt = cards.secureInt) {
   const v = isValidMove(state, pid, move);
-  if (!v.ok) return { ok: false, error: v.error, events: [] };
+  if (!v.ok) return { ok: false, error: v.error, bad: v.bad, events: [] };
   const events = [], hand = state.hands[pid];
 
   if (move.type === 'draw') {
@@ -117,8 +130,12 @@ function applyMove(state, pid, move, randInt = cards.secureInt) {
     }
     hand.push(card);
     state.lastDraw = { pid, source: move.source, card };
-    if (rules.isWinningHand(hand, state.jokerRank)) end(state, 'pairs', pid, events);
+    if (state.config.autoWin && rules.isWinningHand(hand, state.jokerRank)) end(state, 'pairs', pid, events);
     else state.phase = 'discard';
+  } else if (move.type === 'show') {
+    // the player laid down their pairs and checkShow() accepted every one of them
+    events.push({ type: 'PLAYER_SHOWED', pid });
+    end(state, 'pairs', pid, events, move.pairs.map(p => p.slice()));
   } else {
     hand.splice(hand.indexOf(move.card), 1);
     state.discard.push(move.card);
@@ -161,15 +178,13 @@ function viewFor(state, pid) {
     takenFromDiscard: state.takenFromDiscard,
     players: state.players.map(p => ({ pid: p, cards: state.hands[p].length, active: state.active.includes(p) })),
     winner: state.winner, winningHand: state.winningHand, endReason: state.endReason,
-    winningPairs: state.winningHand ? rules.groupHand(state.winningHand, state.jokerRank).pairs : null,
+    winningPairs: state.winningPairs,
     lastDraw: null, you: null,
   };
   const ld = state.lastDraw;
   if (ld) v.lastDraw = { pid: ld.pid, source: ld.source, card: ld.source === 'discard' || ld.pid === pid ? ld.card : null };
-  if (mine && state.active.includes(pid)) {
-    const g = rules.groupHand(mine, state.jokerRank);
-    v.you = { hand: mine.slice(), pairs: g.pairs, singles: g.singles, validMoves: getValidMoves(state, pid) };
-  }
+  // your cards in the order you got them; pairing them up is left to you
+  if (mine && state.active.includes(pid)) v.you = { hand: mine.slice(), validMoves: getValidMoves(state, pid) };
   return v;
 }
 
