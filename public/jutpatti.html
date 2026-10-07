@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Jutpatti</title>
+<link rel="icon" type="image/svg+xml" href="img/jutpatti.svg">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/jutpatti.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"></head><body class="jp">
+
+<!-- table -->
+<div id="jtable">
+ <div id="jstatus"></div>
+ <div id="felt"><div id="seats"></div>
+  <div id="center">
+   <div class="pile"><button id="stock" class="pc down" aria-label="Draw from stock"></button><small id="stockN"></small></div>
+   <div class="pile"><button id="disc" class="pc empty" aria-label="Take from discard pile"></button><small id="discN"></small></div>
+   <div class="pile shown"><div id="shownCard" class="pc sm"></div><small id="jokerTxt"></small></div>
+  </div>
+ </div>
+ <div id="mine">
+  <div id="mylabel"></div>
+  <div id="hand"></div>
+  <div id="acts"><button class="pill" id="aStock">Draw stock</button><button class="pill" id="aDisc">Take discard</button><button class="go" id="aThrow" disabled>Discard</button></div>
+ </div>
+ <div id="jlog" class="glass"></div>
+ <button id="qbtn" class="glass" aria-label="Leave game">✕</button><button id="snd" class="glass" aria-label="Sound">🔊</button>
+</div>
+
+<!-- landing -->
+<div class="ov" id="landing"><a class="back" href="index.html">‹ Games</a>
+ <div class="blobs"><i style="--c:#ef4444;top:-10vmax;left:-8vmax"></i><i style="--c:#22c55e;top:-6vmax;right:-10vmax"></i><i style="--c:#fbc916;bottom:-12vmax;right:-6vmax"></i><i style="--c:#3b82f6;bottom:-10vmax;left:-10vmax"></i></div>
+ <div class="box glass land"><img class="logo" src="img/jutpatti.svg" alt="" width="84" height="84"><h1>Jutpatti</h1>
+  <div class="sub">Make every card a pair · 2–6 players</div>
+  <div class="rm" id="resume"><span id="rtxt"></span><button class="pill" id="rgo">Rejoin</button><button class="pill" id="rno" aria-label="Forget">✕</button></div>
+  <input class="in" id="nick" maxlength="14" placeholder="Your name" autocomplete="nickname">
+  <button class="go" id="bCreate" disabled>Create Room</button>
+  <div class="row" style="margin-top:10px"><input class="in" id="code" maxlength="5" placeholder="CODE" style="margin:0;text-transform:uppercase;letter-spacing:4px"><button class="go alt" id="bJoin" disabled style="margin:0;width:auto;padding:0 26px">Join</button></div>
+  <details class="how"><summary>How to play</summary>
+   <p>Everyone gets an odd number of cards. The card turned face up in the middle picks the <b>Joker</b>: every card one rank higher is a Joker and pairs with anything.</p>
+   <p>On your turn take the top card of the <b>stock</b> or the <b>discard pile</b>, then discard one card. The first player whose whole hand is pairs wins.</p>
+  </details>
+  <div class="sub" id="onl" style="margin:14px 0 0">Connecting…</div>
+ </div>
+</div>
+
+<!-- lobby -->
+<div class="ov" id="lobby" style="display:none"><div class="box glass">
+ <div class="sub" style="margin:0">Jutpatti room code</div><div id="rcode">-----</div>
+ <div class="row"><button class="pill" id="cCode">Copy code</button><button class="pill" id="cLink">Copy invite link</button></div>
+ <div class="seats" id="lseats" style="margin-top:14px"></div>
+ <div id="hsize"></div>
+ <button class="go alt" id="lready">I'm ready</button>
+ <button class="go" id="lstart">Start Game</button>
+ <button class="pill" id="lleave" style="margin-top:12px">Leave</button>
+ <div class="sub" id="lnote" style="margin:14px 0 0"></div>
+</div></div>
+
+<!-- leave confirm -->
+<div class="ov" id="qconf" style="display:none"><div class="box glass"><h1 style="font-size:26px">Leave game?</h1><div class="sub">Your cards go back into the stock and you leave the room.</div><div class="row"><button class="pill" id="qno">Keep playing</button><button class="go" id="qyes" style="padding:12px">Leave</button></div></div></div>
+
+<!-- game over -->
+<div class="ov" id="end" style="display:none"><div class="box glass endbox"><div class="trophy">🏆</div><h1 id="etitle">Game over</h1>
+ <div id="whand"></div><div id="ranks"></div>
+ <div class="endbtns"><button class="go" id="again">Rematch</button><button class="pill" id="home">Leave</button></div><div class="sub" id="enote"></div>
+</div></div>
+
+<div id="toast"></div>
+<script src="js/storage.js"></script>
+<script src="js/realtime.js"></script>
+<script src="js/config.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/jutpatti.js"></script>
+</body></html>

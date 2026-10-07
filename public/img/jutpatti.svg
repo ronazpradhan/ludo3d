@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+ <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f7a4d"/><stop offset="1" stop-color="#0c3d26"/></linearGradient></defs>
+ <rect width="100" height="100" rx="24" fill="url(#g)"/>
+ <g transform="rotate(-14 50 56)"><rect x="18" y="22" width="38" height="54" rx="6" fill="#fff" stroke="#0002"/><text x="24" y="38" font-family="Arial,sans-serif" font-weight="700" font-size="13" fill="#111">7</text><text x="37" y="62" font-family="Arial,sans-serif" font-size="22" text-anchor="middle" fill="#111">♠</text></g>
+ <g transform="rotate(12 50 56)"><rect x="44" y="22" width="38" height="54" rx="6" fill="#fff" stroke="#0002"/><text x="50" y="38" font-family="Arial,sans-serif" font-weight="700" font-size="13" fill="#e11d48">7</text><text x="63" y="62" font-family="Arial,sans-serif" font-size="22" text-anchor="middle" fill="#e11d48">♥</text></g>
+</svg>
