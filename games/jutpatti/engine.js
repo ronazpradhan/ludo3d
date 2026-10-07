@@ -54,7 +54,7 @@ function getValidMoves(state, pid) {
   const m = state.hands[pid]
     .filter(c => state.config.allowDiscardTakenCard || c !== state.takenFromDiscard)
     .map(card => ({ type: 'discard', card }));
-  if (!state.config.autoWin) m.push({ type: 'show' });   // always offered: the server checks the pairs when it's used
+  if (!state.config.autoWin) m.push({ type: 'show' });   // always offered: the server checks the hand when it's used
   return m;
 }
 
@@ -63,7 +63,8 @@ function isValidMove(state, pid, move) {
   if (!move || typeof move !== 'object') return { ok: false, error: 'BAD_REQUEST' };
   if (move.type === 'draw' && !['stock', 'discard'].includes(move.source)) return { ok: false, error: 'BAD_REQUEST' };
   if (move.type === 'discard' && !cards.isCard(move.card)) return { ok: false, error: 'BAD_REQUEST' };
-  if (move.type === 'show' && (!Array.isArray(move.pairs) || move.pairs.length > 16 ||
+  // pairs are optional: just how the player happened to arrange their cards
+  if (move.type === 'show' && move.pairs != null && (!Array.isArray(move.pairs) || move.pairs.length > 16 ||
       !move.pairs.every(p => Array.isArray(p) && p.length === 2 && p.every(cards.isCard)))) return { ok: false, error: 'BAD_REQUEST' };
   if (move.type !== 'draw' && move.type !== 'discard' && move.type !== 'show') return { ok: false, error: 'BAD_REQUEST' };
   if (state.status !== 'playing') return { ok: false, error: 'GAME_NOT_RUNNING' };
@@ -74,8 +75,8 @@ function isValidMove(state, pid, move) {
   if (move.type === 'discard' && !state.hands[pid].includes(move.card)) return { ok: false, error: 'NOT_OWNED' };
   if (move.type === 'show') {
     if (state.config.autoWin) return { ok: false, error: 'ILLEGAL_MOVE' };
-    const c = rules.checkShow(state.hands[pid], move.pairs, state.jokerRank);
-    return c.ok ? { ok: true } : { ok: false, error: 'INVALID_SHOW', bad: c.bad };
+    // Whether the cards are laid out in pairs doesn't matter; the whole hand just has to follow the rule.
+    return rules.isWinningHand(state.hands[pid], state.jokerRank) ? { ok: true } : { ok: false, error: 'INVALID_SHOW' };
   }
   const legal = getValidMoves(state, pid).some(m => m.type === move.type && m.source === move.source && m.card === move.card);
   return legal ? { ok: true } : { ok: false, error: 'ILLEGAL_MOVE' };
@@ -133,9 +134,10 @@ function applyMove(state, pid, move, randInt = cards.secureInt) {
     if (state.config.autoWin && rules.isWinningHand(hand, state.jokerRank)) end(state, 'pairs', pid, events);
     else state.phase = 'discard';
   } else if (move.type === 'show') {
-    // the player laid down their pairs and checkShow() accepted every one of them
+    // Show the cards the way the player arranged them if that arrangement is right; otherwise lay them out in pairs.
     events.push({ type: 'PLAYER_SHOWED', pid });
-    end(state, 'pairs', pid, events, move.pairs.map(p => p.slice()));
+    const own = move.pairs && rules.checkShow(hand, move.pairs, state.jokerRank).ok ? move.pairs.map(p => p.slice()) : null;
+    end(state, 'pairs', pid, events, own);
   } else {
     hand.splice(hand.indexOf(move.card), 1);
     state.discard.push(move.card);

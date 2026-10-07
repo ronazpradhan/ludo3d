@@ -16,7 +16,7 @@ const ERR = {
   ILLEGAL_MOVE: "You can't do that now", NOT_OWNED: "That card isn't in your hand", WRONG_PHASE: 'Draw a card first',
   GAME_NOT_RUNNING: 'The game is not running', RATE_LIMIT: 'Slow down a little', SERVER_FULL: 'Server is busy, try again soon',
   BAD_OPTION: 'That option is not available', SERVER_ERROR: 'Something went wrong',
-  INVALID_SHOW: "Not all of those are pairs — check the red ones", BAD_REQUEST: "That move wasn't valid",
+  INVALID_SHOW: "Not all your cards make pairs yet — keep playing", BAD_REQUEST: "That move wasn't valid",
 };
 const net = window.claude && window.claude.raw;
 
@@ -206,15 +206,15 @@ function renderTable() {
   js.textContent = txt; js.classList.toggle('me', myTurn);
   const tk = g.turn + ':' + cur + ':' + !!deal; if (tk !== lastTurnKey) { js.classList.remove('pop'); void js.offsetWidth; js.classList.add('pop'); if (myTurn && lastTurnKey) { sfx.chime(); buzz(20); } lastTurnKey = tk; }
   renderHand(g, you, myTurn);
-  // Show button + hint: it's only offered once YOU have paired every card, right after drawing
-  const canShow = myTurn && !pending && g.phase == 'discard' && you && you.validMoves.some(m => m.type == 'show') && allPaired();
+  // Show button: available every time you've drawn. The server checks the whole hand, however the cards are arranged.
+  const canShow = myTurn && !pending && g.phase == 'discard' && you && you.validMoves.some(m => m.type == 'show');
   $('showBtn').style.display = canShow ? 'block' : 'none';
   $('sortBtn').style.visibility = you && !deal && g.status == 'playing' ? 'visible' : 'hidden';
   $('hint').textContent = deal || !you || g.status != 'playing' ? '' : pending ? '…'
     : !myTurn ? 'Drag a card onto another to pair them · drag along the row to move it'
     : g.phase == 'draw' ? 'Drag a card from the stock or discard pile into your hand'
-    : canShow ? 'Every card is paired — tap Show, or throw a card to keep playing'
-    : sel ? 'Tap it again — or drag it onto the table — to throw it' : 'Drag a card up onto the table to throw it · drag onto another card to pair';
+    : sel ? 'Tap it again — or drag it onto the table — to throw it'
+    : 'Throw a card onto the table — or tap Show if all your cards make pairs';
   const pairs = arr.filter(x => x.length == 2).length;
   $('mylabel').textContent = you ? (you.hand.length + ' cards · ' + pairs + ' pair' + (pairs == 1 ? '' : 's') + ' made · ' + ((R.players.find(p => p.pid === me) || {}).score || 0) + ' wins') : 'You are watching this game';
   renderLog();
@@ -511,7 +511,8 @@ $('stock').onclick = () => { if (!noClick && canDraw('stock')) { sfx.tick(); act
 $('disc').onclick = () => { if (!noClick && canDraw('discard')) { sfx.tick(); act({ type: 'draw', source: 'discard' }); } };
 $('stock').onpointerdown = e => beginDrag(e, 'stock', null, $('stock'));
 $('disc').onpointerdown = e => beginDrag(e, 'discard', S && S.game && S.game.discardTop, $('disc'));
-$('showBtn').onclick = () => { if (!allPaired() || pending) return; sfx.tick(); buzz(15); act({ type: 'show', pairs: arr.map(g => g.slice()) }); };
+// your own pairing (if you made one) is only used to lay the cards out the way you arranged them
+$('showBtn').onclick = () => { if (pending) return; sfx.tick(); buzz(15); act(allPaired() ? { type: 'show', pairs: arr.map(g => g.slice()) } : { type: 'show' }); };
 $('sortBtn').onclick = () => {   // orders by rank only - it never pairs anything for you
   const jr = S && S.game && S.game.jokerRank, rk = c => c.slice(0, -1) === jr ? 99 : RANK_ORDER.indexOf(c.slice(0, -1));
   arr = arr.slice().sort((a, b) => Math.min(...a.map(rk)) - Math.min(...b.map(rk)));

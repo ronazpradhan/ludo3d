@@ -91,12 +91,12 @@ test('a joker can complete a shown pair', () => {
   assert.strictEqual(g.winner, 'a');
 });
 
-test('a wrong Show is rejected, names the bad pairs, and the game goes on', () => {
+test('a Show is rejected when the hand is not all pairs, and the game goes on', () => {
   const g = fixed({ hands: { a: ['7H', '7S', '9D', '9C', 'KH'], b: ['2H', '3S', '4D', 'QC', 'JH'] }, stock: ['QS'] });
   engine.applyMove(g, 'a', { type: 'draw', source: 'stock' });   // hand is NOT all pairs now
   const before = JSON.stringify(g);
   const r = engine.applyMove(g, 'a', { type: 'show', pairs: [['7H', '7S'], ['9D', 'KH'], ['9C', 'QS']] });
-  assert.strictEqual(r.error, 'INVALID_SHOW'); assert.deepStrictEqual(r.bad, [1, 2]);
+  assert.strictEqual(r.error, 'INVALID_SHOW');
   const cheats = [
     [['7H', '7S'], ['9D', '9C'], ['KH', 'KS']],          // KS is not in the hand
     [['7H', '7S'], ['9D', '9C']],                         // leaves cards out
@@ -105,7 +105,7 @@ test('a wrong Show is rejected, names the bad pairs, and the game goes on', () =
     [['2H', '3S'], ['9D', '9C'], ['KH', 'QS']],           // opponent's cards
   ];
   for (const pairs of cheats) assert.strictEqual(engine.applyMove(g, 'a', { type: 'show', pairs }).error, 'INVALID_SHOW', JSON.stringify(pairs));
-  for (const pairs of [null, 'all', [['7H']], [['7H', '7S', '9D']], [[1, 2]], Array(20).fill(['7H', '7S'])])
+  for (const pairs of ['all', [['7H']], [['7H', '7S', '9D']], [[1, 2]], Array(20).fill(['7H', '7S'])])
     assert.strictEqual(engine.applyMove(g, 'a', { type: 'show', pairs }).error, 'BAD_REQUEST', JSON.stringify(pairs));
   assert.strictEqual(JSON.stringify(g), before);
   assert.strictEqual(g.status, 'playing');

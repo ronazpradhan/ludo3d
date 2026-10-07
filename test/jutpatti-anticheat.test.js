@@ -167,19 +167,44 @@ test('message flooding is rate-limited', () => {
   assert.ok(s.errs().includes('RATE_LIMIT'));
 });
 
-test('Show over the network: wrong pairs are refused with the bad pair numbers; right pairs win', () => {
+// A room where it's `s`'s turn, holding a known hand, about to draw `next` from the stock.
+function knownHand(hand, next) {
   const r = startedRoom(2), s = whoseTurn(r), me = s.state().you, g = r.room.game;
-  g.hands[me] = ['7H', '7S', '9D', '9C', 'KH', 'QS', 'QD'];   // known hand for the test
-  g.stock.push('KD'); g.version++;
+  g.hands[me] = hand.slice(); g.jokerRank = 'A'; g.stock.push(next); g.version++;
   s.msg({ t: 'jp:sync' }); s.act({ type: 'draw', source: 'stock' });
-  const show = pairs => s.msg({ t: 'jp:act', v: g.version, aid: 'show' + Math.random().toString(36).slice(2, 10), move: { type: 'show', pairs } });
-  show([['7H', '9D'], ['7S', '9C'], ['KH', 'KD'], ['QS', 'QD']]);
-  const e = s.last('jp:err');
-  assert.strictEqual(e.code, 'INVALID_SHOW'); assert.deepStrictEqual(e.bad, [0, 1]);
+  const show = move => s.msg({ t: 'jp:act', v: g.version, aid: 'show' + Math.random().toString(36).slice(2, 10), move });
+  return { r, s, me, g, show };
+}
+
+test('Show over the network: a hand that is not all pairs is refused and the game goes on', () => {
+  const { r, s, show } = knownHand(['7H', '7S', '9D', '9C', 'KH', 'QS', 'QD'], '2C');
+  show({ type: 'show' });
+  assert.strictEqual(s.last('jp:err').code, 'INVALID_SHOW');
+  assert.strictEqual(s.last('jp:err').bad, undefined);   // the server doesn't say which cards are unpaired
   assert.strictEqual(r.room.status, 'playing');
-  show([['7H', '7S'], ['9D', '9C'], ['KH', 'KD'], ['QS', 'QD']]);
+});
+
+test('Show over the network: a winning hand wins even if the cards are not arranged in pairs', () => {
+  const { r, me, show } = knownHand(['7H', '9D', 'KH', 'QS', '7S', 'QD', '9C'], 'KD');   // pairs scattered around
+  show({ type: 'show' });
   assert.strictEqual(r.room.status, 'over');
   assert.strictEqual(r.room.game.winner, me);
   assert.strictEqual(r.room.scores[me], 1);
-  for (const ws of r.socks) assert.deepStrictEqual(ws.state().game.winningPairs, [['7H', '7S'], ['9D', '9C'], ['KH', 'KD'], ['QS', 'QD']]);
+  const wp = r.room.game.winningPairs;
+  assert.strictEqual(wp.length, 4);
+  assert.ok(require('../games/jutpatti/rules').checkShow(r.room.game.winningHand, wp, 'A').ok);
+});
+
+test("Show over the network: a wrong arrangement doesn't matter if the hand follows the rule", () => {
+  const { r, me, show } = knownHand(['7H', '7S', '9D', '9C', 'KH', 'QS', 'QD'], 'KD');
+  show({ type: 'show', pairs: [['7H', '9D'], ['7S', '9C'], ['KH', 'KD'], ['QS', 'QD']] });
+  assert.strictEqual(r.room.game.winner, me);
+  assert.ok(require('../games/jutpatti/rules').checkShow(r.room.game.winningHand, r.room.game.winningPairs, 'A').ok);
+});
+
+test("Show over the network: the winner's own arrangement is what everyone sees", () => {
+  const { r, show } = knownHand(['7H', '7S', '9D', '9C', 'KH', 'QS', 'QD'], 'KD');
+  const mine = [['QD', 'QS'], ['7S', '7H'], ['KD', 'KH'], ['9C', '9D']];
+  show({ type: 'show', pairs: mine });
+  for (const ws of r.socks) assert.deepStrictEqual(ws.state().game.winningPairs, mine);
 });
