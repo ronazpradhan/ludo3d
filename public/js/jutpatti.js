@@ -162,9 +162,10 @@ function renderLobby() {
   $('lready').textContent = mine && mine.ready ? 'Ready ✓ (tap to undo)' : "I'm ready";
   const others = R.players.filter(p => p.pid !== R.hostPid), canStart = R.players.length >= R.minPlayers && others.every(p => p.ready && p.connected);
   $('lstart').style.display = host ? '' : 'none'; $('lstart').disabled = !canStart;
-  const pub = $('lpublic'); pub.disabled = !host;
-  pub.textContent = R.listed ? '🌐 Listed in open rooms' + (host ? ' · tap to hide' : '') : '🔒 Private · join by code' + (host ? ' · tap to list' : '');
-  pub.onclick = () => { if (host) { sfx.tick(); send({ t: 'jp:opts', listed: !R.listed }); } };
+  // 🌐 public (listed in open rooms) / 👥 friends only (join by code). Only the host can switch.
+  $('lvis').classList.toggle('ro', !host);
+  $('lvis').querySelectorAll('button').forEach(b => { const v = b.dataset.l == '1'; b.classList.toggle('on', v === !!R.listed); b.disabled = !host;
+    b.onclick = () => { if (host && v !== !!R.listed) { sfx.tick(); send({ t: 'jp:opts', listed: v }); toast(v ? 'Public — anyone can see this room' : 'Friends only — join with the code'); } }; });
   $('lnote').textContent = host ? (R.players.length < R.minPlayers ? 'Share the code — 2 to 6 players' : canStart ? 'Everyone is ready!' : 'Waiting for everyone to be ready…') : 'Waiting for the host to start…';
 }
 
