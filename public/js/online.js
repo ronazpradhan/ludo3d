@@ -62,7 +62,7 @@ function begin(a,b,c){if(started)return;clearInterval(lt);begun={ls:[...a],lo:[.
 async function joinRoom(code,create,resume){if(!lob||net)return;if(!reqNick())return;roomCode=code;host=!!create;leaving=false;$('landing').style.display='none';
  try{net=await lob.join('ludo-'+code.toLowerCase())}catch(e){toast('Could not open the room');$('landing').style.display='flex';return}
  const rg=resume&&resume.game;
- document.body.classList.add('online');if(!rg)$('lobby').style.display='flex';$('rcode').textContent=code;$('clog').textContent='';addChat('','Room '+code,0,1);ls=[0,0,0,0];lo=[null,null,null,null];ln=['','','',''];gotL=0;tries=0;net.presence({id:me});trapBack();
+ document.body.classList.add('online','chat-off');chatOpen=false;if(!rg)$('lobby').style.display='flex';$('rcode').textContent=code;$('clog').textContent='';addChat('','Room '+code,0,1);ls=[0,0,0,0];lo=[null,null,null,null];ln=['','','',''];gotL=0;tries=0;net.presence({id:me});trapBack();
  {const Lb=resume&&resume.lobby;if(host&&Lb&&Array.isArray(Lb.ls)&&Lb.ls.length==4&&Array.isArray(Lb.lo)&&Array.isArray(Lb.ln)){   // host coming back keeps CPU/closed seats, friends re-sit by themselves
   ls=Lb.ls.map((x,i)=>x==1&&Lb.lo[i]!==me?0:x|0);lo=Lb.lo.map((x,i)=>ls[i]==1&&x?String(x).slice(0,12):null);ln=Lb.ln.map((x,i)=>ls[i]==1?esc(x):'')}}
  offs=[net.on('lobby',m=>{const d=m.data;if(host||m.sameTab||!d||d.c!==code||!Array.isArray(d.ls))return;ls=d.ls.map(x=>x|0);lo=d.lo.map(x=>x?String(x).slice(0,12):null);ln=d.ln.map(esc);gotL=1;renderLobby()}),

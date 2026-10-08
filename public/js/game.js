@@ -75,11 +75,24 @@ function avatarOf(c){return seats[c]==2?'🤖':avatarFor(net?owner[c]:(nick||'')
 const $=id=>document.getElementById(id),rollBtn=$('roll');
 function say(t){const m=$('msg');m.textContent=t;m.classList.remove('pop');void m.offsetWidth;m.classList.add('pop')}
 const pct=c=>Math.round(T[c].reduce((a,t)=>a+(t.p<0?0:t.p),0)/224*100),cardTxt=c=>rank.includes(c)?['🥇','🥈','🥉'][rank.indexOf(c)]||'✔':pct(c)+'%';
-function ui(){const box=$('cards'),vp=((3-Math.round(sph.taz/(Math.PI/2)))%4+4)%4,ord=[(vp+1)%4,(vp+2)%4,vp,(vp+3)%4],sig=ord.map(c=>c+':'+seats[c]+':'+avatarOf(c)+':'+(botFor[c]?1:0)).join();   // cards sit where each colour is on screen: me bottom-left, then clockwise
- const cell=c=>seats[c]?`<div class="card glass ${c==active?'on':''}" style="--c:${CS[c]};--p:${pct(c)}%"><i class="av">${avatarOf(c)}${botFor[c]&&seats[c]==1?'<u>🤖</u>':''}</i><b>${PN(c)}</b><small>${seats[c]==2?'CPU':net?(owner[c]===me?'You':''):'You'}</small><span>${cardTxt(c)}</span><em class="cp${caps[c]?'':' z'}">⚔${caps[c]}</em></div>`:'<div class="card ph"></div>';
- if(box.dataset.sig===sig&&box.children.length==4){ord.forEach((c,k)=>{if(!seats[c])return;const d=box.children[k];d.classList.toggle('on',c==active);d.querySelector('b').textContent=PN(c);d.querySelector('span').textContent=cardTxt(c);d.style.setProperty('--p',pct(c)+'%');
-  const e=d.querySelector('.cp'),t='⚔'+caps[c];if(e.textContent!==t){e.textContent=t;e.classList.toggle('z',!caps[c]);e.classList.remove('bump');void e.offsetWidth;e.classList.add('bump')}})}
- else{box.dataset.sig=sig;box.innerHTML=ord.map(cell).join('')}}
+// Top: one kill counter per colour. Each player's avatar, name and turn ring sit next to their own colour on the board.
+function ui(){const box=$('cards'),ks=seats.map((s,c)=>s?c:'').join();
+ if(box.dataset.sig!==ks){box.dataset.sig=ks;box.innerHTML=seats.map((s,c)=>s?`<div class="kc" data-c="${c}" style="--c:${CS[c]}"><i></i><span>⚔ ${caps[c]}</span></div>`:'').join('')}
+ [...box.children].forEach(d=>{const c=+d.dataset.c,e=d.querySelector('span'),t='⚔ '+caps[c];if(e.textContent!==t){e.textContent=t;d.classList.remove('bump');void d.offsetWidth;d.classList.add('bump')}});
+ const tg=$('tags'),sub=c=>rank.includes(c)?['🥇','🥈','🥉'][rank.indexOf(c)]||'✔':botFor[c]&&seats[c]==1?'🤖 bot playing':'',
+  sig=seats.map((s,c)=>s?c+avatarOf(c)+PN(c)+sub(c):'').join('|');
+ if(tg.dataset.sig!==sig){tg.dataset.sig=sig;tg.innerHTML=seats.map((s,c)=>s?`<div class="tg" data-c="${c}" style="--c:${CS[c]}"><i class="av">${avatarOf(c)}${botFor[c]&&seats[c]==1?'<u>🤖</u>':''}</i><b></b><small></small></div>`:'').join('');
+  [...tg.children].forEach(d=>{const c=+d.dataset.c;d.querySelector('b').textContent=PN(c)+(net&&owner[c]===me||!net&&seats[c]==1&&seats.filter(x=>x==1).length==1?' (you)':'');d.querySelector('small').textContent=sub(c)});tagSize=null}
+ [...tg.children].forEach(d=>d.classList.toggle('on',started&&+d.dataset.c==active&&!rank.includes(active)))}
+// keeps each tag beside its home corner, wherever the camera is looking from
+let tagSize=null;const _v=new THREE.Vector3();
+function placeTags(){const tg=$('tags');if(!tg||!tg.children.length)return;const W=stg.clientWidth,H=stg.clientHeight,pr=(x,z)=>{_v.set(x,0,z).project(cam);return[(_v.x+1)/2*W,(1-_v.y)/2*H]},o=pr(0,0);
+ if(!tagSize)tagSize=[...tg.children].map(d=>[d.offsetWidth,d.offsetHeight]);
+ [...tg.children].forEach((d,k)=>{const c=+d.dataset.c,[w,h]=tagSize[k]||[90,60],sx=c==1||c==2?1:-1,sz=c>=2?1:-1,side=W>=H;
+  // the two outer edges of this colour's home square (at its middle); use the one facing the free screen space
+  const a=pr(8.2*sx,4.5*sz),b=pr(4.5*sx,8.2*sz),i=side?0:1,p=Math.abs(a[i]-o[i])>Math.abs(b[i]-o[i])?a:b;let x=p[0],y=p[1];
+  if(side)x+=Math.sign(x-o[0])*(w/2+8);else y+=Math.sign(y-o[1])*(h/2+8);   // just outside the board: beside it on wide screens, above/below on phones
+  x=Math.max(w/2+6,Math.min(W-w/2-6,x));y=Math.max(h/2+44,Math.min(H-h/2-6,y));d.style.transform=`translate(${(x-w/2).toFixed(1)}px,${(y-h/2).toFixed(1)}px)`})}
 function drawSeats(){$('seats').innerHTML=seats.map((s,c)=>`<button class="seat ${s?'':'off'}" style="--c:${CS[c]}" onclick="seats[${c}]=(seats[${c}]+1)%3;sfx.tick();drawSeats()"><i></i><span>${CN[c]}</span><em>${['Off','You','CPU'][s]}</em></button>`).join('')}
 drawSeats();
 $('snd').textContent=snd?'🔊':'🔇';$('snd').onclick=()=>{snd=!snd;store.set('ludo3d.sfx',snd?'1':'0');$('snd').textContent=snd?'🔊':'🔇'};
@@ -160,7 +173,7 @@ async function human(n,c,ask,fb){
   if(inbox[n])return inbox[n];
   if(!botFor[c]){
    if(!ff)turnT={c,t0:Date.now()};
-   const hurry=setTimeout(()=>{if(!inbox[n]&&(rollRes||pickRes))toast('Hurry! 5 more seconds ⏰')},TURN_MS);
+   const hurry=0;
    const r=await raceWait(ask(),TURN_MS+EXTRA_MS,n);clearTimeout(hurry);turnT=null;
    if(inbox[n])return inbox[n];
    if(r){dec(n,r);return inbox[n]}
@@ -180,7 +193,8 @@ const clk=new THREE.Clock();let tm=0;
   if(p.l<=0||p.m.position.y<-2){S.remove(p.m);p.m.material.dispose();parts.splice(i,1)}}
  YD.forEach((m,p)=>{const k=(started&&p==active)?1.1+Math.sin(tm*3)*.07:1;m.material.color.set(C[p]).multiplyScalar(k)});sparks.rotation.y+=dt*.02;sparks.position.y=Math.sin(tm*.5)*.4;
  if(rollRes)dice.scale.setScalar(1+Math.abs(Math.sin(tm*5))*.16);
- {const av=document.querySelector('#cards .card.on .av');document.querySelectorAll('#cards .av.timed').forEach(e=>{if(e!==av||!turnT)e.classList.remove('timed','hurry')});
+ placeTags();
+ {const av=document.querySelector('#tags .tg.on .av');document.querySelectorAll('#tags .av.timed').forEach(e=>{if(e!==av||!turnT)e.classList.remove('timed','hurry')});
   if(av&&turnT&&turnT.c===active){const el=Date.now()-turnT.t0,hurry=el>TURN_MS;av.classList.add('timed');av.classList.toggle('hurry',hurry);av.style.setProperty('--t',Math.min(1,hurry?(el-TURN_MS)/EXTRA_MS:el/TURN_MS).toFixed(3))}}
  movable.forEach(t=>{t.g.position.y=(t.p<0?BY:.1)+Math.abs(Math.sin(tm*5))*.3;t.m.material.emissiveIntensity=.3+Math.sin(tm*6)*.25;t.ring.scale.setScalar(1+Math.sin(tm*6)*.12)});
  

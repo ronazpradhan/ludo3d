@@ -117,3 +117,20 @@ body.online.chat-off{--cw:0px}body.online.chat-off #chat{display:none}body.onlin
 #msg:empty{display:none}
 #botbar{display:none;position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:8;align-items:center;gap:12px;padding:10px 10px 10px 18px;font-weight:600;font-size:14px;white-space:nowrap;animation:up .5s var(--sp) both}
 #botbar .go{width:auto;padding:9px 18px;font-size:14px}
+/* ---- clean table: kill counters on top, each player's tag next to their colour, no hint text ---- */
+#msg{display:none!important}
+#cards{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:calc((100vw - var(--cw,0px)) / 2);right:auto;transform:translateX(-50%);display:flex!important;flex-direction:row;flex-wrap:nowrap;gap:6px;padding:0;pointer-events:none;z-index:3}
+.kc{display:flex;align-items:center;gap:6px;padding:5px 11px 5px 6px;border-radius:999px;background:rgba(0,0,0,.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);font-weight:700;font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kc i{width:14px;height:14px;border-radius:50%;background:var(--c);box-shadow:0 0 10px -2px var(--c)}
+.kc.bump{animation:bump .45s var(--sp)}
+#tags{position:absolute;inset:0;pointer-events:none;z-index:2;overflow:hidden}
+.tg{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;gap:4px;will-change:transform}
+.tg i.av{position:relative;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:21px;font-style:normal;line-height:1;background:radial-gradient(circle at 35% 30%,#fff7,var(--c) 62%);box-shadow:0 4px 14px rgba(0,0,0,.45),0 0 0 2px rgba(255,255,255,.2)}
+.tg i.av u{position:absolute;right:-6px;bottom:-5px;font-size:13px;text-decoration:none;background:#000;border-radius:50%;padding:1px 2px}
+.tg i.av::before{content:'';position:absolute;inset:-6px;border-radius:50%;opacity:0;pointer-events:none;background:conic-gradient(var(--rc,#fff) calc((1 - var(--t,0)) * 360deg),rgba(255,255,255,.14) 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3.5px));mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3.5px));transition:opacity .3s}
+.tg.on i.av.timed::before{opacity:1}
+.tg.on i.av:not(.timed)::before{opacity:1;--t:.7;--rc:#fff;animation:avspin 1.1s linear infinite}
+.tg i.av.hurry{--rc:#ff9f0a;animation:avpulse .5s ease-in-out infinite}
+.tg b{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:rgba(0,0,0,.6);box-shadow:inset 0 0 0 1.5px var(--c);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:background .3s,color .3s}
+.tg.on b{background:var(--c);color:#111;box-shadow:0 0 18px -4px var(--c)}
+.tg small{font-size:10px;font-weight:600;opacity:.85;white-space:nowrap}.tg small:empty{display:none}
