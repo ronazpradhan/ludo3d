@@ -66,22 +66,29 @@ addEventListener('pointerup',e=>{if(dr&&dr.m<28)pick(e);dr=null});addEventListen
 cv.addEventListener('wheel',e=>{});
 // game state
 let seats=[2,2,1,2],active=0,movable=[],pickRes=null,rollRes=null,rank=[],caps=[0,0,0,0],started=false;
+// online turns: a player has TURN_MS (+EXTRA_MS) to act, then a bot plays for them until they're back
+let botFor=[false,false,false,false],turnT=null;const TURN_MS=15000,EXTRA_MS=5000;
+// avatars: a friendly animal per player (picked from their id, so everyone sees the same one), robots for CPUs
+const AV=['🦊','🐼','🐯','🐸','🐵','🦁','🐨','🐰','🐧','🐙','🦄','🐻','🐶','🐱','🐮','🐷','🐲','🦉'];
+function avatarFor(id){let h=7;for(const ch of String(id||''))h=(h*31+ch.charCodeAt(0))>>>0;return AV[h%AV.length]}
+function avatarOf(c){return seats[c]==2?'🤖':avatarFor(net?owner[c]:(nick||'')+c)}
 const $=id=>document.getElementById(id),rollBtn=$('roll');
 function say(t){const m=$('msg');m.textContent=t;m.classList.remove('pop');void m.offsetWidth;m.classList.add('pop')}
 const pct=c=>Math.round(T[c].reduce((a,t)=>a+(t.p<0?0:t.p),0)/224*100),cardTxt=c=>rank.includes(c)?['🥇','🥈','🥉'][rank.indexOf(c)]||'✔':pct(c)+'%';
-function ui(){const box=$('cards'),vp=((3-Math.round(sph.taz/(Math.PI/2)))%4+4)%4,ord=[(vp+1)%4,(vp+2)%4,vp,(vp+3)%4],sig=ord.map(c=>c+':'+seats[c]).join();   // cards sit where each colour is on screen: me bottom-left, then clockwise
- const cell=c=>seats[c]?`<div class="card glass ${c==active?'on':''}" style="--c:${CS[c]};--p:${pct(c)}%"><i></i><b>${PN(c)}</b><small>${seats[c]==2?'CPU':net?(owner[c]===me?'You':''):'You'}</small><span>${cardTxt(c)}</span><em class="cp${caps[c]?'':' z'}">⚔${caps[c]}</em></div>`:'<div class="card ph"></div>';
+function ui(){const box=$('cards'),vp=((3-Math.round(sph.taz/(Math.PI/2)))%4+4)%4,ord=[(vp+1)%4,(vp+2)%4,vp,(vp+3)%4],sig=ord.map(c=>c+':'+seats[c]+':'+avatarOf(c)+':'+(botFor[c]?1:0)).join();   // cards sit where each colour is on screen: me bottom-left, then clockwise
+ const cell=c=>seats[c]?`<div class="card glass ${c==active?'on':''}" style="--c:${CS[c]};--p:${pct(c)}%"><i class="av">${avatarOf(c)}${botFor[c]&&seats[c]==1?'<u>🤖</u>':''}</i><b>${PN(c)}</b><small>${seats[c]==2?'CPU':net?(owner[c]===me?'You':''):'You'}</small><span>${cardTxt(c)}</span><em class="cp${caps[c]?'':' z'}">⚔${caps[c]}</em></div>`:'<div class="card ph"></div>';
  if(box.dataset.sig===sig&&box.children.length==4){ord.forEach((c,k)=>{if(!seats[c])return;const d=box.children[k];d.classList.toggle('on',c==active);d.querySelector('b').textContent=PN(c);d.querySelector('span').textContent=cardTxt(c);d.style.setProperty('--p',pct(c)+'%');
   const e=d.querySelector('.cp'),t='⚔'+caps[c];if(e.textContent!==t){e.textContent=t;e.classList.toggle('z',!caps[c]);e.classList.remove('bump');void e.offsetWidth;e.classList.add('bump')}})}
  else{box.dataset.sig=sig;box.innerHTML=ord.map(cell).join('')}}
 function drawSeats(){$('seats').innerHTML=seats.map((s,c)=>`<button class="seat ${s?'':'off'}" style="--c:${CS[c]}" onclick="seats[${c}]=(seats[${c}]+1)%3;sfx.tick();drawSeats()"><i></i><span>${CN[c]}</span><em>${['Off','You','CPU'][s]}</em></button>`).join('')}
 drawSeats();
 $('snd').textContent=snd?'🔊':'🔇';$('snd').onclick=()=>{snd=!snd;store.set('ludo3d.sfx',snd?'1':'0');$('snd').textContent=snd?'🔊':'🔇'};
-function startGame(){caps=[0,0,0,0];sfx.start();
+function startGame(){caps=[0,0,0,0];botFor=[false,false,false,false];turnT=null;sfx.start();if(typeof updBotBar=='function')updBotBar();
  ALL.forEach(t=>{t.g.visible=seats[t.pl]>0;t.g.position.copy(wv(t));t.g.position.y=8;t.g.scale.setScalar(.01)});
  ALL.filter(t=>t.g.visible).forEach((t,k)=>sleep(k*60).then(()=>{beep(300+k*40,.08);tween(.5,k2=>{t.g.position.y=BY+8*(1-k2)*(1-k2);t.g.scale.setScalar(Math.max(.01,k2))},ease)}));
  faceTo(Math.max(0,net?seats.findIndex((x,i)=>x==1&&owner[i]===me):(seats.indexOf(1)>=0?seats.indexOf(1):seats.findIndex(x=>x))),true);started=true;sleep(1400).then(play)}
-$('start').onclick=()=>{if(seats.filter(x=>x).length<2){seats[0]=1;seats[2]=2;drawSeats();return}$('menu').style.display='none';startGame()};
+$('start').onclick=()=>{if(seats.filter(x=>x).length<2){seats[0]=1;seats[2]=2;drawSeats();return}
+ {const oc=[0,1,2,3].filter(i=>seats[i]);if(oc.length==2&&oc[1]-oc[0]!=2){seats[(oc[0]+2)%4]=seats[oc[1]];seats[oc[1]]=0;drawSeats()}}$('menu').style.display='none';startGame()};
 
 const can=(t,v)=>t.p<0?v==6:t.p+v<=56;
 async function settle(){const m={};ALL.forEach(t=>{if(!t.g.visible)return;const k=t.p<0||t.p==56?'u'+t.pl+t.i:t.p<=50?'c'+abs(t.pl,t.p):'l'+t.pl+t.p;(m[k]=m[k]||[]).push(t)});
@@ -125,17 +132,46 @@ rollBtn.onclick=()=>{if(rollRes){const r=rollRes;rollRes=null;r()}};
 function faceTo(p,snap){const b=(3-p)*Math.PI/2;sph.taz=b+Math.round((sph.taz-b)/(2*Math.PI))*2*Math.PI;if(snap)sph.az=sph.taz}
 const moveDice=c=>{const x=YB[c][0]+(c==1||c==2?5:0)-7,z=YB[c][1]+(c>=2?5:0)-7,a=dice.position.clone(),rz=dice.rotation.z;return tween(.34,k=>{dice.position.set(a.x+(x-a.x)*k,.3+Math.sin(k*Math.PI)*.8,a.z+(z-a.z)*k);dice.rotation.z=rz+k*Math.PI*2},ease)};
 async function play(){let c=seats.findIndex(s=>s),six=0,pc=-1;const n=seats.filter(s=>s).length;
- while(true){const same=c===pc;pc=c;if(!net&&seats[c]==1)faceTo(c);active=c;ui();glow.color.set(C[c]);halo.material.color.set(C[c]);const cpu=seats[c]==2,prod=cpu?(!net||host):(!net||owner[c]===me);say(same?`${PN(c)} rolls again`:`${PN(c)}'s turn`);if(!same)await moveDice(c);
-  const nr=dn++;if(ff&&!inbox[nr])ff=false;let v;if(inbox[nr]&&inbox[nr].k=='r')v=inbox[nr].v|0;else if(prod){if(cpu)await sleep(450);else{rollBtn.disabled=false;sfx.chime();say(`${PN(c)} — tap the dice`);await new Promise(r=>rollRes=r);rollBtn.disabled=true}if(inbox[nr]&&inbox[nr].k=='r')v=inbox[nr].v|0;else{v=1+Math.random()*6|0;dec(nr,{k:'r',v})}}else v=(await take(nr,c,()=>({k:'r',v:1+Math.random()*6|0}))).v;
+ while(true){const same=c===pc;pc=c;if(!net&&seats[c]==1)faceTo(c);active=c;ui();glow.color.set(C[c]);halo.material.color.set(C[c]);const cpu=seats[c]==2,prod=cpu?(!net||host):(!net||owner[c]===me);say(same?`${PN(c)} rolls again`:'');if(!same)await moveDice(c);
+  const nr=dn++;if(ff&&!inbox[nr])ff=false;let v;if(inbox[nr]&&inbox[nr].k=='r')v=inbox[nr].v|0;
+  else if(net&&!cpu)v=(await human(nr,c,async()=>{rollBtn.disabled=false;sfx.chime();say('Tap the dice 🎲');await new Promise(r=>rollRes=r);rollBtn.disabled=true;return{k:'r',v:1+Math.random()*6|0}},()=>({k:'r',v:1+Math.random()*6|0}))).v;
+  else if(prod){if(cpu)await sleep(450);else{rollBtn.disabled=false;sfx.chime();say(`${PN(c)} — tap the dice`);await new Promise(r=>rollRes=r);rollBtn.disabled=true}if(inbox[nr]&&inbox[nr].k=='r')v=inbox[nr].v|0;else{v=1+Math.random()*6|0;dec(nr,{k:'r',v})}}else v=(await take(nr,c,()=>({k:'r',v:1+Math.random()*6|0}))).v;
   await rollDice(v);say(`${PN(c)} rolled ${v}`);let extra=v==6;six=v==6?six+1:0;
   if(six==3){say('Three sixes — turn lost!');six=0;extra=false;await sleep(750)}
   else{const mv=T[c].filter(t=>can(t,v));
    if(!mv.length){say(`${PN(c)} has no moves`);extra=false;await sleep(650)}
-   else{let t;if(mv.length==1){t=mv[0];await sleep(160)}else{const np=dn++,best=()=>mv.reduce((a,b)=>score(b,v)>score(a,v)?b:a);if(ff&&!inbox[np])ff=false;if(inbox[np]&&inbox[np].k=='p'){t=T[c][inbox[np].i];if(!mv.includes(t))t=best()}else if(prod){if(cpu){await sleep(320);t=best()}else t=await pickToken(mv);dec(np,{k:'p',i:t.i})}else{say(`${PN(c)} is choosing…`);const m=await take(np,c,()=>({k:'p',i:best().i}));t=T[c][m.i];if(!mv.includes(t))t=best()}}
+   else{let t;if(mv.length==1){t=mv[0];await sleep(160)}else{const np=dn++,best=()=>mv.reduce((a,b)=>score(b,v)>score(a,v)?b:a);if(ff&&!inbox[np])ff=false;if(inbox[np]&&inbox[np].k=='p'){t=T[c][inbox[np].i];if(!mv.includes(t))t=best()}
+     else if(net&&!cpu){const m=await human(np,c,async()=>{const x=await pickToken(mv);return{k:'p',i:x.i}},()=>({k:'p',i:best().i}));t=T[c][m.i];if(!mv.includes(t))t=best()}
+     else if(prod){if(cpu){await sleep(320);t=best()}else t=await pickToken(mv);dec(np,{k:'p',i:t.i})}else{say(`${PN(c)} is choosing…`);const m=await take(np,c,()=>({k:'p',i:best().i}));t=T[c][m.i];if(!mv.includes(t))t=best()}}
     const r=await moveToken(t,v);if(r.cap){extra=true;say('Captured! Bonus roll')}if(r.fin)extra=true;
     if(T[c].every(x=>x.p==56)){rank.push(c);extra=false;ui();sfx.win();say(`${PN(c)} finished #${rank.length}!`);if(!ff)for(let i=0;i<5;i++)setTimeout(()=>burst((Math.random()-.5)*8,6,(Math.random()-.5)*8,[0xff5252,0xffd740,0x69f0ae,0x40c4ff,0xffffff],40,6),i*220);await sleep(1400);
      if(rank.length>=n-1){seats.forEach((s,i)=>{if(s&&!rank.includes(i))rank.push(i)});ui();showEnd();return}}}}
   six=extra?six:0;if(!extra||rank.includes(c)){six=0;do{c=(c+1)%4}while(!seats[c]||rank.includes(c))}}}
+// ---------- online human decisions: timer, then a bot covers the seat ----------
+// Resolves with the decision for step n of seat c. Only ONE client ever produces it:
+// the seat's owner while they're playing, otherwise the host (see take() in online.js).
+function raceWait(p,ms,n){return new Promise(res=>{let done=false;const fin=v=>{if(done)return;done=true;clearInterval(iv);clearTimeout(to);res(v)};
+ const iv=setInterval(()=>{if(inbox[n])fin(null)},150),to=setTimeout(()=>fin(null),ms);Promise.resolve(p).then(fin)})}
+function cancelAsk(){rollRes=null;rollBtn.disabled=true;if(pickRes){movable.forEach(x=>x.ring.visible=false);movable=[];pickRes=null}}
+async function human(n,c,ask,fb){
+ const mine=owner[c]===me;
+ if(!mine){if(!ff&&!botFor[c])turnT={c,t0:Date.now()};try{return await take(n,c,fb)}finally{if(turnT&&turnT.c===c)turnT=null}}
+ for(;;){
+  if(inbox[n])return inbox[n];
+  if(!botFor[c]){
+   if(!ff)turnT={c,t0:Date.now()};
+   const hurry=setTimeout(()=>{if(!inbox[n]&&(rollRes||pickRes))toast('Hurry! 5 more seconds ⏰')},TURN_MS);
+   const r=await raceWait(ask(),TURN_MS+EXTRA_MS,n);clearTimeout(hurry);turnT=null;
+   if(inbox[n])return inbox[n];
+   if(r){dec(n,r);return inbox[n]}
+   cancelAsk();say('');                     // time's up
+   if(!host)return take(n,c,fb);            // the host's bot plays this move
+   setBot(c,true);                          // I'm the host: my own bot covers me
+  }
+  if(host){await sleep(600);if(!inbox[n])dec(n,fb());return inbox[n]}
+  await Promise.race([take(n,c,fb),waitBack()]);   // the host's bot plays, unless I come back first
+ }
+}
 // loop
 const clk=new THREE.Clock();let tm=0;
 (function loop(){requestAnimationFrame(loop);const dt=Math.min(clk.getDelta(),.05);tm+=dt;
@@ -144,6 +180,8 @@ const clk=new THREE.Clock();let tm=0;
   if(p.l<=0||p.m.position.y<-2){S.remove(p.m);p.m.material.dispose();parts.splice(i,1)}}
  YD.forEach((m,p)=>{const k=(started&&p==active)?1.1+Math.sin(tm*3)*.07:1;m.material.color.set(C[p]).multiplyScalar(k)});sparks.rotation.y+=dt*.02;sparks.position.y=Math.sin(tm*.5)*.4;
  if(rollRes)dice.scale.setScalar(1+Math.abs(Math.sin(tm*5))*.16);
+ {const av=document.querySelector('#cards .card.on .av');document.querySelectorAll('#cards .av.timed').forEach(e=>{if(e!==av||!turnT)e.classList.remove('timed','hurry')});
+  if(av&&turnT&&turnT.c===active){const el=Date.now()-turnT.t0,hurry=el>TURN_MS;av.classList.add('timed');av.classList.toggle('hurry',hurry);av.style.setProperty('--t',Math.min(1,hurry?(el-TURN_MS)/EXTRA_MS:el/TURN_MS).toFixed(3))}}
  movable.forEach(t=>{t.g.position.y=(t.p<0?BY:.1)+Math.abs(Math.sin(tm*5))*.3;t.m.material.emissiveIntensity=.3+Math.sin(tm*6)*.25;t.ring.scale.setScalar(1+Math.sin(tm*6)*.12)});
  
  sph.az+=(sph.taz-sph.az)*.16;sph.pol+=(sph.tpol-sph.pol)*.16;sph.r+=(sph.tr-sph.r)*.16;{const sa=Math.sin(sph.az),ca=Math.cos(sph.az);ALL.forEach(t=>{t.m.rotation.set(-1.36,sph.az,0,'YXZ');t.m.position.set(sa*.4,.3,ca*.4)})}shake*=.9;

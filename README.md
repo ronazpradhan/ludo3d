@@ -64,3 +64,12 @@ to silence them); they never contain a card drawn from the stock.
 Rejoin: refreshing the tab puts you straight back in your seat; another tab/browser restart shows a Rejoin
 button. A player who stays disconnected for 2 minutes during a game is removed and their cards are shuffled
 back into the stock.
+
+## Ludo online: seats, turn timer and bots
+- With two players, the second one is seated opposite the first, and if two players sit side by side
+  the host's Start moves one to the opposite corner (1st/3rd or 2nd/4th).
+- Every player has an avatar; a ring around the current player's avatar counts down their turn:
+  15 seconds, then 5 more (orange). If they still don't move, "🤖 Bot joined the game" is announced and
+  the host's browser plays for them (like the CPUs), also when someone disconnects.
+- The covered player gets an "I'm back" banner (or taps the board, or rejoins); everyone is told they're back.
+- Timings live at the top of the game state in `public/js/game.js` (`TURN_MS`, `EXTRA_MS`).

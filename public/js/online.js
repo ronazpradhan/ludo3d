@@ -11,8 +11,20 @@ async function copy(t){try{await navigator.clipboard.writeText(t)}catch(e){const
 function put(m){inbox[m.n]=m;saveSoon();const w=waiters[m.n];if(w){delete waiters[m.n];w(m)}}
 function dec(n,o){o.n=n;o.g=gameNo;put(o);if(net){lastDec=[...lastDec,o].slice(-4);net.emit('g',o)}}
 function take(n,c,fb){return new Promise(r=>{if(inbox[n])return r(inbox[n]);waiters[n]=r;
- if(net&&host&&seats[c]==1&&owner[c]!==me){const iv=setInterval(()=>{if(inbox[n]||!started){clearInterval(iv);return}if(!net.peers().some(p=>p.presence&&p.presence.id===owner[c])){clearInterval(iv);dec(n,fb())}},1200)}})}
-setInterval(()=>{if(net&&started)lastDec.forEach(o=>net.emit('g',o))},2500);
+ // host: if the seat's player left, ran out of time, or is already covered by a bot, the bot plays this move
+ if(net&&host&&seats[c]==1&&owner[c]!==me){const t0=Date.now(),iv=setInterval(()=>{if(inbox[n]||!started){clearInterval(iv);return}
+  const gone=!net.peers().some(p=>p.presence&&p.presence.id===owner[c]),late=Date.now()-t0>TURN_MS+EXTRA_MS+1500;
+  if(botFor[c]&&Date.now()-t0<600)return;   // bot moves at a CPU-like pace
+  if(botFor[c]||gone||late){clearInterval(iv);if(!botFor[c])setBot(c,true);dec(n,fb())}},300)}})}
+// ---------- bot takeover / "I'm back" ----------
+let backWait=[],backAt=0;
+const waitBack=()=>new Promise(r=>backWait.push(r));
+function applyBot(c,on){if(!(c>=0&&c<4)||seats[c]!=1||!!botFor[c]===!!on)return;botFor[c]=!!on;ui();updBotBar();
+ const t=on?'🤖 Bot joined the game for '+PN(c):PN(c)+' is back! 👋';addChat('',t,0,1);toast(t);if(on&&owner[c]===me){sfx.chime();try{if(navigator.vibrate&&(!navigator.userActivation||navigator.userActivation.hasBeenActive))navigator.vibrate([60,60,60])}catch(e){}}}
+function setBot(c,on){applyBot(c,on);if(net)net.emit('bot',{g:gameNo,c,on:!!on})}
+function updBotBar(){const b=$('botbar');if(!b)return;const s=net?owner.indexOf(me):-1;b.style.display=s>=0&&botFor[s]&&started&&!ended?'flex':'none'}
+function iAmBack(){const s=net?owner.indexOf(me):-1;if(s<0||!botFor[s])return;backAt=Date.now();setBot(s,false);backWait.splice(0).forEach(f=>f())}
+setInterval(()=>{if(net&&started)lastDec.forEach(o=>net.emit('g',o));if(net&&started&&host)net.emit('bots',{g:gameNo,b:botFor})},2500);
 function addChat(who,txt,col,sys){const d=document.createElement('div');d.className='cm'+(sys?' sys':'');if(!sys){const b=document.createElement('b');b.textContent=who;b.style.color=col||'#fff';d.append(b)}d.append(document.createTextNode((sys?'':' ')+txt));$('clog').append(d);$('clog').scrollTop=1e9;if(!sys&&chatHidden()){unread++;$('cbadge').textContent=unread;floatMsg(who,txt,col)}}
 // floating chat: new messages pop up over the board (like a live stream) while the chat panel is closed
 function floatMsg(who,txt,col){const f=$('float');if(!f)return;const d=document.createElement('div');d.className='fm';const b=document.createElement('b');b.textContent=who;b.style.color=col||'#fff';d.append(b,document.createTextNode(' '+txt));f.append(d);while(f.children.length>3)f.firstChild.remove();setTimeout(()=>{d.classList.add('out');setTimeout(()=>d.remove(),500)},6000)}
@@ -36,8 +48,11 @@ function renderRooms(){const L=$('rooms');L.textContent='';if(!lob)return;const 
  if(ss&&(!inv||q===ss.code)){if(ss.tab===TAB||ss.auto){toast('Rejoining room '+ss.code+'...');rejoin(ss)}else showResume(ss)}
  else if(inv){pend=q;$('code').value=q;toast('Enter your name to join room '+q);$('nick').focus();$('nick').onkeydown=e=>{if(e.key=='Enter'&&pend)joinRoom(pend)}}})();
 function bc(){if(!host||!net)return;net.emit('lobby',{c:roomCode,h:me,ls,lo,ln});renderLobby();saveSoon();lob.presence({lr:started?null:roomCode,hn:nick,pc:ls.filter(x=>x==1||x==2).length})}
-function claimSeat(id,nk,seat){const cur=lo.indexOf(id);if(seat<0){if(cur>=0)return;seat=ls.indexOf(0)}if(!(seat>=0&&seat<4)||ls[seat]!=0)return;if(cur>=0){ls[cur]=0;lo[cur]=null;ln[cur]=''}ls[seat]=1;lo[seat]=id;ln[seat]=nk;bc()}
-function renderLobby(){const S=$('lseats');S.textContent='';ls.forEach((s,i)=>{const b=document.createElement('button');b.className='seat'+(s==0||s==3?' off':'');b.style.setProperty('--c',CS[i]);const d=document.createElement('i'),n=document.createElement('span'),e=document.createElement('em');n.textContent=CN[i];
+// a new player who didn't pick a seat sits opposite the first player, so a 2-player game is played from opposite corners
+function autoSeat(){const oc=[0,1,2,3].filter(i=>ls[i]==1||ls[i]==2);if(oc.length==1&&ls[(oc[0]+2)%4]==0)return(oc[0]+2)%4;return ls.indexOf(0)}
+function oppose(){const oc=[0,1,2,3].filter(i=>ls[i]==1||ls[i]==2);if(oc.length!=2||oc[1]-oc[0]==2)return;const b=oc[1],to=(oc[0]+2)%4;ls[to]=ls[b];lo[to]=lo[b];ln[to]=ln[b];ls[b]=0;lo[b]=null;ln[b]=''}
+function claimSeat(id,nk,seat){const cur=lo.indexOf(id);if(seat<0){if(cur>=0)return;seat=autoSeat()}if(!(seat>=0&&seat<4)||ls[seat]!=0)return;if(cur>=0){ls[cur]=0;lo[cur]=null;ln[cur]=''}ls[seat]=1;lo[seat]=id;ln[seat]=nk;bc()}
+function renderLobby(){const S=$('lseats');S.textContent='';ls.forEach((s,i)=>{const b=document.createElement('button');b.className='seat'+(s==0||s==3?' off':'');b.style.setProperty('--c',CS[i]);const d=document.createElement('i'),n=document.createElement('span'),e=document.createElement('em');n.textContent=CN[i];if(s==1||s==2){d.className='av';d.textContent=s==2?'🤖':avatarFor(lo[i])}
   e.textContent=s==1?(lo[i]===me?'You':ln[i]||'Player'):s==2?'CPU':s==3?'Closed':'Sit here';b.append(d,n,e);
   b.onclick=()=>{sfx.tick();if(s==0){if(host)claimSeat(me,nick,i);else net.emit('claim',{id:me,nick,seat:i})}else if(host&&s!=1){ls[i]=s==2?3:0;bc()}};
   if(host&&s==0){const g=document.createElement('button');g.className='pill';g.textContent='+ CPU';g.onclick=ev=>{ev.stopPropagation();sfx.tick();ls[i]=2;bc()};b.append(g)}
@@ -55,6 +70,8 @@ async function joinRoom(code,create,resume){if(!lob||net)return;if(!reqNick())re
  net.on('start',m=>{const d=m.data;if(!host&&!m.sameTab&&d&&Array.isArray(d.ls))begin(d.ls,d.lo,d.ln)}),
  net.on('again',m=>{const d=m.data;if(d&&(d.g|0)===gameNo+1){if(ended)restartGame();else againPend=true}}),
  net.on('snd',m=>{const d=m.data;if(d&&!m.sameTab&&Date.now()-lastSnd>800){lastSnd=Date.now();playBoard(d.i|0,true,esc(d.u||''))}}),
+ net.on('bot',m=>{const d=m.data;if(!m.sameTab&&d&&(d.g|0)===gameNo)applyBot(d.c|0,!!d.on)}),
+ net.on('bots',m=>{const d=m.data;if(host||m.sameTab||!d||(d.g|0)!==gameNo||!Array.isArray(d.b))return;const s=owner.indexOf(me);d.b.forEach((x,i)=>{if(i===s&&Date.now()-backAt<5000)return;applyBot(i,!!x)})}),
  net.on('chat',m=>{const d=m.data;if(!m.sameTab&&d)addChat(esc(d.u||'?'),String(d.t||'').slice(0,200),CS[d.s],0)}),
  net.on('g',m=>{const d=m.data;if(!m.sameTab&&d&&Number.isInteger(d.n)&&(d.g|0)===gameNo&&((d.k=='r'&&d.v>=1&&d.v<=6)||(d.k=='p'&&d.i>=0&&d.i<4)))put({k:d.k,v:d.v|0,i:d.i|0,n:d.n})}),
  net.onPeers(ch=>{ch.joined.forEach(p=>{if(!p.isMe&&p.presence&&p.presence.id&&!started)addChat('','A player joined',0,1)});ch.left.forEach(p=>{const id=p.presence&&p.presence.id,s=lo.indexOf(id);if(id&&s>=0){addChat('',(ln[s]||'A player')+' left',0,1);if(!started&&host){ls[s]=0;lo[s]=null;ln[s]='';bc()}}})})];
@@ -74,8 +91,9 @@ $('cCode').onclick=()=>copy(roomCode);$('cLink').onclick=()=>copy(LINK+roomCode)
 $('again').onclick=()=>{if(!ended)return;if(net)net.emit('again',{g:gameNo+1});restartGame()};
 $('home').onclick=()=>$('qyes').onclick();
 $('qbtn').onclick=()=>$('qconf').style.display='flex';$('qno').onclick=()=>$('qconf').style.display='none';$('qyes').onclick=()=>{leaving=true;store.del(SKEY);try{if(net)net.leave()}catch(e){}try{const u=new URL(location.href);u.searchParams.delete('room');u.hash='';location.replace(u.toString())}catch(e){location.reload()}};
-$('lstart').onclick=()=>{if(ls.filter(x=>x==1||x==2).length<2)return;const d={ls,lo,ln};for(let i=0;i<6;i++)setTimeout(()=>net&&net.emit('start',d),i*1200);begin(ls,lo,ln)};
-$('csend').onclick=sendChat;$('ctext').onkeydown=e=>{if(e.key=='Enter')sendChat()};
+$('lstart').onclick=()=>{if(ls.filter(x=>x==1||x==2).length<2)return;oppose();bc();const d={ls,lo,ln};for(let i=0;i<6;i++)setTimeout(()=>net&&net.emit('start',d),i*1200);begin(ls,lo,ln)};
+$('csend').onclick=sendChat;
+$('botback').onclick=iAmBack;$('stage').addEventListener('pointerdown',iAmBack);$('ctext').onkeydown=e=>{if(e.key=='Enter')sendChat()};
 // chat: ✕ closes it (side panel on desktop, slide-over on phones), 💬 button brings it back
 const chatHidden=()=>innerWidth<900?!chatOpen:document.body.classList.contains('chat-off');
 function setChat(open){if(innerWidth<900){chatOpen=open;$('chat').classList.toggle('open',open)}else document.body.classList.toggle('chat-off',!open);if(open){unread=0;$('cbadge').textContent='';$('float').textContent=''}}
@@ -107,7 +125,8 @@ async function resumeGame(g){restoring=true;const b=g.b;ls=b.ls.map(x=>x|0);lo=b
  const got=new Promise(r=>syncRes=r);requestSync();await Promise.race([got,new Promise(r=>setTimeout(r,2000))]);syncRes=null;   // ask the others what we missed
  ff=true;setTimeout(()=>{ff=false},4000);begin(ls,lo,ln);restoring=false;saveNow();   // 4s failsafe so silent mode can never get stuck
                                                                              // silent fast replay up to the present
- setTimeout(()=>{if(net)net.emit('log',{g:gameNo,l:logStr()})},1500);toast('Back in the game')}
+ setTimeout(()=>{if(net)net.emit('log',{g:gameNo,l:logStr()})},1500);toast('Back in the game');
+ setTimeout(()=>{const s=owner.indexOf(me);if(net&&s>=0){backAt=Date.now();net.emit('bot',{g:gameNo,c:s,on:false})}},2500)}   // tell everyone I'm back (only announced if a bot was covering me)
 function hardResync(l,g){if(!begun)return;const last=+store.get('ludo3d.hr')||0;if(Date.now()-last<15000)return;store.set('ludo3d.hr',String(Date.now()));
  leaving=true;store.set(SKEY,JSON.stringify({code:roomCode,nick,me,host,tab:TAB,t:Date.now(),auto:1,game:{no:g,b:begun,log:l}}));location.reload()}
 // connection lost / back: tell the player and catch up on anything missed
