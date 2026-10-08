@@ -25,7 +25,7 @@ let lastTurnKey = '', lastStatus = '', lastEvId = null, lastGameNo = null;
 let arr = [], sel = null;   // MY arrangement of my hand: [[card], [card, card], ...]. Only the player pairs cards.
 let drag = null, deferred = false, noClick = false, skipMine = false, hideCard = null, flipFrom = null, lastThrown = null;
 let deal = null;            // while the deal animation runs: { mine, seats: {pid: n}, total, done }
-let badKeys = null, badTimer = 0, endShown = false, endTimer = 0;
+let badKeys = null, badTimer = 0, endShown = false, endTimer = 0, showAlert = null, watching = false;
 
 // ---------- small helpers ----------
 const toast = t => { const e = $('toast'); e.textContent = t; e.classList.remove('on'); void e.offsetWidth; e.classList.add('on'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('on'), 2600); };
@@ -94,8 +94,10 @@ function onMsg(m) {
     const own = tabSess(), other = anySess();
     if (own && wantResume && !kicked) send({ t: 'jp:resume', code: own.code, token: own.token });
     else if (other && !S) showResume(other);
+    watching = false; setWatch(!S);   // (re)subscribe to the open-rooms list after (re)connecting
     return;
   }
+  if (m.t == 'jp:rooms') return renderRooms(Array.isArray(m.rooms) ? m.rooms : []);
   if (m.t == 'jp:joined') {
     me = m.pid; saveSess(m.code, m.token); kicked = false; wantResume = true;
     try { history.replaceState(null, '', location.pathname); } catch (e) {}
@@ -128,7 +130,7 @@ function render() {
     const live = lastStatus == 'playing' && S.game && S.game.winner;
     if (!live) endShown = true; else endTimer = setTimeout(() => { endTimer = 0; endShown = true; render(); }, 2600);
   }
-  show('landing', !S); show('lobby', st == 'lobby'); show('end', st == 'over' && endShown);
+  show('landing', !S); setWatch(!S); show('lobby', st == 'lobby'); show('end', st == 'over' && endShown);
   $('jtable').style.visibility = S && S.game ? 'visible' : 'hidden';
   if (!S) { lastStatus = ''; lastEvId = null; return; }
   if (st == 'lobby') renderLobby();
@@ -160,6 +162,9 @@ function renderLobby() {
   $('lready').textContent = mine && mine.ready ? 'Ready ✓ (tap to undo)' : "I'm ready";
   const others = R.players.filter(p => p.pid !== R.hostPid), canStart = R.players.length >= R.minPlayers && others.every(p => p.ready && p.connected);
   $('lstart').style.display = host ? '' : 'none'; $('lstart').disabled = !canStart;
+  const pub = $('lpublic'); pub.disabled = !host;
+  pub.textContent = R.listed ? '🌐 Listed in open rooms' + (host ? ' · tap to hide' : '') : '🔒 Private · join by code' + (host ? ' · tap to list' : '');
+  pub.onclick = () => { if (host) { sfx.tick(); send({ t: 'jp:opts', listed: !R.listed }); } };
   $('lnote').textContent = host ? (R.players.length < R.minPlayers ? 'Share the code — 2 to 6 players' : canStart ? 'Everyone is ready!' : 'Waiting for everyone to be ready…') : 'Waiting for the host to start…';
 }
 
@@ -201,20 +206,22 @@ function renderTable() {
   const cur = g.current, js = $('jstatus'); let txt;
   if (deal) txt = 'Dealing the cards…';
   else if (g.status != 'playing') txt = g.winner ? (g.winner === me ? 'You win! 🎉' : nameOf(g.winner) + ' shows their pairs and wins!') : 'Game over';
-  else if (myTurn) txt = g.phase == 'draw' ? 'Your turn · take a card' : 'Your turn · throw a card away';
+  else if (myTurn) txt = g.phase == 'draw' ? 'Your turn · take a card' : you && you.canShow ? 'You have all pairs! 🎉' : 'Your turn · throw a card away';
   else txt = nameOf(cur) + "'s turn" + (conn[cur] === false ? ' · offline, 2 min to return' : '…');
   js.textContent = txt; js.classList.toggle('me', myTurn);
   const tk = g.turn + ':' + cur + ':' + !!deal; if (tk !== lastTurnKey) { js.classList.remove('pop'); void js.offsetWidth; js.classList.add('pop'); if (myTurn && lastTurnKey) { sfx.chime(); buzz(20); } lastTurnKey = tk; }
   renderHand(g, you, myTurn);
-  // Show button: available every time you've drawn. The server checks the whole hand, however the cards are arranged.
-  const canShow = myTurn && !pending && g.phase == 'discard' && you && you.validMoves.some(m => m.type == 'show');
+  // Show button: lights up by itself when the server says your hand is all pairs (no need to arrange anything)
+  const canShow = myTurn && !pending && g.phase == 'discard' && !!(you && you.canShow);
+  if (canShow && showAlert !== g.turn) { showAlert = g.turn; sfx.chime(); buzz([20, 40, 20]); }
   $('showBtn').style.display = canShow ? 'block' : 'none';
   $('sortBtn').style.visibility = you && !deal && g.status == 'playing' ? 'visible' : 'hidden';
   $('hint').textContent = deal || !you || g.status != 'playing' ? '' : pending ? '…'
     : !myTurn ? 'Drag a card onto another to pair them · drag along the row to move it'
     : g.phase == 'draw' ? 'Drag a card from the stock or discard pile into your hand'
+    : canShow ? 'All your cards make pairs! Tap Show to win'
     : sel ? 'Tap it again — or drag it onto the table — to throw it'
-    : 'Throw a card onto the table — or tap Show if all your cards make pairs';
+    : 'Drag a card up onto the table to throw it';
   const pairs = arr.filter(x => x.length == 2).length;
   $('mylabel').textContent = you ? (you.hand.length + ' cards · ' + pairs + ' pair' + (pairs == 1 ? '' : 's') + ' made · ' + ((R.players.find(p => p.pid === me) || {}).score || 0) + ' wins') : 'You are watching this game';
   renderLog();
@@ -519,6 +526,21 @@ $('sortBtn').onclick = () => {   // orders by rank only - it never pairs anythin
   sfx.tick(); saveArr(); render();
 };
 addEventListener('resize', () => { if (S && S.game) layoutHand(); });
+
+// ---------- open rooms on the home screen (rooms friends created on this server) ----------
+function setWatch(on) { if (on === watching || !net || !net.online()) return; watching = on; send({ t: 'jp:watch', on }); }
+function renderRooms(list) {
+  const L = $('rooms'); L.textContent = '';
+  if (!list.length) return;
+  L.append(Object.assign(document.createElement('div'), { className: 'sub', textContent: 'Open rooms', style: 'margin:14px 0 0' }));
+  list.forEach(r => {
+    const d = document.createElement('div'); d.className = 'rm';
+    const t = document.createElement('span'); t.textContent = r.host + "'s room · " + r.players + '/' + r.max;
+    const b = document.createElement('button'); b.className = 'pill'; b.textContent = 'Join';
+    b.onclick = () => { $('code').value = r.code; $('bJoin').onclick(); };
+    d.append(t, b); L.append(d);
+  });
+}
 
 // ---------- lobby / landing ----------
 const nickOk = () => { const v = $('nick').value.trim(); if (v) { store.set('ludo3d.nick', v); return v; } toast('Enter your name first'); $('nick').focus(); return null; };

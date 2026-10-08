@@ -35,10 +35,11 @@
   <input class="in" id="nick" maxlength="14" placeholder="Your name" autocomplete="nickname">
   <button class="go" id="bCreate" disabled>Create Room</button>
   <div class="row" style="margin-top:10px"><input class="in" id="code" maxlength="5" placeholder="CODE" style="margin:0;text-transform:uppercase;letter-spacing:4px"><button class="go alt" id="bJoin" disabled style="margin:0;width:auto;padding:0 26px">Join</button></div>
+  <div id="rooms"></div>
   <details class="how"><summary>How to play</summary>
    <p>Everyone gets an odd number of cards. The card turned face up in the middle picks the <b>Joker</b>: every card one rank higher is a Joker and pairs with anything.</p>
    <p>On your turn drag a card from the <b>stock</b> or the <b>discard pile</b> into your hand, then drag one card back onto the table.</p>
-   <p>Right after you draw, if all your cards make pairs, tap <b>Show</b> to win. You can drag cards onto each other to keep track of pairs, but you don't have to.</p>
+   <p>When all your cards make pairs right after you draw, a <b>Show</b> button lights up — tap it to win. Dragging cards onto each other to keep track is optional.</p>
   </details>
   <div class="sub" id="onl" style="margin:14px 0 0">Connecting…</div>
  </div>
@@ -50,6 +51,7 @@
  <div class="row"><button class="pill" id="cCode">Copy code</button><button class="pill" id="cLink">Copy invite link</button></div>
  <div class="seats" id="lseats" style="margin-top:14px"></div>
  <div id="hsize"></div>
+ <button class="pill" id="lpublic" type="button"></button>
  <button class="go alt" id="lready">I'm ready</button>
  <button class="go" id="lstart">Start Game</button>
  <button class="pill" id="lleave" style="margin-top:12px">Leave</button>

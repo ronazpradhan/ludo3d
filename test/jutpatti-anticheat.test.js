@@ -208,3 +208,20 @@ test("Show over the network: the winner's own arrangement is what everyone sees"
   show({ type: 'show', pairs: mine });
   for (const ws of r.socks) assert.deepStrictEqual(ws.state().game.winningPairs, mine);
 });
+
+test('open rooms list: shows rooms waiting for players, hides private, full and started ones', () => {
+  const h = harness(), a = h.client(), b = h.client(), watcher = h.client();
+  a.msg({ t: 'jp:create', name: 'Ann' }); const code = a.last('jp:joined').code;
+  b.msg({ t: 'jp:create', name: 'Ben', listed: false });
+  watcher.msg({ t: 'jp:watch' });
+  let list = watcher.last('jp:rooms').rooms;
+  assert.deepStrictEqual(list, [{ code, host: 'Ann', players: 1, max: 6 }]);   // Ben's private room isn't listed
+  assert.ok(!JSON.stringify(list).includes('token') && !JSON.stringify(list).includes('pid'));
+  a.msg({ t: 'jp:opts', listed: false }); watcher.msg({ t: 'jp:watch' });
+  assert.deepStrictEqual(watcher.last('jp:rooms').rooms, []);
+  a.msg({ t: 'jp:opts', listed: true });
+  const c = h.client(); c.msg({ t: 'jp:join', code, name: 'Cat' }); c.msg({ t: 'jp:ready', ready: true });
+  a.msg({ t: 'jp:start' }); watcher.msg({ t: 'jp:watch' });
+  assert.deepStrictEqual(watcher.last('jp:rooms').rooms, []);   // game running: not joinable, not listed
+  c.msg({ t: 'jp:opts', listed: false }); assert.strictEqual(c.lastErr(), 'NOT_HOST');
+});

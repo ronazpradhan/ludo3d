@@ -117,3 +117,5 @@ button.pc.can:active{transform:scale(.93)}
  #showBtn{padding:11px 22px;font-size:16px}
 }
 @media(max-height:560px){#felt{min-height:150px}#hand{--cardw:52px;padding-top:12px}}
+#lpublic{margin:-4px 0 14px;font-size:13px}#lpublic:disabled{opacity:.75;cursor:default}
+#rooms .rm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

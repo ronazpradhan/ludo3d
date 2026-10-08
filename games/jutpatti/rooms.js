@@ -46,7 +46,7 @@ function createJutpattiServer({ send, now = Date.now, log = defaultLog, randInt 
       t: 'jp:state', you: pid,
       room: {
         code: room.code, gameType: room.gameType, hostPid: room.hostPid, status: room.status,
-        handSize: room.handSize, gameNo: room.gameNo,
+        handSize: room.handSize, gameNo: room.gameNo, listed: room.listed,
         handSizes: rules.CONFIG.handSizes.filter(h => rules.validHandSize(h, Math.max(2, room.players.length))),
         minPlayers: rules.CONFIG.minPlayers, maxPlayers: rules.CONFIG.maxPlayers,
         players: room.players.map(p => ({ pid: p.pid, name: p.name, ready: p.ready, connected: p.connected, score: room.scores[p.pid] || 0 })),
@@ -57,7 +57,26 @@ function createJutpattiServer({ send, now = Date.now, log = defaultLog, randInt 
   }
 
   // Every player gets their own sanitized view; nobody ever receives another player's hand.
-  function broadcast(room) { for (const p of room.players) if (p.ws) send(p.ws, roomView(room, p.pid)); }
+  function broadcast(room) { for (const p of room.players) if (p.ws) send(p.ws, roomView(room, p.pid)); listChanged(); }
+
+  // Open-rooms list for the home screen (like Ludo's): rooms waiting for players, unless the host hid theirs.
+  // Only public lobby info: code, host name, player count.
+  const watchers = new Set();
+  let listTimer = null;
+  function openRooms() {
+    const out = [];
+    for (const r of rooms.values()) {
+      if (r.status !== 'lobby' || !r.listed || r.players.length >= rules.CONFIG.maxPlayers || !r.players.some(p => p.connected)) continue;
+      out.push({ code: r.code, host: r.names[r.hostPid] || 'Player', players: r.players.length, max: rules.CONFIG.maxPlayers });
+      if (out.length >= 20) break;
+    }
+    return out;
+  }
+  function listChanged() {
+    if (listTimer || !watchers.size) return;
+    listTimer = setTimeout(() => { listTimer = null; const msg = { t: 'jp:rooms', rooms: openRooms() }; for (const w of watchers) send(w, msg); }, 100);
+    if (listTimer.unref) listTimer.unref();
+  }
 
   function bind(ws, room, p) {
     if (p.ws && p.ws !== ws) { send(p.ws, { t: 'jp:kicked', reason: 'opened elsewhere' }); p.ws.jp = null; }
@@ -87,7 +106,7 @@ function createJutpattiServer({ send, now = Date.now, log = defaultLog, randInt 
       for (const e of engine.removePlayer(room.game, p.pid, randInt)) if (e.type !== 'PLAYER_LEFT') record(room, e);
       afterMove(room);
     }
-    if (!room.players.length) { rooms.delete(room.code); log({ room: room.code, type: 'ROOM_CLOSED' }); return; }
+    if (!room.players.length) { rooms.delete(room.code); log({ room: room.code, type: 'ROOM_CLOSED' }); listChanged(); return; }
     if (room.hostPid === p.pid) room.hostPid = room.players[0].pid;   // host role only controls start/hand size
     broadcast(room);
   }
@@ -121,9 +140,10 @@ function createJutpattiServer({ send, now = Date.now, log = defaultLog, randInt 
       const name = cleanName(m.name); if (!name) return err(ws, 'NAME_REQUIRED');
       if (rooms.size >= MAX_ROOMS) return err(ws, 'SERVER_FULL');
       const room = { code: newCode(), gameType: 'jutpatti', players: [], names: {}, hostPid: null, status: 'lobby',
-        handSize: rules.CONFIG.defaultHandSize, game: null, gameNo: 0, scores: {}, history: [], lastDealerIdx: null, emptySince: null };
+        handSize: rules.CONFIG.defaultHandSize, game: null, gameNo: 0, scores: {}, history: [], lastDealerIdx: null, emptySince: null,
+        listed: m.listed !== false };   // shown in the open-rooms list unless the host hides it
       rooms.set(room.code, room);
-      const p = addPlayer(room, name); room.hostPid = p.pid; bind(ws, room, p);
+      const p = addPlayer(room, name); room.hostPid = p.pid; bind(ws, room, p); watchers.delete(ws);
       record(room, { type: 'ROOM_CREATED', pid: p.pid });
       send(ws, { t: 'jp:joined', code: room.code, pid: p.pid, token: p.token });
       broadcast(room);
@@ -134,7 +154,7 @@ function createJutpattiServer({ send, now = Date.now, log = defaultLog, randInt 
       if (!room) return err(ws, 'ROOM_NOT_FOUND');
       if (room.status === 'playing') return err(ws, 'IN_PROGRESS');
       if (room.players.length >= rules.CONFIG.maxPlayers) return err(ws, 'ROOM_FULL');
-      const p = addPlayer(room, name); bind(ws, room, p);
+      const p = addPlayer(room, name); bind(ws, room, p); watchers.delete(ws);
       if (room.status === 'over') p.ready = false;
       record(room, { type: 'PLAYER_JOINED', pid: p.pid });
       send(ws, { t: 'jp:joined', code: room.code, pid: p.pid, token: p.token });
@@ -147,6 +167,10 @@ function createJutpattiServer({ send, now = Date.now, log = defaultLog, randInt 
       bind(ws, room, p);
       send(ws, { t: 'jp:joined', code: room.code, pid: p.pid, token: p.token, resumed: true });
       broadcast(room);
+    },
+    'jp:watch'(ws, m) {   // the home screen asks for the open-rooms list (and live updates)
+      if (m.on === false) return void watchers.delete(ws);
+      watchers.add(ws); send(ws, { t: 'jp:rooms', rooms: openRooms() });
     },
     'jp:sync'(ws) { const b = bound(ws); if (b) send(ws, roomView(b.room, b.p.pid)); },
     'jp:leave'(ws) { const b = bound(ws); if (b) { removePlayer(b.room, b.p, 'left'); send(ws, { t: 'jp:left' }); } },
@@ -162,6 +186,7 @@ function createJutpattiServer({ send, now = Date.now, log = defaultLog, randInt 
       const b = bound(ws); if (!b) return err(ws, 'NOT_IN_ROOM');
       if (b.room.hostPid !== b.p.pid) return err(ws, 'NOT_HOST');
       if (b.room.status === 'playing') return err(ws, 'IN_PROGRESS');
+      if (typeof m.listed === 'boolean') { b.room.listed = m.listed; return broadcast(b.room); }
       const h = Number(m.handSize);
       if (!rules.validHandSize(h, Math.max(2, b.room.players.length))) return err(ws, 'BAD_OPTION');
       b.room.handSize = h; for (const p of b.room.players) p.ready = false;   // settings changed: everyone re-confirms
@@ -219,7 +244,7 @@ function createJutpattiServer({ send, now = Date.now, log = defaultLog, randInt 
     try { h(ws, m); } catch (e) { log({ type: 'ERROR', msg: String(e && e.message) }); err(ws, 'SERVER_ERROR'); }
   }
 
-  function disconnect(ws) { unbind(ws); }
+  function disconnect(ws) { watchers.delete(ws); unbind(ws); }
 
   // Drop players who stayed away too long, and empty rooms.
   function sweep() {
@@ -233,7 +258,7 @@ function createJutpattiServer({ send, now = Date.now, log = defaultLog, randInt 
       if (!rooms.has(room.code)) continue;
       if (room.players.some(p => p.connected)) room.emptySince = null;
       else if (room.emptySince == null) room.emptySince = t;
-      else if (t - room.emptySince > EMPTY_ROOM_MS) { rooms.delete(room.code); log({ room: room.code, type: 'ROOM_CLOSED' }); }
+      else if (t - room.emptySince > EMPTY_ROOM_MS) { rooms.delete(room.code); log({ room: room.code, type: 'ROOM_CLOSED' }); listChanged(); }
     }
   }
 

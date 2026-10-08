@@ -127,7 +127,8 @@ test('autoWin: true restores the old behaviour (game ends on the winning draw)',
 test('players are not handed a ready-made pairing of their cards', () => {
   const g = engine.createGame({ players: ['a', 'b'], handSize: 7, dealerIndex: 1 });
   const v = engine.viewFor(g, 'a');
-  assert.deepStrictEqual(Object.keys(v.you).sort(), ['hand', 'validMoves']);
+  assert.deepStrictEqual(Object.keys(v.you).sort(), ['canShow', 'hand', 'validMoves']);   // a yes/no flag, never a grouping
+  assert.strictEqual(typeof v.you.canShow, 'boolean');
   assert.deepStrictEqual(v.you.hand, g.hands.a);   // in deal order, untouched
 });
 
@@ -168,4 +169,16 @@ test('viewFor never leaks hidden cards', () => {
       for (const o of players) if (o !== pid) for (const c of g.hands[o]) if (!pub.has(c)) assert.ok(!seen.has(c), 'opponent card leaked');
     }
   }
+});
+
+test('canShow: only the player whose turn it is, only after drawing, only when the hand really is all pairs', () => {
+  const g = fixed({ hands: { a: ['7H', '7S', '9D', '9C', 'KH'], b: ['2H', '2S', '4D', '4C', 'JH'] }, stock: ['QS', 'KS'] });
+  assert.strictEqual(engine.viewFor(g, 'a').you.canShow, false);   // before drawing
+  engine.applyMove(g, 'a', { type: 'draw', source: 'stock' });     // KS completes the pairs
+  assert.strictEqual(engine.viewFor(g, 'a').you.canShow, true);
+  assert.strictEqual(engine.viewFor(g, 'b').you.canShow, false);   // nobody else is told anything
+  assert.ok(!('canShow' in engine.viewFor(g, 'b')));
+  engine.applyMove(g, 'a', { type: 'discard', card: 'KS' });
+  engine.applyMove(g, 'b', { type: 'draw', source: 'stock' });     // QS does not complete b's hand
+  assert.strictEqual(engine.viewFor(g, 'b').you.canShow, false);
 });

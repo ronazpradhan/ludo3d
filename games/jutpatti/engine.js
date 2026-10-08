@@ -186,7 +186,11 @@ function viewFor(state, pid) {
   const ld = state.lastDraw;
   if (ld) v.lastDraw = { pid: ld.pid, source: ld.source, card: ld.source === 'discard' || ld.pid === pid ? ld.card : null };
   // your cards in the order you got them; pairing them up is left to you
-  if (mine && state.active.includes(pid)) v.you = { hand: mine.slice(), validMoves: getValidMoves(state, pid) };
+  if (mine && state.active.includes(pid)) {
+    v.you = { hand: mine.slice(), validMoves: getValidMoves(state, pid) };
+    // tells ONLY this player that their own hand is complete, so the Show button can appear by itself
+    v.you.canShow = !state.config.autoWin && state.status === 'playing' && state.current === pid && state.phase === 'discard' && rules.isWinningHand(mine, state.jokerRank);
+  }
   return v;
 }
 
