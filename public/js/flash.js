@@ -19,6 +19,8 @@ const net = window.claude && window.claude.raw;
 
 let S = null, me = null, pending = null, kicked = false, wantResume = true, watching = false;
 let lastEvId = null, lastStatus = '', deadlineAt = 0, turnKey = '', wasSeen = false, lastGameNo = null;
+let endShown = false, endTimer = 0;
+const ROUND_END_DELAY = 5000;   // ms the last game's result stays on the table before the round results
 
 // ---------- helpers ----------
 const toast = t => { const e = $('toast'); e.textContent = t; e.classList.remove('on'); void e.offsetWidth; e.classList.add('on'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('on'), 2600); };
@@ -98,7 +100,14 @@ function onMsg(m) {
 // ---------- rendering ----------
 function render() {
   const st = S ? S.room.status : 'none';
-  show('landing', !S); setWatch(!S); show('lobby', st == 'lobby'); show('end', st == 'over');
+  // The round results wait a few seconds after a live round ends, so the 10th game's result (and any
+  // Show on the table) can be seen first. Reloading into a finished round shows them straight away.
+  if (st != 'over') { endShown = false; clearTimeout(endTimer); endTimer = 0; }
+  else if (!endShown && !endTimer) {
+    if (lastStatus == 'playing') endTimer = setTimeout(() => { endTimer = 0; endShown = true; render(); }, ROUND_END_DELAY);
+    else endShown = true;
+  }
+  show('landing', !S); setWatch(!S); show('lobby', st == 'lobby'); show('end', st == 'over' && endShown);
   $('jtable').style.visibility = S && S.game ? 'visible' : 'hidden';
   if (!S) { lastStatus = ''; lastEvId = null; return; }
   if (st == 'lobby') renderLobby();
@@ -135,7 +144,7 @@ function renderLobby() {
 function renderTable() {
   const g = S.game, R = S.room, you = g.you, over = g.status == 'over', res = g.result;
   const myTurn = !over && you && g.current === me && !g.pending;
-  $('rinfo').textContent = `Round ${R.round} · Game ${R.gameInRound}/${R.gamesPerRound}` + (R.nextIn != null && R.status == 'playing' ? ` · next game in ${Math.ceil(R.nextIn / 1000)}s` : '');
+  $('rinfo').textContent = `Round ${R.round} · Game ${R.gameInRound}/${R.gamesPerRound}` + (R.status == 'over' ? ' · round over · results in a moment' : R.nextIn != null ? ` · next game in ${Math.ceil(R.nextIn / 1000)}s` : '');
   // seats: everyone except me, around the top of the table
   const felt = $('seats'); felt.textContent = '';
   const order = g.players.map(p => p.pid), at = Math.max(0, order.indexOf(me));
