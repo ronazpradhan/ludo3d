@@ -188,6 +188,15 @@ function createRoomServer({ prefix, adapter: A, send, now = Date.now, log, randI
       const e = A.canStart && A.canStart(room); if (e) return err(ws, e);
       startGame(room);
     },
+    // game-specific extras outside the turn order (e.g. Flash's sapati / borrowing). Identity comes from the socket.
+    x(ws, m) {
+      const b = bound(ws); if (!b) return err(ws, 'NOT_IN_ROOM');
+      if (!A.custom) return err(ws, 'BAD_REQUEST');
+      const r = A.custom(b.room, b.p.pid, m, ctx);
+      if (r && r.error) { log({ room: b.room.code, type: 'EXTRA_REJECTED', pid: b.p.pid, error: r.error }); return err(ws, r.error); }
+      for (const e of (r && r.events) || []) record(b.room, e);
+      broadcast(b.room);
+    },
     act(ws, m) {
       // 1. sender is a player in this room (identity comes from the socket, never from the message)
       const b = bound(ws); if (!b) return err(ws, 'NOT_IN_ROOM');

@@ -53,11 +53,14 @@ test('a round is 10 games; chips carry over between games and reset for the next
   for (const p of r.room.players) assert.strictEqual(r.room.game.chips[p.pid] + r.room.game.invested[p.pid], C.startingChips);   // fresh chips (minus this game's boot)
 });
 
-test('the round ends early if fewer than 2 players can still pay the boot', () => {
-  const r = table(2);
-  r.room.chips[r.room.players[1].pid] = 10; r.room.game.chips[r.room.players[1].pid] = 0;   // P1 will be broke after this game
-  while (r.room.game.status === 'playing') r.turn().act({ type: 'pack' });
-  if (r.room.chips[r.room.players[1].pid] < 10) assert.strictEqual(r.room.status, 'over');
+test('the round ends early if fewer than 2 players can still pay the boot (after the pause, so they could borrow)', () => {
+  const r = table(2), broke = r.room.players[1].pid;
+  r.room.game.chips[broke] = 0;                      // P1 is out of chips after this game
+  while (r.room.game.status === 'playing') { const s = r.turn(); s.act(s.state().you === broke ? { type: 'pack' } : { type: 'pack' }); }
+  r.room.chips[broke] = 0;
+  assert.strictEqual(r.room.status, 'playing');      // not yet: there's a pause to borrow in
+  r.advance(rules.CONFIG.nextGameSeconds * 1000 + 10);
+  assert.strictEqual(r.room.status, 'over');
 });
 
 test("blind players' cards stay on the server; opponents' cards are never sent", () => {

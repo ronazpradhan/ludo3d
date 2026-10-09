@@ -14,12 +14,26 @@
   <div id="reveal"></div>
  </div>
  <div id="mine">
-  <div id="me"><span id="mychips"></span><span id="mystate"></span><span id="myname"></span></div>
+  <div id="me"><span id="mychips"></span><span id="mystate"></span><span id="myname"></span><button class="pill" id="sapBtn" type="button">💰 Sapati</button></div>
   <div id="hand"></div>
   <div id="acts"></div>
  </div>
  <button id="qbtn" class="glass" aria-label="Leave game">✕</button><button id="snd" class="glass" aria-label="Sound">🔊</button>
 </div>
+
+<!-- sapati (borrow) panel -->
+<div class="ov" id="sap" style="display:none"><div class="box glass sapbox">
+ <h1 style="font-size:26px">💰 Sapati</h1><div class="sub" style="margin:2px 0 12px">Borrow chips now · everything is paid back at the end of the round</div>
+ <div id="sapme"></div>
+ <div class="saplbl">How much?</div><div id="sapamt"></div>
+ <div class="saplbl">Ask a player</div><div id="sapwho"></div>
+ <div class="saplbl">Or the bank</div><div id="sapbank"></div>
+ <div id="sapdebts"></div>
+ <button class="pill" id="sapclose" style="margin-top:14px">Close</button>
+</div></div>
+<!-- sapati request to me -->
+<div class="ov" id="sapq" style="display:none"><div class="box glass"><h1 style="font-size:24px">Sapati request</h1><div class="sub" id="sapqs"></div>
+ <div class="row"><button class="pill" id="sapqno">Decline</button><button class="go" id="sapqyes" style="padding:12px">Lend</button></div></div></div>
 
 <!-- side show request -->
 <div class="ov" id="sideq" style="display:none"><div class="box glass"><h1 style="font-size:24px" id="sqt">Side show?</h1><div class="sub" id="sqs"></div>
@@ -39,6 +53,7 @@
    <p>A <b>round</b> is 10 games. Everyone starts the round with <b>Rs 1000</b> — use it wisely, it only resets next round. The richest player after 10 games wins the round.</p>
    <p>Each game everyone puts in the boot and gets 3 cards face down. Play <b>blind</b> (cheaper bets) or tap your cards to <b>see</b> them. On your turn: <b>Chaal</b> (bet), <b>Raise</b>, <b>Pack</b> (fold), <b>Show</b> (when two are left) or <b>Side show</b> with the previous player.</p>
    <p>Best to worst: Trail (three of a kind) · Pure sequence · Sequence · Color · Pair · High card.</p>
+   <p><b>Sapati:</b> short on chips? Borrow from a player (or the bank if nobody lends). It's all paid back at the end of the round, before the winner is decided.</p>
   </details>
   <div class="sub" style="margin:12px 0 0;font-size:12px">Play money only — chips have no real-world value.</div>
   <div class="sub" id="onl" style="margin:8px 0 0">Connecting…</div>

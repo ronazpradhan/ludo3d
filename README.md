@@ -89,3 +89,8 @@ public/flash.html, js/flash.js, css/flash.css
 - Blind players' own cards are not sent to their browser until they tap to see them.
 - 30-second turn clock (auto-pack), 6-second pause between games. Messages use the `fl:` prefix
   (set `FLASH_LOG=0` to silence its server log).
+- **Sapati (borrowing):** during a round, tap 💰 Sapati to borrow from a player; if they say no (or don't answer
+  in 20 s, or nobody can lend) the bank lends instead. Limits: borrow up to Rs 500 and lend up to Rs 500 per round,
+  in steps of Rs 50. Everything is paid back at the end of the round before the winner is decided; anything a
+  borrower can't cover is subtracted from their final and credited to the lender. Settings: `sapati` in
+  `games/flash/rules.js`.

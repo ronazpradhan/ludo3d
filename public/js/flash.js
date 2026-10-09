@@ -14,6 +14,9 @@ const ERR = {
   ILLEGAL_MOVE: "You can't do that now", NOT_ENOUGH_CHIPS: 'Not enough chips', PACKED: 'You packed this game', WAITING: 'Waiting for the side show answer',
   GAME_NOT_RUNNING: 'This game is over', RATE_LIMIT: 'Slow down a little', SERVER_FULL: 'Server is busy, try again soon',
   BAD_OPTION: 'That option is not available', SERVER_ERROR: 'Something went wrong', BAD_REQUEST: "That move wasn't valid",
+  BAD_AMOUNT: 'Pick one of the amounts', BORROW_LIMIT: "That's more than you can still borrow this round", LENDER_LIMIT: "They can't lend that much",
+  ALREADY_ASKED: 'You already asked someone — wait for their answer', ASK_A_PLAYER_FIRST: 'Ask a player first — the bank helps if they say no',
+  ROUND_NOT_RUNNING: 'Sapati is only during a round',
 };
 const net = window.claude && window.claude.raw;
 
@@ -112,6 +115,7 @@ function render() {
   if (!S) { lastStatus = ''; lastEvId = null; return; }
   if (st == 'lobby') renderLobby();
   if (S.game) renderTable();
+  renderSapati();
   animateEvents();
   if (st == 'over') renderEnd();
   lastStatus = st;
@@ -159,6 +163,7 @@ function renderTable() {
     const stt = document.createElement('span'); stt.className = 'state' + (p.packed ? ' packed' : p.seen ? ' seen' : ''); stt.textContent = p.packed ? 'packed' : p.seen ? 'seen' : 'blind';
     const bet = document.createElement('small'); bet.className = 'bet'; bet.textContent = 'in pot ' + rs(p.bet);
     d.append(av, nm, ch, stt, bet);
+    const owes = owedBy(p.pid); if (owes) { const o = document.createElement('small'); o.className = 'owe'; o.textContent = '💰 owes ' + rs(owes); d.append(o); }
     // cards I'm allowed to see: shown at a Show, or theirs from my private side show
     const shown = res && res.shown && res.shown[p.pid], side = g.sideShow && g.sideShow.with === p.pid ? g.sideShow : null;
     const hand = shown ? shown.hand : side ? side.theirHand : null;
@@ -269,19 +274,80 @@ function renderReveal(g, res) {
 
 function renderEnd() {
   const R = S.room, mine = R.players.find(p => p.pid === me);
-  const st = R.players.slice().sort((a, b) => (b.chips || 0) - (a.chips || 0)), top = st.length ? st[0].chips : 0, winners = st.filter(p => p.chips === top);
+  const fin = p => p.final ?? p.chips ?? 0;   // after sapati is paid back
+  const st = R.players.slice().sort((a, b) => fin(b) - fin(a)), top = st.length ? fin(st[0]) : 0, winners = st.filter(p => fin(p) === top);
   $('etitle').textContent = winners.length > 1 ? 'Tie for the round!' : (winners[0] && winners[0].pid === me ? 'You win the round! 🎉' : (winners[0] ? winners[0].name + ' wins the round!' : 'Round over'));
   $('esub').textContent = `Round ${R.round} · ${R.gamesPerRound} games · chips reset next round`;
   const K = $('ranks'); K.textContent = '';
   st.forEach((p, i) => {
-    const d = document.createElement('div'); d.className = 'rk' + (p.chips === top ? ' w' : ''); d.style.animationDelay = i * .07 + 's'; d.style.setProperty('--c', colorOf(p.pid));
+    const d = document.createElement('div'); d.className = 'rk' + (fin(p) === top ? ' w' : ''); d.style.animationDelay = i * .07 + 's'; d.style.setProperty('--c', colorOf(p.pid));
     const n = document.createElement('span'); n.className = 'n'; n.textContent = avatarOf(p.pid) + ' ' + p.name + (p.pid === me ? ' (you)' : '');
-    const s = document.createElement('small'); s.textContent = rs(p.chips) + ' · ' + p.score + ' round' + (p.score == 1 ? '' : 's') + (p.ready ? ' · ready ✓' : '');
+    const sp = (p.lent || 0) - (p.borrowed || 0);
+    const s = document.createElement('small'); s.textContent = rs(fin(p)) + (sp ? ` (chips ${rs(fin(p) - sp)} ${sp > 0 ? '+' : '−'} sapati ${rs(Math.abs(sp))})` : '') + ' · ' + p.score + ' round' + (p.score == 1 ? '' : 's') + (p.ready ? ' · ready ✓' : '');
     d.append(document.createElement('i'), n, s); K.append(d);
   });
   $('again').textContent = mine && mine.ready ? 'Waiting… (tap to cancel)' : 'Next round';
-  $('enote').textContent = 'Everyone starts the next round with ' + rs(R.startingChips) + '. It starts when everyone is ready.';
+  const sl = R.sapati && R.sapati.settlement || [];
+  $('enote').textContent = (sl.length ? 'Sapati paid back: ' + sl.map(l => `${nameOf(l.to)} → ${l.from === 'bank' ? 'bank' : nameOf(l.from)} ${rs(l.paid)}${l.paid < l.amount ? ' (short ' + rs(l.amount - l.paid) + ')' : ''}`).join(' · ') + '. ' : '') +
+    'Everyone starts the next round with ' + rs(R.startingChips) + '. It starts when everyone is ready.';
 }
+
+// ---------- sapati (borrowing) ----------
+let sapOpen = false, sapAmt = 0;
+const owedBy = pid => S && S.room.sapati ? S.room.sapati.loans.filter(l => l.to === pid).reduce((a, l) => a + l.amount, 0) : 0;
+const sap = o => send({ t: P + 'x', what: 'sapati', ...o });
+function renderSapati() {
+  const R = S.room, SP = R.sapati, running = R.status == 'playing', mp = R.players.find(p => p.pid === me);
+  $('sapBtn').style.display = SP && SP.enabled && running && mp ? '' : 'none';
+  if (!SP || !mp) { show('sap', false); show('sapq', false); return; }
+  // a player asking ME to lend
+  const q = running && SP.requests.find(r => r.to === me);
+  show('sapq', !!q);
+  if (q) {
+    $('sapqs').textContent = `${nameOf(q.from)} wants to borrow ${rs(q.amount)} from you. They pay it back at the end of the round. (${Math.ceil(q.left / 1000)}s)`;
+    $('sapqyes').onclick = () => { sfx.tick(); sap({ action: 'answer', id: q.id, accept: true }); };
+    $('sapqno').onclick = () => { sfx.tick(); sap({ action: 'answer', id: q.id, accept: false }); };
+  }
+  show('sap', sapOpen && running);
+  if (!sapOpen || !running) return;
+  const left = mp.canBorrow, mine = SP.requests.find(r => r.from === me);
+  $('sapme').textContent = `You've borrowed ${rs(mp.borrowed)} of ${rs(SP.maxBorrow)} this round` + (mp.lent ? ` · lent ${rs(mp.lent)}` : '');
+  const amts = [50, 100, 200, 300, 500].filter(a => a % SP.step === 0 && a <= left);
+  if (!amts.includes(sapAmt)) sapAmt = amts.includes(100) ? 100 : amts[0] || 0;
+  const A = $('sapamt'); A.textContent = '';
+  if (!amts.length) A.textContent = 'You have reached the borrowing limit for this round.';
+  amts.forEach(a => { const b = document.createElement('button'); b.className = 'pill' + (a === sapAmt ? ' on' : ''); b.textContent = rs(a); b.onclick = () => { sapAmt = a; sfx.tick(); renderSapati(); }; A.append(b); });
+  const W = $('sapwho'); W.textContent = '';
+  if (mine) {
+    const d = document.createElement('div'); d.className = 'rm';
+    const t = document.createElement('span'); t.textContent = `Waiting for ${nameOf(mine.to)} to answer (${rs(mine.amount)}) · ${Math.ceil(mine.left / 1000)}s`;
+    const c = document.createElement('button'); c.className = 'pill'; c.textContent = 'Cancel'; c.onclick = () => sap({ action: 'cancel' });
+    d.append(t, c); W.append(d);
+  } else R.players.filter(p => p.pid !== me).forEach(p => {
+    const d = document.createElement('div'); d.className = 'rm';
+    const t = document.createElement('span'); t.textContent = `${avatarOf(p.pid)} ${p.name} · can lend ${rs(p.canLend)}` + (p.connected ? '' : ' · offline');
+    const b = document.createElement('button'); b.className = 'pill'; b.textContent = 'Ask';
+    b.disabled = !sapAmt || p.canLend < sapAmt || !p.connected;
+    b.onclick = () => { sfx.tick(); sap({ action: 'ask', to: p.pid, amount: sapAmt }); };
+    d.append(t, b); W.append(d);
+  });
+  const B = $('sapbank'); B.textContent = '';
+  const bb = document.createElement('button'); bb.className = 'go alt'; bb.style.padding = '11px';
+  bb.textContent = mp.bankOk ? `Borrow ${rs(sapAmt)} from the bank` : 'Ask a player first — the bank helps if they say no';
+  bb.disabled = !mp.bankOk || !sapAmt || !!mine;
+  bb.onclick = () => { sfx.tick(); sap({ action: 'bank', amount: sapAmt }); };
+  B.append(bb);
+  // who owes whom this round
+  const D = $('sapdebts'); D.textContent = '';
+  if (SP.loans.length) {
+    D.append(Object.assign(document.createElement('div'), { className: 'saplbl', textContent: 'Owed this round' }));
+    SP.loans.forEach(l => { const d = document.createElement('div'); d.className = 'debt';
+      d.textContent = `${nameOf(l.to)} ${l.to === me ? 'owe' : 'owes'} ${l.from === 'bank' ? 'the bank' : l.from === me ? 'you' : nameOf(l.from)} ${rs(l.amount)}`; D.append(d); });
+  }
+}
+$('sapBtn').onclick = () => { sapOpen = true; sfx.tick(); renderSapati(); };
+$('sapclose').onclick = () => { sapOpen = false; renderSapati(); };
+setInterval(() => { if (S && S.room.sapati && S.room.sapati.requests.length) { S.room.sapati.requests.forEach(r => r.left = Math.max(0, r.left - 1000)); renderSapati(); } }, 1000);
 
 // ---------- animations for what just happened (deal, bets, payouts) ----------
 function animateEvents() {
@@ -300,6 +366,10 @@ function play(e) {
   } else if (e.type == 'CHAAL' || e.type == 'SHOW' || e.type == 'SIDESHOW_ASKED') { coins(placeOf(e.pid), pot, e.type == 'CHAAL' && !e.blind ? 4 : 3); sfx.tick(); }
   else if (e.type == 'HAND_WON') { coins(pot, placeOf(e.pid), 8); $('pot').classList.remove('bump'); void $('pot').offsetWidth; $('pot').classList.add('bump'); e.pid === me ? sfx.win() : sfx.chime(); }
   else if (e.type == 'PACKED') sfx.tick();
+  else if (e.type == 'SAPATI_GIVEN') { if (e.to === me) { toast(`💰 ${e.pid === 'bank' ? 'The bank' : nameOf(e.pid)} lent you ${rs(e.amount)}`); sfx.chime(); sapOpen = false; render(); }
+    else if (e.pid === me) toast(`You lent ${nameOf(e.to)} ${rs(e.amount)}`); }
+  else if (e.type == 'SAPATI_DECLINED' && e.to === me) toast(`${nameOf(e.pid)} ${e.why == 'no answer' ? "didn't answer" : 'said no'} — you can ask the bank now`);
+  else if (e.type == 'SAPATI_ASKED' && e.to === me) sfx.chime();
 }
 
 // turn ring + countdowns (every frame)

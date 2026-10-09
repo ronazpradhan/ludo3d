@@ -29,6 +29,18 @@ const CONFIG = Object.freeze({
   aceTwoThree: 'second',
   turnSeconds: 30,         // no action in time: pack (or decline a side show)
   nextGameSeconds: 6,      // pause between games so everyone can see the result
+  // SAPATI (borrowing). Ask a player first; the bank lends only if that didn't work (declined, no answer,
+  // or nobody can lend). Everything is paid back at the END of the round, before the winner is decided:
+  // the borrower repays from their chips; whatever they can't cover is subtracted from their final score
+  // and credited to the lender.
+  sapati: Object.freeze({
+    enabled: true,
+    maxBorrow: 500,        // most a player may borrow in one round (players + bank together)
+    maxLend: 500,          // most a player may lend out in one round
+    step: 50,              // amounts go in steps of this
+    askSeconds: 20,        // a request not answered in time counts as declined
+    bankOnlyAsFallback: true,
+  }),
 });
 
 const VAL = Object.fromEntries(RANKS.map((r, i) => [r, i + 2]));   // 2..14, ace high
