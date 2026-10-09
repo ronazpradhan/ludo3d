@@ -1,0 +1,56 @@
+/* Flash table. Cards, felt, lobby and overlays come from style.css + jutpatti.css. */
+body.fl #felt{background:radial-gradient(ellipse at 50% 40%,#7a1f2b,#3a0b14 78%)}
+#ftop{display:flex;gap:10px;align-items:center;justify-content:center;min-height:34px}
+#rinfo{padding:7px 16px;border-radius:999px;background:rgba(0,0,0,.45);font-weight:700;font-size:13px;font-variant-numeric:tabular-nums}
+
+/* seats: avatar with turn ring, name, chips, state */
+body.fl .st{min-width:92px;gap:3px;padding:8px 12px 9px}
+.fl .st .av{position:relative;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;background:radial-gradient(circle at 35% 30%,#fff6,var(--c) 62%)}
+.fl .st .av::before{content:'';position:absolute;inset:-5px;border-radius:50%;opacity:0;background:conic-gradient(var(--rc,#fff) calc((1 - var(--t,0)) * 360deg),rgba(255,255,255,.14) 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3.5px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 3.5px),#000 calc(100% - 3px))}
+.fl .st.on .av::before{opacity:1}.fl .st .av.hurry{--rc:#ff9f0a}
+.fl .st .chips{font-weight:800;font-size:13px;color:#fde68a;font-variant-numeric:tabular-nums}
+.fl .st .state{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.14)}
+.fl .st .state.seen{background:#0a84ff}.fl .st .state.packed{background:rgba(255,255,255,.08);opacity:.7}
+.fl .st.packed{opacity:.45}
+.fl .st .mini{display:flex;margin-top:2px}.fl .st .mini .pc{--cardw:24px;margin-left:-8px}.fl .st .mini .pc:first-child{margin-left:0}
+.fl .st .bet{font-size:10px;opacity:.75}
+.fl .st.win{box-shadow:0 0 0 2px #fbbf24,0 0 30px -2px #fbbf24}
+
+/* pot */
+#pot{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 22px;border-radius:20px;background:rgba(0,0,0,.35);box-shadow:inset 0 0 0 1px rgba(251,191,36,.35)}
+#pot small{font-size:11px;opacity:.75}#potv{font-size:24px;font-weight:800;color:#fde68a;font-variant-numeric:tabular-nums}
+#pot.bump{animation:bump .45s var(--sp)}
+#banner{position:absolute;left:50%;bottom:10%;transform:translateX(-50%);padding:9px 18px;border-radius:16px;background:rgba(0,0,0,.6);font-weight:700;font-size:14px;text-align:center;max-width:90%;z-index:3}
+#banner:empty{display:none}
+
+/* my area */
+body.fl #mine{gap:8px}
+#me{display:flex;gap:10px;align-items:center;font-size:13px}
+#mychips{font-weight:800;font-size:16px;color:#fde68a}
+#mystate{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:2px 9px;border-radius:999px;background:rgba(255,255,255,.14)}
+#mystate.seen{background:#0a84ff}
+#myname{font-weight:700;color:#fbbf24}
+body.fl #hand{--cardw:clamp(66px,15vw,92px);display:flex;justify-content:center;gap:8px;min-height:calc(var(--cardw)*1.4 + 8px);padding:4px 0;perspective:700px}
+body.fl #hand .pc{cursor:pointer}
+body.fl #hand.blind .pc:hover{transform:translateY(-6px)}
+#acts{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;min-height:46px}
+#acts button{border:0;border-radius:14px;padding:11px 16px;font:700 14px inherit;font-family:inherit;color:#fff;cursor:pointer;background:rgba(255,255,255,.14);transition:transform .2s var(--sp)}
+#acts button:active{transform:scale(.94)}
+#acts button small{display:block;font-size:11px;font-weight:600;opacity:.85}
+#acts .bet{background:#0a84ff;box-shadow:0 6px 18px rgba(10,132,255,.4)}
+#acts .raise{background:#7c3aed}
+#acts .show{background:linear-gradient(180deg,#fde68a,#f59e0b);color:#3b2400}
+#acts .pack{background:rgba(239,68,68,.85)}
+#acts .wait{background:none;opacity:.7;font-weight:600;cursor:default}
+
+/* chips flying to the pot / pot to the winner */
+.coin{position:fixed;z-index:30;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff7d6,#fbbf24 55%,#b45309);box-shadow:0 2px 6px rgba(0,0,0,.4);pointer-events:none}
+.pc.fly{position:fixed;z-index:35;pointer-events:none;margin:0}
+
+@media(max-width:640px){
+ body.fl .st{flex-direction:column;min-width:0;padding:5px 7px 6px;gap:2px}.fl .st .av{width:28px;height:28px;font-size:15px}.fl .st b{max-width:64px;font-size:11px}
+ .fl .st .bet,.fl .st .tag{display:none}.fl .st .chips{font-size:11px}.fl .st small{display:block}.fl .st .state{font-size:9px}
+ .fl .st .mini .pc{--cardw:18px;margin-left:-6px}
+ #acts button{padding:10px 12px;font-size:13px}
+ #potv{font-size:20px}
+}

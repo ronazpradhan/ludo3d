@@ -3,6 +3,7 @@
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const { WebSocketServer } = require('ws');
 const { createJutpattiServer } = require('./games/jutpatti/rooms');
+const { createFlashServer } = require('./games/flash/rooms');
 
 const PUB = path.join(__dirname, 'public');
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml',
@@ -34,6 +35,9 @@ const send = (ws, o) => { if (ws.readyState === 1) ws.send(JSON.stringify(o)); }
 // Jutpatti is server-authoritative (hidden cards); its messages start with 'jp:'. Ludo keeps using the relay below.
 const jutpatti = createJutpattiServer({ send });
 setInterval(jutpatti.sweep, 5000).unref();
+// Flash (3-card betting with play-money chips) is server-authoritative too; its messages start with 'fl:'.
+const flash = createFlashServer({ send });
+setInterval(flash.sweep, 1000).unref();   // every second: turn clocks + next deal
 function snapshot(name) {
   const r = rooms.get(name); if (!r) return;
   const peers = [...r].map(([id, c]) => ({ id, presence: c.presence }));
@@ -55,6 +59,7 @@ wss.on('connection', ws => {
     let m; try { m = JSON.parse(raw); } catch { return; }
     if (m && m.t === 'ping') return send(ws, { t: 'pong' });   // client heartbeat: lets phones notice a dead connection fast
     if (m && typeof m.t === 'string' && m.t.startsWith('jp:')) return jutpatti.handle(ws, m);
+    if (m && typeof m.t === 'string' && m.t.startsWith('fl:')) return flash.handle(ws, m);
     if (!m || typeof m.room !== 'string' || !NAME.test(m.room)) return;
     if (m.t === 'join') {
       if (ws.rooms.has(m.room) || ws.rooms.size >= MAX_ROOMS_PER_CLIENT) return;
@@ -74,7 +79,7 @@ wss.on('connection', ws => {
       for (const [id, c] of r) if (id !== ws.id && c.ws.readyState === 1) c.ws.send(out);
     }
   });
-  ws.on('close', () => { for (const n of [...ws.rooms]) leave(ws, n); jutpatti.disconnect(ws); });
+  ws.on('close', () => { for (const n of [...ws.rooms]) leave(ws, n); jutpatti.disconnect(ws); flash.disconnect(ws); });
 });
 
 // Drop dead connections and keep idle ones alive through proxies.

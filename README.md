@@ -73,3 +73,19 @@ back into the stock.
   the host's browser plays for them (like the CPUs), also when someone disconnects.
 - The covered player gets an "I'm back" banner (or taps the board, or rejoins); everyone is told they're back.
 - Timings live at the top of the game state in `public/js/game.js` (`TURN_MS`, `EXTRA_MS`).
+
+## Flash (3-card betting, play money)
+Server-authoritative like Jutpatti, using the same shared room system (`games/common/room-server.js`).
+Chips are **play money with no real-world value**.
+```
+games/common/room-server.js   rooms, lobby, ready, reconnect, open-rooms list, anti-replay (used by Jutpatti + Flash)
+games/common/cards.js         52-card deck + crypto-secure Fisher-Yates shuffle
+games/flash/rules.js          <- FLASH HOUSE RULES (chips, games per round, boot, bet multipliers, A-2-3, turn clock)
+games/flash/engine.js         one game: boot, blind/seen bets, pack, show, side show, timeouts
+games/flash/rooms.js          rounds: 10 games per round, Rs 1000 each at the start of every round
+public/flash.html, js/flash.js, css/flash.css
+```
+- A round is 10 games. Everyone starts each round with Rs 1000; chips carry over between that round's games.
+- Blind players' own cards are not sent to their browser until they tap to see them.
+- 30-second turn clock (auto-pack), 6-second pause between games. Messages use the `fl:` prefix
+  (set `FLASH_LOG=0` to silence its server log).

@@ -11,7 +11,7 @@ function connect(){clearTimeout(tmr);let w;try{w=ws=new WebSocket(url)}catch(_){
  w.onmessage=e=>{if(w!==ws)return;lastRx=Date.now();let m;try{m=JSON.parse(e.data)}catch(_){return}
   if(m.t=='welcome'){id=m.id;backoff=500;const re=everUp;everUp=true;up=true;nss.forEach(n=>n._join());wait.splice(0).forEach(f=>f());if(re)fire('up');raw.slice().forEach(f=>f(m))}
   else if(m.t=='pong'){}
-  else if(typeof m.t=='string'&&m.t.startsWith('jp:'))raw.slice().forEach(f=>f(m))   // server-authoritative games (Jutpatti)
+  else if(typeof m.t=='string'&&/^[a-z]+:/.test(m.t))raw.slice().forEach(f=>f(m))   // server-authoritative games (jp: Jutpatti, fl: Flash)
   else{const n=nss.get(m.room);if(n)n._msg(m)}};
  w.onclose=()=>{if(w!==ws)return;down();tmr=setTimeout(connect,backoff);backoff=Math.min(backoff*2,8000)}}
 function kill(){const w=ws;ws=null;if(w){w.onclose=null;w.onmessage=null;try{w.close()}catch(_){}}down();backoff=500;connect()}

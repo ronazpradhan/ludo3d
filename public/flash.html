@@ -1,0 +1,75 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Flash</title>
+<link rel="icon" type="image/svg+xml" href="img/flash.svg">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/jutpatti.css">
+<link rel="stylesheet" href="css/flash.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"></head><body class="jp fl">
+
+<!-- table -->
+<div id="jtable">
+ <div id="ftop"><span id="rinfo"></span></div>
+ <div id="felt"><div id="seats"></div>
+  <div id="center"><div id="pot"><small>Pot</small><b id="potv">Rs 0</b><small id="stakev"></small></div></div>
+  <div id="banner"></div>
+ </div>
+ <div id="mine">
+  <div id="me"><span id="mychips"></span><span id="mystate"></span><span id="myname"></span></div>
+  <div id="hand"></div>
+  <div id="acts"></div>
+ </div>
+ <button id="qbtn" class="glass" aria-label="Leave game">✕</button><button id="snd" class="glass" aria-label="Sound">🔊</button>
+</div>
+
+<!-- side show request -->
+<div class="ov" id="sideq" style="display:none"><div class="box glass"><h1 style="font-size:24px" id="sqt">Side show?</h1><div class="sub" id="sqs"></div>
+ <div class="row"><button class="pill" id="sqno">Decline</button><button class="go" id="sqyes" style="padding:12px">Accept</button></div></div></div>
+
+<!-- landing -->
+<div class="ov" id="landing"><a class="back" href="index.html">‹ Games</a>
+ <div class="blobs"><i style="--c:#f59e0b;top:-10vmax;left:-8vmax"></i><i style="--c:#ef4444;top:-6vmax;right:-10vmax"></i><i style="--c:#a855f7;bottom:-12vmax;right:-6vmax"></i><i style="--c:#22c55e;bottom:-10vmax;left:-10vmax"></i></div>
+ <div class="box glass land"><img class="logo" src="img/flash.svg" alt="" width="84" height="84"><h1>Flash</h1>
+  <div class="sub">3 cards · blind or seen · 2–6 players</div>
+  <div class="rm" id="resume"><span id="rtxt"></span><button class="pill" id="rgo">Rejoin</button><button class="pill" id="rno" aria-label="Forget">✕</button></div>
+  <input class="in" id="nick" maxlength="14" placeholder="Your name" autocomplete="nickname">
+  <button class="go" id="bCreate" disabled>Create Room</button>
+  <div class="row" style="margin-top:10px"><input class="in" id="code" maxlength="5" placeholder="CODE" style="margin:0;text-transform:uppercase;letter-spacing:4px"><button class="go alt" id="bJoin" disabled style="margin:0;width:auto;padding:0 26px">Join</button></div>
+  <div id="rooms"></div>
+  <details class="how"><summary>How to play</summary>
+   <p>A <b>round</b> is 10 games. Everyone starts the round with <b>Rs 1000</b> — use it wisely, it only resets next round. The richest player after 10 games wins the round.</p>
+   <p>Each game everyone puts in the boot and gets 3 cards face down. Play <b>blind</b> (cheaper bets) or tap your cards to <b>see</b> them. On your turn: <b>Chaal</b> (bet), <b>Raise</b>, <b>Pack</b> (fold), <b>Show</b> (when two are left) or <b>Side show</b> with the previous player.</p>
+   <p>Best to worst: Trail (three of a kind) · Pure sequence · Sequence · Color · Pair · High card.</p>
+  </details>
+  <div class="sub" style="margin:12px 0 0;font-size:12px">Play money only — chips have no real-world value.</div>
+  <div class="sub" id="onl" style="margin:8px 0 0">Connecting…</div>
+ </div>
+</div>
+
+<!-- lobby -->
+<div class="ov" id="lobby" style="display:none"><div class="box glass">
+ <div class="vis" id="lvis" role="group" aria-label="Who can join"><button type="button" data-l="1" title="Public: shown in open rooms" aria-label="Public">🌐</button><button type="button" data-l="0" title="Friends only: join with the code" aria-label="Friends only">👥</button></div>
+ <div class="sub" style="margin:0">Flash room code</div><div id="rcode">-----</div>
+ <div class="row"><button class="pill" id="cCode">Copy code</button><button class="pill" id="cLink">Copy invite link</button></div>
+ <div class="seats" id="lseats" style="margin-top:14px"></div>
+ <div class="sub" id="lrules" style="margin:-6px 0 14px;font-size:13px"></div>
+ <button class="go alt" id="lready">I'm ready</button>
+ <button class="go" id="lstart">Start Round</button>
+ <button class="pill" id="lleave" style="margin-top:12px">Leave</button>
+ <div class="sub" id="lnote" style="margin:14px 0 0"></div>
+</div></div>
+
+<!-- leave confirm -->
+<div class="ov" id="qconf" style="display:none"><div class="box glass"><h1 style="font-size:26px">Leave the table?</h1><div class="sub">You'll pack this game and leave the room.</div><div class="row"><button class="pill" id="qno">Stay</button><button class="go" id="qyes" style="padding:12px">Leave</button></div></div></div>
+
+<!-- round over -->
+<div class="ov" id="end" style="display:none"><div class="box glass endbox"><div class="trophy">🏆</div><h1 id="etitle">Round over</h1><div class="sub" id="esub"></div>
+ <div id="ranks"></div>
+ <div class="endbtns"><button class="go" id="again">Next round</button><button class="pill" id="home">Leave</button></div><div class="sub" id="enote"></div>
+</div></div>
+
+<div id="toast"></div>
+<script src="js/storage.js"></script>
+<script src="js/realtime.js"></script>
+<script src="js/config.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/flash.js"></script>
+</body></html>
