@@ -54,3 +54,18 @@ body.fl #hand.blind .pc:hover{transform:translateY(-6px)}
  #acts button{padding:10px 12px;font-size:13px}
  #potv{font-size:20px}
 }
+
+/* cards laid on the table at a show / side show, so everyone can verify the result */
+.fl #reveal{inset:30% 5% 6%;gap:10px;z-index:4;background:rgba(0,0,0,.6)}
+.fl #reveal .rt{font-size:15px;color:#fde68a}
+.rv{display:flex;gap:clamp(12px,4vw,36px);align-items:stretch;justify-content:center;flex-wrap:wrap;perspective:800px}
+.rh{display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 14px;border-radius:18px;background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1.5px var(--c);transition:opacity .4s}
+.rh b{font-size:14px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rh .cs{display:flex;gap:6px;--cardw:clamp(44px,9vw,70px)}
+.rh .hn{font-weight:800;font-size:15px}
+.rh .badge{font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;background:linear-gradient(180deg,#fde68a,#f59e0b);color:#3b2400}
+.rh.win{background:rgba(251,191,36,.15);box-shadow:inset 0 0 0 2px #fbbf24,0 0 34px -8px #fbbf24}
+.rh.lose{opacity:.62}
+.rnote{font-size:12px;font-weight:600;opacity:.85}
+#felt:has(#reveal:not(:empty)) #banner{display:none}   /* the panel says it all */
+@media(max-width:640px){.fl #reveal{inset:28% 2% 4%}.rh{padding:8px 9px}.rh .cs{--cardw:40px;gap:4px}.rh b{font-size:12px;max-width:110px}}

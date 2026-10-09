@@ -79,6 +79,9 @@ test('show: blind pays the stake; higher hand wins; tie goes against the asker',
   g = game(2, { a: ['AH', 'KS', '9D'], b: ['AS', 'KD', '9C'] });   // identical strength
   mv(g, 'a', { type: 'show' });
   assert.strictEqual(g.result.winner, 'b');
+  const v = engine.viewFor(g, 'c-not-playing', T0);   // even someone watching sees both shown hands, and that it was a tie
+  assert.strictEqual(v.result.tie, true); assert.strictEqual(v.result.askedBy, 'a');
+  assert.deepStrictEqual(v.result.shown.a.hand, ['AH', 'KS', '9D']); assert.deepStrictEqual(v.result.shown.b.hand, ['AS', 'KD', '9C']);
 });
 
 test('show: a seen player pays 2x, and cannot call a show on a blind player', () => {

@@ -62,9 +62,9 @@ function options(s, pid) {
 }
 
 // ---------- moves ----------
-function finish(s, winner, reason, events, shown) {
+function finish(s, winner, reason, events, shown, extra) {
   s.chips[winner] += s.pot;
-  s.result = { winner, reason, pot: s.pot, shown: shown || null };
+  s.result = { winner, reason, pot: s.pot, shown: shown || null, ...extra };
   s.pot = 0;   // paid out (the result keeps the amount)
   s.status = 'over'; s.pending = null;
   events.push({ type: 'HAND_WON', pid: winner, pot: s.pot, reason });
@@ -121,8 +121,8 @@ function applyMove(s, pid, move, { now = Date.now() } = {}) {
       pay(s, pid, o.show.cost);
       events.push({ type: 'SHOW', pid, vs: other, cost: o.show.cost });
       // higher hand wins; on a tie the player who asked for the show loses
-      const winner = rules.compare(s.hands[pid], s.hands[other], s.config) > 0 ? pid : other;
-      finish(s, winner, 'show', events, { [pid]: s.hands[pid].slice(), [other]: s.hands[other].slice() });
+      const cmp = rules.compare(s.hands[pid], s.hands[other], s.config), winner = cmp > 0 ? pid : other;
+      finish(s, winner, 'show', events, { [pid]: s.hands[pid].slice(), [other]: s.hands[other].slice() }, { askedBy: pid, tie: cmp === 0 });
     } else if (move.type === 'sideshow') {
       if (!o.sideShow) return fail('ILLEGAL_MOVE');
       pay(s, pid, o.sideShow.cost);   // a seen bet of 2x: the stake stays the same
@@ -179,7 +179,7 @@ function viewFor(s, pid, now = Date.now()) {
     players: s.players.map(p => ({ pid: p, packed: s.packed.includes(p), seen: s.seen[p], chips: s.chips[p], bet: s.invested[p] })),
     pending: s.pending && { from: s.pending.from, to: s.pending.to, cost: s.pending.cost },
     lastAction: s.lastAction,
-    result: s.result && { winner: s.result.winner, reason: s.result.reason, pot: s.result.pot,
+    result: s.result && { winner: s.result.winner, reason: s.result.reason, pot: s.result.pot, askedBy: s.result.askedBy, tie: !!s.result.tie,
       shown: s.result.shown && Object.fromEntries(Object.entries(s.result.shown).map(([p, h]) => [p, { hand: h, name: rules.evaluate(h, s.config).name }])) },
     sideShow: null, you: null,
   };

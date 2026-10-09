@@ -141,7 +141,7 @@ function renderTable() {
   const order = g.players.map(p => p.pid), at = Math.max(0, order.indexOf(me));
   const others = g.players.slice(at).concat(g.players.slice(0, at)).filter(p => p.pid !== me);
   others.forEach((p, i) => {
-    const a = Math.PI + (i + 1) / (others.length + 1) * Math.PI, x = 50 + 44 * Math.cos(a), y = 52 + 44 * Math.sin(a);
+    const a = Math.PI + (i + 1) / (others.length + 1) * Math.PI, x = 50 + 44 * Math.cos(a), y = 58 + 42 * Math.sin(a);   // kept inside the table
     const d = document.createElement('div'); d.className = 'st' + (g.current === p.pid && !over ? ' on' : '') + (p.packed ? ' packed' : '') + (res && res.winner === p.pid ? ' win' : '');
     d.dataset.pid = p.pid; d.style.left = x + '%'; d.style.top = y + '%'; d.style.setProperty('--c', colorOf(p.pid));
     const av = document.createElement('div'); av.className = 'av'; av.textContent = avatarOf(p.pid);
@@ -169,6 +169,7 @@ function renderTable() {
     if (res.reason == 'show' && res.shown) ban += ' · ' + Object.entries(res.shown).map(([p, h]) => nameOf(p) + ': ' + h.name).join(' vs ');
   } else if (g.pending) ban = nameOf(g.pending.from) + ' asked ' + (g.pending.to === me ? 'you' : nameOf(g.pending.to)) + ' for a side show…';
   $('banner').textContent = ban;
+  renderReveal(g, res);
   // me
   const mp = g.players.find(p => p.pid === me);
   $('mychips').textContent = mp ? rs(mp.chips) : 'Watching';
@@ -216,7 +217,46 @@ function renderTable() {
   const tk = g.turn + ':' + g.current + ':' + (g.pending ? 1 : 0);
   if (tk !== turnKey) { turnKey = tk; if ((myTurn || (you && you.options.reply)) && !over) { sfx.chime(); try { if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) navigator.vibrate(20); } catch (e) {} } }
 }
-let sideToastKey = '';
+let sideToastKey = '', revealKey = '', sideUntil = 0, sideKey = '';
+
+// Cards laid face up in the middle of the table so everyone can check the result:
+// at a Show (both hands, for everyone) and, privately, right after a side show you were in.
+function renderReveal(g, res) {
+  const R = $('reveal'), shown = res && res.shown;
+  // a side show I was part of: show it to me for a few seconds
+  const ss = g.sideShow, sk = ss ? g.dealer + ':' + ss.with + ':' + ss.loser : '';
+  if (ss && sk !== sideKey) { sideKey = sk; sideUntil = Date.now() + 6000; setTimeout(render, 6100); }
+  const side = !shown && ss && g.you && g.you.hand && Date.now() < sideUntil;
+  let hands, title, note = '', key;
+  if (shown) {
+    key = 'show:' + S.room.gameNo;
+    hands = Object.entries(shown).map(([pid, h]) => ({ pid, hand: h.hand, name: h.name, win: pid === res.winner }));
+    hands.sort((a, b) => (a.pid === res.askedBy ? -1 : 1));   // the player who called the show first
+    title = 'Show · ' + nameOf(res.askedBy) + (res.askedBy === me ? ' call' : ' calls') + ' it';
+    note = res.tie ? 'Tie — the player who asked for the show loses' : '';
+  } else if (side) {
+    key = 'side:' + sideKey;
+    hands = [{ pid: me, hand: g.you.hand, name: g.you.handName, win: ss.loser !== me }, { pid: ss.with, hand: ss.theirHand, name: ss.theirName, win: ss.loser === me }];
+    title = 'Side show · only you two can see this';
+    note = (ss.loser === me ? 'You pack' : nameOf(ss.with) + ' packs') + ' · on a tie the asker packs';
+  }
+  if (!hands) { R.textContent = ''; revealKey = ''; return; }
+  if (key === revealKey) return;   // already on the table
+  revealKey = key; R.textContent = '';
+  const t = document.createElement('div'); t.className = 'rt'; t.textContent = title; R.append(t);
+  const row = document.createElement('div'); row.className = 'rv'; R.append(row);
+  hands.forEach((h, i) => {
+    const box = document.createElement('div'); box.className = 'rh ' + (h.win ? 'win' : 'lose'); box.style.setProperty('--c', colorOf(h.pid));
+    const who = document.createElement('b'); who.textContent = avatarOf(h.pid) + ' ' + nameOf(h.pid);
+    const cs = document.createElement('div'); cs.className = 'cs';
+    h.hand.forEach((c, k) => { const e = cardEl(c); flipIn(e, 200 + i * 350 + k * 110); cs.append(e); });
+    const hn = document.createElement('span'); hn.className = 'hn'; hn.textContent = h.name;
+    box.append(who, cs, hn);
+    if (h.win) { const w = document.createElement('span'); w.className = 'badge'; w.textContent = shown ? '🏆 Wins ' + rs(res.pot) : '✓ Stays in'; box.append(w); }
+    row.append(box);
+  });
+  if (note) { const n = document.createElement('div'); n.className = 'rnote'; n.textContent = note; R.append(n); }
+}
 
 function renderEnd() {
   const R = S.room, mine = R.players.find(p => p.pid === me);
