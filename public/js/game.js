@@ -144,7 +144,7 @@ function drawSeats(){$('seats').innerHTML=seats.map((s,c)=>`<button class="seat 
 drawSeats();
 $('snd').textContent=snd?'🔊':'🔇';$('snd').onclick=()=>{snd=!snd;store.set('ludo3d.sfx',snd?'1':'0');$('snd').textContent=snd?'🔊':'🔇'};
 function startGame(){setBoard(seats.length);caps=seats.map(()=>0);botFor=seats.map(()=>false);turnT=null;sfx.start();if(typeof updBotBar=='function')updBotBar();
- ALL.forEach(t=>{t.g.visible=seats[t.pl]>0;t.g.position.copy(wv(t));t.g.position.y=8;t.g.scale.setScalar(.01)});
+ ALL.forEach(t=>{t.g.visible=seats[t.pl]>0;if(!t.g.visible)return;t.g.position.copy(wv(t));t.g.position.y=8;t.g.scale.setScalar(.01)});
  ALL.filter(t=>t.g.visible).forEach((t,k)=>sleep(k*60).then(()=>{beep(300+k*40,.08);tween(.5,k2=>{t.g.position.y=BY+8*(1-k2)*(1-k2);t.g.scale.setScalar(Math.max(.01,k2))},ease)}));
  faceTo(Math.max(0,net?seats.findIndex((x,i)=>x==1&&owner[i]===me):(seats.indexOf(1)>=0?seats.indexOf(1):seats.findIndex(x=>x))),true);started=true;sleep(1400).then(play)}
 // players spread round the board as evenly as possible (2 players: opposite corners; 3 on six arms: every other arm)

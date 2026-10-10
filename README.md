@@ -94,3 +94,9 @@ public/flash.html, js/flash.js, css/flash.css
   in steps of Rs 50. Everything is paid back at the end of the round before the winner is decided; anything a
   borrower can't cover is subtracted from their final and credited to the lender. Settings: `sapati` in
   `games/flash/rules.js`.
+
+## Ludo for 5-6 players
+Pick the **6-player board** (vs computer: the board button in the setup; online: the host's board button in the lobby).
+It's a six-armed board with the same rules: each colour has an arm (3 x 6 cells), a start square, a safe star,
+a 5-cell home lane and a yard; the shared track is 78 squares. Orange and Purple join the classic four colours.
+Five players = one seat empty or a CPU. Players are spread out evenly at the start (2: opposite; 3: every other arm).
