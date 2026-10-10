@@ -40,30 +40,34 @@ function sendChat(){const t=$('ctext').value.trim().slice(0,200);if(!t||!net)ret
  $('ebtn').onclick=()=>P.classList.toggle('on');$('csend').addEventListener('click',()=>P.classList.remove('on'))})();
 let lastSnd=0;
 function renderRooms(){const L=$('rooms');L.textContent='';if(!lob)return;const a=lob.peers().filter(p=>!p.isMe&&p.presence&&/^[A-Z0-9]{5}$/.test(p.presence.lr||''));if(a.length)L.append(Object.assign(document.createElement('div'),{className:'sub',textContent:'Open rooms',style:'margin:14px 0 0'}));
- a.forEach(p=>{const d=document.createElement('div');d.className='rm';const s=document.createElement('span');s.textContent=esc(p.presence.hn||'Player')+"'s room · "+(+p.presence.pc||1)+'/4';const b=document.createElement('button');b.className='pill';b.textContent='Join';b.onclick=()=>joinRoom(p.presence.lr);d.append(s,b);L.append(d)})}
+ a.forEach(p=>{const d=document.createElement('div');d.className='rm';const s=document.createElement('span');s.textContent=esc(p.presence.hn||'Player')+"'s room · "+(+p.presence.pc||1)+'/'+(+p.presence.n==6?6:4);const b=document.createElement('button');b.className='pill';b.textContent='Join';b.onclick=()=>joinRoom(p.presence.lr);d.append(s,b);L.append(d)})}
 (async()=>{try{lob=window.claude?await claude.use('room'):null}catch(e){}
  const o=$('onl');if(!lob){o.textContent='Online play is unavailable right now. Try reloading.';return}
  o.textContent=claude.online()?'':'Offline - retrying...';$('bCreate').disabled=$('bJoin').disabled=false;lob.onPeers(renderRooms);
  const q=(new URLSearchParams(location.search).get('room')||(location.hash.match(/room=([A-Za-z0-9]{5})/)||[])[1]||'').toUpperCase(),inv=/^[A-Z0-9]{5}$/.test(q),ss=loadSess();
  if(ss&&(!inv||q===ss.code)){if(ss.tab===TAB||ss.auto){toast('Rejoining room '+ss.code+'...');rejoin(ss)}else showResume(ss)}
  else if(inv){pend=q;$('code').value=q;toast('Enter your name to join room '+q);$('nick').focus();$('nick').onkeydown=e=>{if(e.key=='Enter'&&pend)joinRoom(pend)}}})();
-function bc(){if(!host||!net)return;net.emit('lobby',{c:roomCode,h:me,ls,lo,ln});renderLobby();saveSoon();lob.presence({lr:started?null:roomCode,hn:nick,pc:ls.filter(x=>x==1||x==2).length})}
+function bc(){if(!host||!net)return;net.emit('lobby',{c:roomCode,h:me,ls,lo,ln});renderLobby();saveSoon();lob.presence({lr:started?null:roomCode,hn:nick,pc:ls.filter(x=>x==1||x==2).length,n:ls.length})}
 // a new player who didn't pick a seat sits opposite the first player, so a 2-player game is played from opposite corners
-function autoSeat(){const oc=[0,1,2,3].filter(i=>ls[i]==1||ls[i]==2);if(oc.length==1&&ls[(oc[0]+2)%4]==0)return(oc[0]+2)%4;return ls.indexOf(0)}
-function oppose(){const oc=[0,1,2,3].filter(i=>ls[i]==1||ls[i]==2);if(oc.length!=2||oc[1]-oc[0]==2)return;const b=oc[1],to=(oc[0]+2)%4;ls[to]=ls[b];lo[to]=lo[b];ln[to]=ln[b];ls[b]=0;lo[b]=null;ln[b]=''}
-function claimSeat(id,nk,seat){const cur=lo.indexOf(id);if(seat<0){if(cur>=0)return;seat=autoSeat()}if(!(seat>=0&&seat<4)||ls[seat]!=0)return;if(cur>=0){ls[cur]=0;lo[cur]=null;ln[cur]=''}ls[seat]=1;lo[seat]=id;ln[seat]=nk;bc()}
+function autoSeat(){const N=ls.length,oc=ls.map((x,i)=>x==1||x==2?i:-1).filter(i=>i>=0),free=ls.map((x,i)=>x==0?i:-1).filter(i=>i>=0);if(!free.length)return -1;if(!oc.length)return free[0];
+ const dist=i=>Math.min(...oc.map(o=>{const d=Math.abs(i-o);return Math.min(d,N-d)}));let best=free[0];for(const i of free)if(dist(i)>dist(best))best=i;return best}
+// at Start: spread the players evenly round the board (2 players: opposite; 3 on six arms: every other arm)
+function oppose(){const oc=ls.map((x,i)=>x==1||x==2?i:-1).filter(i=>i>=0),tg=spreadPlan(oc,ls.length);if(!tg)return;
+ const v=oc.map(i=>[ls[i],lo[i],ln[i]]);oc.forEach(i=>{ls[i]=0;lo[i]=null;ln[i]=''});tg.forEach((t,j)=>{[ls[t],lo[t],ln[t]]=v[j]})}
+function claimSeat(id,nk,seat){const cur=lo.indexOf(id);if(seat<0){if(cur>=0)return;seat=autoSeat()}if(!(seat>=0&&seat<ls.length)||ls[seat]!=0)return;if(cur>=0){ls[cur]=0;lo[cur]=null;ln[cur]=''}ls[seat]=1;lo[seat]=id;ln[seat]=nk;bc()}
 function renderLobby(){const S=$('lseats');S.textContent='';ls.forEach((s,i)=>{const b=document.createElement('button');b.className='seat'+(s==0||s==3?' off':'');b.style.setProperty('--c',CS[i]);const d=document.createElement('i'),n=document.createElement('span'),e=document.createElement('em');n.textContent=CN[i];if(s==1||s==2){d.className='av';d.textContent=s==2?'🤖':avatarFor(lo[i])}
   e.textContent=s==1?(lo[i]===me?'You':ln[i]||'Player'):s==2?'CPU':s==3?'Closed':'Sit here';b.append(d,n,e);
   b.onclick=()=>{sfx.tick();if(s==0){if(host)claimSeat(me,nick,i);else net.emit('claim',{id:me,nick,seat:i})}else if(host&&s!=1){ls[i]=s==2?3:0;bc()}};
   if(host&&s==0){const g=document.createElement('button');g.className='pill';g.textContent='+ CPU';g.onclick=ev=>{ev.stopPropagation();sfx.tick();ls[i]=2;bc()};b.append(g)}
   S.append(b)});
+ {const z=$('lsize');z.textContent=(ls.length==6?'6-player board':'4-player board')+(host?' · tap for '+(ls.length==6?'4':'6'):'');z.disabled=!host}
  const cnt=ls.filter(x=>x==1||x==2).length;$('lstart').style.display=host?'':'none';$('lstart').disabled=cnt<2;$('lnote').textContent=host?'Share the code or invite link — friends join with one tap':'Waiting for the host to start…';$('cinfo').textContent=' · '+ls.filter(x=>x==1).length+' online'}
 function begin(a,b,c){if(started)return;clearInterval(lt);begun={ls:[...a],lo:[...b],ln:[...c]};seats=a.map(x=>x==1?1:x==2?2:0);owner=b;names=c.map(esc);$('lobby').style.display='none';if(host)lob.presence({lr:null});trapBack();startGame();saveSoon()}
 async function joinRoom(code,create,resume){if(!lob||net)return;if(!reqNick())return;roomCode=code;host=!!create;leaving=false;$('landing').style.display='none';
  try{net=await lob.join('ludo-'+code.toLowerCase())}catch(e){toast('Could not open the room');$('landing').style.display='flex';return}
  const rg=resume&&resume.game;
  document.body.classList.add('online','chat-off');chatOpen=false;if(!rg)$('lobby').style.display='flex';$('rcode').textContent=code;$('clog').textContent='';addChat('','Room '+code,0,1);ls=[0,0,0,0];lo=[null,null,null,null];ln=['','','',''];gotL=0;tries=0;net.presence({id:me});trapBack();
- {const Lb=resume&&resume.lobby;if(host&&Lb&&Array.isArray(Lb.ls)&&Lb.ls.length==4&&Array.isArray(Lb.lo)&&Array.isArray(Lb.ln)){   // host coming back keeps CPU/closed seats, friends re-sit by themselves
+ {const Lb=resume&&resume.lobby;if(host&&Lb&&Array.isArray(Lb.ls)&&(Lb.ls.length==4||Lb.ls.length==6)&&Array.isArray(Lb.lo)&&Array.isArray(Lb.ln)){   // host coming back keeps CPU/closed seats, friends re-sit by themselves
   ls=Lb.ls.map((x,i)=>x==1&&Lb.lo[i]!==me?0:x|0);lo=Lb.lo.map((x,i)=>ls[i]==1&&x?String(x).slice(0,12):null);ln=Lb.ln.map((x,i)=>ls[i]==1?esc(x):'')}}
  offs=[net.on('lobby',m=>{const d=m.data;if(host||m.sameTab||!d||d.c!==code||!Array.isArray(d.ls))return;ls=d.ls.map(x=>x|0);lo=d.lo.map(x=>x?String(x).slice(0,12):null);ln=d.ln.map(esc);gotL=1;renderLobby()}),
  net.on('claim',m=>{const d=m.data;if(host&&!m.sameTab&&d)claimSeat(String(d.id).slice(0,12),esc(d.nick||'Player'),+d.seat)}),
@@ -87,6 +91,10 @@ $('bQuick').onclick=()=>{if(!reqNick())return;sfx.tick();$('landing').style.disp
 $('mback').onclick=()=>{$('menu').style.display='none';$('landing').style.display='flex'};
 $('bCreate').onclick=()=>{sfx.tick();let c='';for(let i=0;i<5;i++)c+=CODES[Math.random()*CODES.length|0];joinRoom(c,true)};
 $('bJoin').onclick=()=>{const c=$('code').value.trim().toUpperCase();if(/^[A-Z0-9]{5}$/.test(c))joinRoom(c);else toast('Enter the 5-character code')};
+$('lsize').onclick=()=>{if(!host||started)return;
+ if(ls.length==4){ls=[...ls,0,0];lo=[...lo,null,null];ln=[...ln,'','']}
+ else{if(ls.slice(4).some(x=>x==1)){toast('Ask Orange and Purple to pick another seat first');return}ls=ls.slice(0,4);lo=lo.slice(0,4);ln=ln.slice(0,4)}
+ sfx.tick();bc()};
 $('cCode').onclick=()=>copy(roomCode);$('cLink').onclick=()=>copy(LINK+roomCode);$('lleave').onclick=leaveRoom;
 $('again').onclick=()=>{if(!ended)return;if(net)net.emit('again',{g:gameNo+1});restartGame()};
 $('home').onclick=()=>$('qyes').onclick();
@@ -116,7 +124,7 @@ addEventListener('pagehide',saveNow);document.addEventListener('visibilitychange
 function loadSess(){let s;try{s=JSON.parse(store.get(SKEY)||'null')}catch(e){return null}
  if(!s||typeof s!='object'||!/^[A-Z0-9]{5}$/.test(s.code||'')||Date.now()-(+s.t||0)>12*36e5)return null;
  s.me=String(s.me||'').slice(0,12);s.nick=esc(s.nick||'');if(!s.me||!s.nick)return null;s.host=!!s.host;
- const g=s.game;if(g){if(g.b&&Array.isArray(g.b.ls)&&g.b.ls.length==4&&Array.isArray(g.b.lo)&&g.b.lo.length==4&&Array.isArray(g.b.ln)&&g.b.ln.length==4&&typeof g.log=='string'&&/^[1-6a-d_]{0,6000}$/.test(g.log))g.no=g.no|0;else s.game=null}
+ const g=s.game;if(g){if(g.b&&Array.isArray(g.b.ls)&&(g.b.ls.length==4||g.b.ls.length==6)&&Array.isArray(g.b.lo)&&g.b.lo.length==g.b.ls.length&&Array.isArray(g.b.ln)&&g.b.ln.length==g.b.ls.length&&typeof g.log=='string'&&/^[1-6a-d_]{0,6000}$/.test(g.log))g.no=g.no|0;else s.game=null}
  return s}
 function showResume(s){const r=$('resume');r.style.display='flex';$('rtxt').textContent=(s.game?'Game in progress · room ':'Room ')+s.code;$('rgo').onclick=()=>{r.style.display='none';rejoin(s)};$('rno').onclick=()=>{r.style.display='none';forgetSession()}}
 async function rejoin(s){if(!lob||net)return;me=s.me;$('nick').value=s.nick;$('resume').style.display='none';await joinRoom(s.code,s.host,s)}
