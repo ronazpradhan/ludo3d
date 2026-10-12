@@ -19,3 +19,13 @@ body.dh #hand .pc .pv{position:absolute;left:50%;bottom:-9px;transform:translate
 .dh #reveal .rv{gap:10px}.dh .rh{padding:9px 10px}.dh .rh .cs{--cardw:clamp(34px,6.5vw,52px)}
 .dh #reveal .again{display:flex;gap:10px;margin-top:6px}
 @media(max-width:640px){.dh #reveal{inset:16% 2% 3%}.dh .rh .cs{--cardw:30px;gap:3px}}
+
+/* animations: cards still flying to a spot stay hidden there until they land */
+.dh .pc.incoming,.dh #hand .pc.undealt{visibility:hidden}
+.dh .pc.fly{position:fixed;z-index:35;pointer-events:none;margin:0;transition:none}
+.dh .coin{z-index:36}
+.dh #throws .pc{transition:transform .2s}
+.dh .st{transition:box-shadow .4s,transform .4s var(--sp)}
+.dh #hand .pc:not(.sel):hover{top:-6px}
+.dh #jhyap{transform-origin:center}
+@media(prefers-reduced-motion:reduce){.dh .pc.fly,.dh .coin{display:none}.dh .pc.incoming,.dh #hand .pc.undealt{visibility:visible}}

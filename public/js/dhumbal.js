@@ -21,6 +21,8 @@ const net = window.claude && window.claude.raw;
 
 let S = null, me = null, pending = null, kicked = false, wantResume = true, watching = false;
 let lastEvId = null, deadlineAt = 0, turnKey = '', sel = new Set(), drag = null, noClick = false;
+// animation state: cards on their way somewhere stay invisible in their final spot until the flying copy lands
+let deal = null, incoming = new Set(), hideMine = new Set(), myRects = {};
 
 // ---------- helpers ----------
 const toast = t => { const e = $('toast'); e.textContent = t; e.classList.remove('on'); void e.offsetWidth; e.classList.add('on'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('on'), 2600); };
@@ -88,8 +90,9 @@ function render() {
   $('jtable').style.visibility = S && S.game ? 'visible' : 'hidden';
   if (!S) { lastEvId = null; return; }
   if (st == 'lobby') renderLobby();
+  const fresh = takeFresh(); prepare(fresh);
   if (S.game) renderTable();
-  animateEvents();
+  play(fresh);
 }
 
 function renderLobby() {
@@ -128,7 +131,7 @@ function renderTable() {
     d.dataset.pid = p.pid; d.style.left = x + '%'; d.style.top = y + '%'; d.style.setProperty('--c', colorOf(p.pid));
     const av = document.createElement('div'); av.className = 'av'; av.textContent = avatarOf(p.pid);
     const nm = document.createElement('b'); nm.textContent = nameOf(p.pid);
-    const fan = document.createElement('div'); fan.className = 'fan'; for (let k = 0; k < p.cards; k++) fan.append(document.createElement('span'));
+    const fan = document.createElement('div'); fan.className = 'fan'; for (let k = 0, n = deal ? deal.seats[p.pid] || 0 : p.cards; k < n; k++) fan.append(document.createElement('span'));
     const pt = document.createElement('div'); pt.className = 'pts'; pt.textContent = pts(ptsOf(p.pid)) + ' pts';
     d.append(av, nm, fan, pt);
     if (p.pid === g.dealer) { const t = document.createElement('span'); t.className = 'tag'; t.textContent = 'dealer'; d.append(t); }
@@ -141,7 +144,7 @@ function renderTable() {
   const T = $('throws'); T.textContent = '';
   const showCards = drawPhase ? g.pickable : (g.pileTop[g.pileTop.length - 1] || []);
   showCards.forEach(c => {
-    const e = cardEl(c, drawPhase ? 'button' : 'div');
+    const e = cardEl(c, drawPhase ? 'button' : 'div'); e.dataset.card = c; if (incoming.has(c)) e.classList.add('incoming');
     if (drawPhase && o.pick.includes(c)) { e.classList.add('pick'); e.onclick = () => { sfx.tick(); act({ type: 'draw', source: 'pile', card: c }); }; }
     T.append(e);
   });
@@ -151,14 +154,17 @@ function renderTable() {
   $('mypts').textContent = you ? `Your hand: ${you.total} point${you.total == 1 ? '' : 's'}` : 'Watching';
   $('mystate').textContent = you ? pts(ptsOf(me)) + ' pts' : '';
   $('jhyap').style.display = myTurn && o.show && !pending ? 'block' : 'none';
-  const H = $('hand'); H.textContent = '';
-  if (you) you.hand.forEach(c => {
+  const H = $('hand'), prev = new Map([...H.querySelectorAll('.pc')].map(e => [e.dataset.card, e.getBoundingClientRect()])); H.textContent = '';
+  if (you) you.hand.forEach((c, idx) => {
     const e = cardEl(c, 'button'); e.dataset.card = c; if (sel.has(c)) e.classList.add('sel');
+    if (hideMine.has(c) || (deal && idx >= deal.mine)) e.classList.add('undealt');
     const v = document.createElement('span'); v.className = 'pv'; v.textContent = val(c); e.append(v);
-    e.onclick = () => { if (noClick) return; sel.has(c) ? sel.delete(c) : sel.add(c); sfx.tick(); render(); };
+    e.onclick = () => { if (noClick || deal) return; sel.has(c) ? sel.delete(c) : sel.add(c); sfx.tick(); render(); };
     e.onpointerdown = ev => beginDrag(ev, c, e);
     H.append(e);
   });
+  H.querySelectorAll('.pc').forEach(e => { const p = prev.get(e.dataset.card); if (!p) return; const r = e.getBoundingClientRect(), dx = p.left - r.left, dy = p.top - r.top;
+    if (Math.abs(dx) + Math.abs(dy) > 1) e.animate([{ transform: `translate(${dx}px,${dy}px)` }, { transform: 'none' }], { duration: 300, easing: 'cubic-bezier(.2,.8,.2,1)' }); });
   // hint + throw button
   const hint = $('hint'); hint.textContent = '';
   if (over) hint.textContent = '';
@@ -172,7 +178,11 @@ function renderTable() {
   if (tk !== turnKey) { turnKey = tk; if (myTurn && g.phase == 'throw') { sfx.chime(); buzz(20); } }
 }
 const prevOf = g => { const a = g.players.filter(p => p.active).map(p => p.pid), i = a.indexOf(g.current); return a[(i - 1 + a.length) % a.length]; };
-function throwSel() { if (!sel.size || pending) return; const cs = [...sel]; sel.clear(); sfx.tick(); act({ type: 'throw', cards: cs }); }
+function throwSel() {
+  if (!sel.size || pending || deal) return; const cs = [...sel]; sel.clear();
+  myRects = {}; cs.forEach(c => { const e = $('hand').querySelector('[data-card="' + c + '"]'); if (e) myRects[c] = e.getBoundingClientRect(); });
+  sfx.tick(); act({ type: 'throw', cards: cs });
+}
 $('jhyap').onclick = () => { if (!pending) { sfx.chime(); buzz([20, 40, 20]); act({ type: 'show' }); } };
 $('stock').onclick = () => { const g = S && S.game; if (g && g.current === me && g.phase == 'draw') { sfx.tick(); act({ type: 'draw', source: 'stock' }); } };
 
@@ -229,19 +239,104 @@ function endDrag(e) {
 }
 addEventListener('pointerup', endDrag); addEventListener('pointercancel', endDrag);
 
-// ---------- what just happened: a card flies from the thrower to the pile ----------
-function animateEvents() {
-  const h = S.room.history; if (!h.length) return;
+// ---------- animations: deal, throws, draws, Jhyap payouts ----------
+// events that happened since the last update (none on first view / rejoin, so nothing is replayed)
+function takeFresh() {
+  const h = S.room.history; if (!h.length) return [];
   const newest = h[h.length - 1].id;
-  if (lastEvId == null || newest < lastEvId || newest - lastEvId > 12) { lastEvId = newest; return; }
-  const fresh = h.filter(e => e.id > lastEvId); lastEvId = newest;
-  fresh.forEach(e => {
-    if (e.type == 'THREW' && e.pid !== me) { sfx.tick(); const s = document.querySelector('.st[data-pid="' + e.pid + '"]'); if (s) s.animate([{ transform: 'translate(-50%,-50%) scale(1.12)' }, { transform: 'translate(-50%,-50%)' }], { duration: 350 }); }
-    if (e.type == 'DREW' && e.pid !== me) sfx.tick();
-    if (e.type == 'JHYAP') toast(`${nameOf(e.pid)} called Jhyap with ${e.total} points!`);
-    if (e.type == 'GAME_ENDED') { if (e.winner === me) sfx.win(); else sfx.chime(); }
-    if (e.type == 'TIMED_OUT' && e.pid === me) toast('Time ran out — your highest card was thrown');
+  if (lastEvId == null || newest < lastEvId || newest - lastEvId > 14) { lastEvId = newest; return []; }
+  const fresh = h.filter(e => e.id > lastEvId); lastEvId = newest; return fresh;
+}
+// before drawing: decide which cards must stay hidden until their flying copy arrives
+function prepare(fresh) {
+  const g = S.game; if (!g) return;
+  for (const e of fresh) {
+    if (e.type == 'GAME_STARTED') {
+      const n = e.players.length, di = e.players.indexOf(e.dealer), order = [];
+      for (let k = 0; k < 5; k++) for (let i = 1; i <= n; i++) order.push(e.players[(di + i) % n]);
+      deal = { order, mine: 0, seats: {}, open: e.open }; incoming.add(e.open); sel.clear();
+    }
+    if (e.type == 'THREW') e.cards.forEach(c => incoming.add(c));
+    if (e.type == 'DREW' && e.pid === me) { const c = e.card || (g.lastDraw && g.lastDraw.pid === me && g.lastDraw.card); if (c) hideMine.add(c); }
+  }
+  if (incoming.size || hideMine.size) { clearTimeout(prepare.t); prepare.t = setTimeout(() => { incoming.clear(); hideMine.clear(); render(); }, 3500); }   // never stay hidden
+}
+const rectOf = el => el && el.getBoundingClientRect();
+const seatRect = pid => pid === me ? rectOf($('hand')) : rectOf(document.querySelector('.st[data-pid="' + pid + '"]')) || rectOf($('center'));
+const pileSpot = c => rectOf($('throws').querySelector('[data-card="' + c + '"]')) || rectOf($('throws'));
+const handSpot = c => $('hand').querySelector('[data-card="' + c + '"]');
+function backEl() { const e = document.createElement('div'); e.className = 'pc down'; return e; }
+// a card (or a card back) flies in an arc from one place to another
+function fly(card, from, to, o = {}) {
+  if (!from || !to) { if (o.done) o.done(); return; }
+  const w = $('stock').getBoundingClientRect().width, el = card ? cardEl(card) : backEl();
+  el.classList.add('fly'); el.style.width = w + 'px'; el.style.height = w * 1.4 + 'px';
+  el.style.left = from.left + from.width / 2 - w / 2 + 'px'; el.style.top = from.top + from.height / 2 - w * .7 + 'px';
+  document.body.append(el);
+  const tx = to.left + to.width / 2 - (from.left + from.width / 2), ty = to.top + to.height / 2 - (from.top + from.height / 2);
+  const end = o.scale != null ? o.scale : Math.max(.5, Math.min(1.5, to.width / w)), spin = o.spin != null ? o.spin : (tx > 0 ? 12 : -12);
+  el.animate([{ transform: `scale(${o.grow ? .6 : 1})`, opacity: o.grow ? .7 : 1 },
+    { transform: `translate(${tx * .5}px,${ty * .5 - 34}px) scale(1.08) rotate(${spin}deg)`, opacity: 1, offset: .5 },
+    { transform: `translate(${tx}px,${ty}px) scale(${end}) rotate(0deg)`, opacity: o.fade ? .2 : 1 }],
+    { duration: o.ms || 430, delay: o.delay || 0, easing: 'cubic-bezier(.3,.7,.2,1)', fill: 'both' }).onfinish = () => { el.remove(); if (o.done) o.done(); };
+}
+const land = el => el && el.animate([{ transform: 'scale(1.12)' }, { transform: 'scale(.96)' }, { transform: 'none' }], { duration: 260, easing: 'ease-out' });
+function coins(from, to, n, delay = 0) {
+  for (let i = 0; i < n; i++) { const c = document.createElement('div'); c.className = 'coin';
+    const f = { left: from.left + from.width / 2 - 11 + (Math.random() - .5) * 30, top: from.top + from.height / 2 - 11, width: 22, height: 22 };
+    c.style.left = f.left + 11 + 'px'; c.style.top = f.top + 11 + 'px'; document.body.append(c);
+    const tx = to.left + to.width / 2 - f.left - 11, ty = to.top + to.height / 2 - f.top - 11;
+    c.animate([{ transform: 'translate(-50%,-50%) scale(.6)', opacity: 0 }, { transform: `translate(calc(-50% + ${tx * .5}px), calc(-50% + ${ty * .5 - 50}px)) scale(1.1)`, opacity: 1, offset: .45 },
+      { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(.8)`, opacity: .9 }], { duration: 650, delay: delay + i * 70, easing: 'cubic-bezier(.3,.7,.3,1)', fill: 'both' }).onfinish = () => c.remove(); }
+}
+function runDeal() {
+  const d = deal, stock = rectOf($('stock')), total = d.order.length, step = Math.min(95, 2200 / total);
+  d.order.forEach((pid, k) => {
+    const mineIdx = d.order.slice(0, k).filter(p => p === me).length;
+    const slot = pid === me ? $('hand').querySelectorAll('.pc')[mineIdx] : null;
+    fly(null, stock, pid === me ? rectOf(slot) : seatRect(pid), { delay: 300 + k * step, ms: 360, scale: pid === me ? undefined : .5, fade: pid !== me, done: () => {
+      if (deal !== d) return;
+      if (pid === me) { const el = $('hand').querySelectorAll('.pc')[d.mine++]; if (el) { el.classList.remove('undealt'); flipIn(el); } }
+      else { d.seats[pid] = (d.seats[pid] || 0) + 1; const f = document.querySelector('.st[data-pid="' + pid + '"] .fan'); if (f) f.append(document.createElement('span')); }
+      if (k % 3 == 0) sfx.tok(0, .05, 230 + (k % 4) * 30);
+      if (k === total - 1) setTimeout(() => {   // finally the open card is turned up on the pile
+        if (deal !== d) return; deal = null; incoming.delete(d.open); render();
+        const e = $('throws').querySelector('[data-card="' + d.open + '"]'); if (e) flipIn(e); sfx.chime();
+      }, 380);
+    } });
   });
+}
+function play(fresh) {
+  if (!S || !S.game) return;
+  let t = 0;
+  for (const e of fresh) {
+    if (e.type == 'GAME_STARTED' && deal) runDeal();
+    else if (e.type == 'THREW') {
+      e.cards.forEach((c, k) => {
+        const from = e.pid === me && myRects[c] ? myRects[c] : seatRect(e.pid);
+        fly(c, from, pileSpot(c), { delay: t + k * 90, grow: e.pid !== me, done: () => { incoming.delete(c); const el = $('throws').querySelector('[data-card="' + c + '"]'); if (el) { el.classList.remove('incoming'); land(el); } } });
+      });
+      if (e.pid !== me) setTimeout(() => sfx.tick(), t);
+      t += 160 + e.cards.length * 90;
+    } else if (e.type == 'DREW') {
+      const src = e.source == 'stock' ? rectOf($('stock')) : rectOf($('throws'));
+      if (e.pid === me) {
+        const c = e.card || (S.game.lastDraw && S.game.lastDraw.card), el = c && handSpot(c);
+        fly(e.source == 'pile' ? c : null, src, rectOf(el), { delay: t, done: () => { hideMine.delete(c); const x = c && handSpot(c); if (x) { x.classList.remove('undealt'); if (e.source == 'stock') flipIn(x); else land(x); } } });
+      } else fly(e.card || null, src, seatRect(e.pid), { delay: t, scale: .5, fade: true, done: () => sfx.tick() });
+      t += 200;
+    } else if (e.type == 'JHYAP') toast(`${nameOf(e.pid)} called Jhyap with ${e.total} points!`);
+    else if (e.type == 'GAME_ENDED') {
+      const r = S.game.result;
+      if (r && r.winner) {   // the losers' points pour over to the winner
+        const to = seatRect(r.winner);
+        Object.entries(r.pay || {}).filter(([, d]) => d < 0).forEach(([pid, d], i) => coins(seatRect(pid), to, Math.min(10, 3 + Math.round(-d / 8)), 700 + i * 250));
+        const ws = document.querySelector('.st[data-pid="' + r.winner + '"]');
+        if (ws) ws.animate([{ transform: 'translate(-50%,-50%) scale(1)' }, { transform: 'translate(-50%,-50%) scale(1.18)' }, { transform: 'translate(-50%,-50%) scale(1)' }], { duration: 600, delay: 900 });
+      }
+      if (e.winner === me) sfx.win(); else sfx.chime();
+    } else if (e.type == 'TIMED_OUT' && e.pid === me) toast('Time ran out — your highest card was thrown');
+  }
 }
 (function loop() {
   requestAnimationFrame(loop);
