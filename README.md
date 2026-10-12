@@ -100,3 +100,11 @@ Pick the **6-player board** (vs computer: the board button in the setup; online:
 It's a six-armed board with the same rules: each colour has an arm (3 x 6 cells), a start square, a safe star,
 a 5-cell home lane and a yard; the shared track is 78 squares. Orange and Purple join the classic four colours.
 Five players = one seat empty or a CPU. Players are spread out evenly at the start (2: opposite; 3: every other arm).
+
+## Dhumbal (Jhyap)
+Server-authoritative card game on the shared room system (`dh:` messages). Rules in `games/dhumbal/rules.js`:
+2-5 players, 5 cards each; throw first (one card, a set of 2+ same rank, or a run of 3+ same suit), then draw
+(deck, or any one card the previous player threw). Points: A=1, 2-10 face, J=11, Q=12, K=13. Call Jhyap with
+10 points or less: lowest hand wins and everyone pays the caller their points; if someone has the same or less,
+they win and the caller pays everyone's points to them. Points (play money) carry over between games.
+30-second turn clock (throws your highest card and draws). Set `DHUMBAL_LOG=0` to silence its server log.
