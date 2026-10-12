@@ -65,6 +65,14 @@ Rejoin: refreshing the tab puts you straight back in your seat; another tab/brow
 button. A player who stays disconnected for 2 minutes during a game is removed and their cards are shuffled
 back into the stock.
 
+## Ludo dice: fair and server-rolled
+
+Every roll is an even 1-in-6; the dice never looks at the board. Online, the **server** rolls
+(`games/ludo/dice.js`, `crypto.randomInt`): a browser asks for "roll number n" and the server sends the
+value to everyone at once, so a modified browser can't choose its numbers or re-roll. The server also keeps
+the order of every roll and pawn pick, and that log is what players resync from after a reload. Offline
+games roll with `crypto.getRandomValues`. Tests: `test/ludo-dice.test.js`.
+
 ## Ludo online: seats, turn timer and bots
 - With two players, the second one is seated opposite the first, and if two players sit side by side
   the host's Start moves one to the opposite corner (1st/3rd or 2nd/4th).

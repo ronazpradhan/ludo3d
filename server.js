@@ -5,6 +5,7 @@ const { WebSocketServer } = require('ws');
 const { createJutpattiServer } = require('./games/jutpatti/rooms');
 const { createFlashServer } = require('./games/flash/rooms');
 const { createDhumbalServer } = require('./games/dhumbal/rooms');
+const { createLudoDice } = require('./games/ludo/dice');
 
 const PUB = path.join(__dirname, 'public');
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml',
@@ -42,6 +43,8 @@ setInterval(flash.sweep, 1000).unref();   // every second: turn clocks + next de
 // Dhumbal (Jhyap): server-authoritative too; messages start with 'dh:'.
 const dhumbal = createDhumbalServer({ send });
 setInterval(dhumbal.sweep, 1000).unref();
+// Ludo: the server rolls the dice and keeps the order of moves (topics 'g', 'sync', 'seed'); everything else is relayed.
+const ludoDice = createLudoDice();
 function snapshot(name) {
   const r = rooms.get(name); if (!r) return;
   const peers = [...r].map(([id, c]) => ({ id, presence: c.presence }));
@@ -50,7 +53,8 @@ function snapshot(name) {
 function leave(ws, name) {
   const r = rooms.get(name); if (!r || !r.has(ws.id)) return;
   r.delete(ws.id); ws.rooms.delete(name);
-  if (r.size === 0) rooms.delete(name); else snapshot(name);
+  if (r.size === 0) { rooms.delete(name); setTimeout(() => { if (!rooms.has(name)) ludoDice.drop(name); }, 2 * 3600e3).unref(); }   // keep a Ludo game's log a while so players can come back
+  else snapshot(name);
 }
 
 wss.on('connection', ws => {
@@ -80,6 +84,13 @@ wss.on('connection', ws => {
     } else if (m.t === 'emit') {
       const r = rooms.get(m.room);
       if (!r || !r.has(ws.id) || typeof m.topic !== 'string' || m.topic.length > 20) return;
+      if (m.room.startsWith('ludo-') && (m.topic === 'g' || m.topic === 'sync' || m.topic === 'seed')) {
+        for (const o of ludoDice.handle(m.room, m.topic, m.data)) {
+          const out = JSON.stringify({ t: 'ev', room: m.room, topic: o.topic, data: o.data, from: 'srv' });
+          if (o.to === 'me') ws.send(out); else for (const c of r.values()) if (c.ws.readyState === 1) c.ws.send(out);
+        }
+        return;
+      }
       const out = JSON.stringify({ t: 'ev', room: m.room, topic: m.topic, data: m.data, from: ws.id });
       for (const [id, c] of r) if (id !== ws.id && c.ws.readyState === 1) c.ws.send(out);
     }

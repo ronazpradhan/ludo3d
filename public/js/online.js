@@ -8,9 +8,12 @@ $('nick').value=store.get('ludo3d.nick')||'';
 const toast=t=>{const e=$('toast');e.textContent=t;e.classList.remove('on');void e.offsetWidth;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),2400)};
 const getNick=()=>{nick=esc($('nick').value.trim());if(nick)store.set('ludo3d.nick',nick);return nick},reqNick=()=>{const i=$('nick');if(getNick()){i.classList.remove('bad');return true}toast('Enter your name first');i.classList.remove('bad');void i.offsetWidth;i.classList.add('bad');clearTimeout(i._b);i._b=setTimeout(()=>i.classList.remove('bad'),1200);i.focus();return false};let pend='';$('nick').addEventListener('input',()=>{$('nick').classList.remove('bad');$('toast').classList.remove('on')});
 async function copy(t){try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();try{document.execCommand('copy')}catch(e2){}a.remove()}toast('Copied!')}
-function put(m){inbox[m.n]=m;saveSoon();const w=waiters[m.n];if(w){delete waiters[m.n];w(m)}}
-function dec(n,o){o.n=n;o.g=gameNo;put(o);if(net){lastDec=[...lastDec,o].slice(-4);net.emit('g',o)}}
-function take(n,c,fb){return new Promise(r=>{if(inbox[n])return r(inbox[n]);waiters[n]=r;
+function put(m){inbox[m.n]=m;saveSoon();const w=waiters[m.n];if(w){delete waiters[m.n];w.forEach(f=>f(m))}}
+const wait=n=>inbox[n]?Promise.resolve(inbox[n]):new Promise(r=>(waiters[n]=waiters[n]||[]).push(r));
+// online, the server rolls: we only ask for roll n and the value comes back to everyone at once
+function dec(n,o){o.n=n;o.g=gameNo;if(net&&o.k=='r')delete o.v;else put(o);if(net){lastDec=[...lastDec,o].slice(-4);net.emit('g',o)}}
+function decW(n,o){dec(n,o);return wait(n)}
+function take(n,c,fb){return new Promise(r=>{if(inbox[n])return r(inbox[n]);(waiters[n]=waiters[n]||[]).push(r);
  // host: if the seat's player left, ran out of time, or is already covered by a bot, the bot plays this move
  if(net&&host&&seats[c]==1&&owner[c]!==me){const t0=Date.now(),iv=setInterval(()=>{if(inbox[n]||!started){clearInterval(iv);return}
   const gone=!net.peers().some(p=>p.presence&&p.presence.id===owner[c]),late=Date.now()-t0>TURN_MS+EXTRA_MS+1500;
@@ -77,10 +80,11 @@ async function joinRoom(code,create,resume){if(!lob||net)return;if(!reqNick())re
  net.on('bot',m=>{const d=m.data;if(!m.sameTab&&d&&(d.g|0)===gameNo)applyBot(d.c|0,!!d.on)}),
  net.on('bots',m=>{const d=m.data;if(host||m.sameTab||!d||(d.g|0)!==gameNo||!Array.isArray(d.b))return;const s=owner.indexOf(me);d.b.forEach((x,i)=>{if(i===s&&Date.now()-backAt<5000)return;applyBot(i,!!x)})}),
  net.on('chat',m=>{const d=m.data;if(!m.sameTab&&d)addChat(esc(d.u||'?'),String(d.t||'').slice(0,200),CS[d.s],0)}),
- net.on('g',m=>{const d=m.data;if(!m.sameTab&&d&&Number.isInteger(d.n)&&(d.g|0)===gameNo&&((d.k=='r'&&d.v>=1&&d.v<=6)||(d.k=='p'&&d.i>=0&&d.i<4)))put({k:d.k,v:d.v|0,i:d.i|0,n:d.n})}),
+ net.on('g',m=>{const d=m.data;if(m.from==='srv'&&d&&Number.isInteger(d.n)&&(d.g|0)===gameNo&&((d.k=='r'&&d.v>=1&&d.v<=6)||(d.k=='p'&&d.i>=0&&d.i<4)))put({k:d.k,v:d.v|0,i:d.i|0,n:d.n})}),
  net.onPeers(ch=>{ch.joined.forEach(p=>{if(!p.isMe&&p.presence&&p.presence.id&&!started)addChat('','A player joined',0,1)});ch.left.forEach(p=>{const id=p.presence&&p.presence.id,s=lo.indexOf(id);if(id&&s>=0){addChat('',(ln[s]||'A player')+' left',0,1);if(!started&&host){ls[s]=0;lo[s]=null;ln[s]='';bc()}}})})];
- offs.push(net.on('sync',m=>{const d=m.data;if(!d||!started||restoring)return;const g=d.g|0;if(g>gameNo){requestSync();return}const l=logStr();if(g<gameNo||l.length>(d.n|0))net.emit('log',{g:gameNo,l})}),
-  net.on('log',m=>{const d=m.data;if(!d||typeof d.l!='string'||!/^[1-6a-d_]{0,6000}$/.test(d.l))return;const g=d.g|0;
+ // the move log comes only from the server; after a server restart it's empty, so we give it our copy back
+ offs.push(net.on('log',m=>{const d=m.data;if(m.from!=='srv'||!d||typeof d.l!='string'||!/^[1-6a-d_]{0,6000}$/.test(d.l))return;const g=d.g|0;
+   if(!d.l&&logStr()&&!/_/.test(logStr()))net.emit('seed',{g:gameNo,l:logStr()});
    if(restoring){if(g>gameNo){gameNo=g;wipeInbox()}if(g==gameNo)applyLog(d.l,true);if(syncRes){const r=syncRes;syncRes=null;r()}return}
    if(!started)return;if(g==gameNo){if(applyLog(d.l,false))hardResync(d.l,g)}else if(g>gameNo)hardResync(d.l,g)}));
  if(rg){resumeGame(rg);return}
@@ -133,7 +137,7 @@ async function resumeGame(g){restoring=true;const b=g.b;ls=b.ls.map(x=>x|0);lo=b
  const got=new Promise(r=>syncRes=r);requestSync();await Promise.race([got,new Promise(r=>setTimeout(r,2000))]);syncRes=null;   // ask the others what we missed
  ff=true;setTimeout(()=>{ff=false},4000);begin(ls,lo,ln);restoring=false;saveNow();   // 4s failsafe so silent mode can never get stuck
                                                                              // silent fast replay up to the present
- setTimeout(()=>{if(net)net.emit('log',{g:gameNo,l:logStr()})},1500);toast('Back in the game');
+ setTimeout(requestSync,1500);toast('Back in the game');
  setTimeout(()=>{const s=owner.indexOf(me);if(net&&s>=0){backAt=Date.now();net.emit('bot',{g:gameNo,c:s,on:false})}},2500)}   // tell everyone I'm back (only announced if a bot was covering me)
 function hardResync(l,g){if(!begun)return;const last=+store.get('ludo3d.hr')||0;if(Date.now()-last<15000)return;store.set('ludo3d.hr',String(Date.now()));
  leaving=true;store.set(SKEY,JSON.stringify({code:roomCode,nick,me,host,tab:TAB,t:Date.now(),auto:1,game:{no:g,b:begun,log:l}}));location.reload()}

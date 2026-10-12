@@ -1,5 +1,5 @@
 // End to end: boots the real server.js and talks to it over real WebSockets.
-// Checks the Ludo relay still behaves exactly as before, and Jutpatti works alongside it.
+// Checks the Ludo relay (with server-rolled dice), and Jutpatti works alongside it.
 const test = require('node:test');
 const assert = require('node:assert');
 const path = require('path');
@@ -53,9 +53,17 @@ test('Ludo relay: join, presence, peers and emit work as before', async () => {
   await a.wait(m => m.t === 'peers' && m.peers.length === 2);
   a.send({ t: 'pres', room: 'ludo-tst01', p: { id: 'me1' } });
   await b.wait(m => m.t === 'peers' && m.peers.some(p => p.id === wa.id && p.presence.id === 'me1'));
-  a.send({ t: 'emit', room: 'ludo-tst01', topic: 'g', data: { k: 'r', v: 6, n: 0, g: 0 } });
+  a.send({ t: 'emit', room: 'ludo-tst01', topic: 'chat', data: { u: 'Ann', t: 'hi' } });
   const ev = await b.wait(m => m.t === 'ev');
-  assert.deepStrictEqual(ev, { t: 'ev', room: 'ludo-tst01', topic: 'g', data: { k: 'r', v: 6, n: 0, g: 0 }, from: wa.id });
+  assert.deepStrictEqual(ev, { t: 'ev', room: 'ludo-tst01', topic: 'chat', data: { u: 'Ann', t: 'hi' }, from: wa.id });
+  // dice: the server rolls, ignores the number the client sent, and tells both players the same value
+  a.send({ t: 'emit', room: 'ludo-tst01', topic: 'g', data: { k: 'r', v: 6, n: 0, g: 0 } });
+  const ra = await a.wait(m => m.t === 'ev' && m.topic === 'g'), rb = await b.wait(m => m.t === 'ev' && m.topic === 'g');
+  assert.strictEqual(ra.from, 'srv'); assert.deepStrictEqual(ra.data, rb.data);
+  assert.ok(ra.data.v >= 1 && ra.data.v <= 6 && ra.data.n === 0);
+  b.send({ t: 'emit', room: 'ludo-tst01', topic: 'sync', data: { g: 0, n: 0 } });
+  const lg = await b.wait(m => m.t === 'ev' && m.topic === 'log');
+  assert.deepStrictEqual(lg.data, { g: 0, l: String(ra.data.v) });
   a.send({ t: 'ping' }); await a.wait(m => m.t === 'pong');
   b.send({ t: 'leave', room: 'ludo-tst01' });
   await a.next(m => m.t === 'peers' && m.peers.length === 1);

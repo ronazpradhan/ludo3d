@@ -177,6 +177,8 @@ function showEnd(){ended=true;forgetSession();const w=rank[0];$('etitle').textCo
 function restartGame(){if(!ended)return;ended=false;$('end').style.display='none';rank=[];dn=0;Object.keys(inbox).forEach(k=>delete inbox[k]);Object.keys(waiters).forEach(k=>delete waiters[k]);lastDec=[];movable=[];gameNo++;
  T.forEach(a=>a.forEach(t=>{t.p=-1;t.ring.visible=false;t.g.rotation.y=0}));startGame()}
 function PN(c){if(seats[c]==2)return CN[c];if(net)return names[c]||CN[c];const h=seats.map((x,i)=>x==1?i:-1).filter(i=>i>=0);return (nick||CN[c])+(h.length>1?' '+(h.indexOf(c)+1):'')}
+// offline die: crypto randomness, every face exactly 1 in 6 (online games get their rolls from the server)
+function die(){const a=new Uint8Array(1);do crypto.getRandomValues(a);while(a[0]>=252);return 1+a[0]%6}
 async function rollDice(v){sfx.roll();const T=Math.PI*2,r0=((dice.rotation.z%T)+T+Math.PI)%T-Math.PI,N=6;let last=-1,prev=-1;
  await tween(.75,k=>{const e=1-Math.pow(1-k,3),th=e*N*Math.PI,h=Math.abs(Math.sin(k*Math.PI*2))*Math.pow(1-k,1.2);
   dice.position.y=.3+h*1.5;dice.scale.setScalar(1+h*.25);dice.scale.y*=Math.max(.1,Math.abs(Math.cos(th)));
@@ -198,8 +200,8 @@ const moveDice=c=>{const x=NP==6?Math.cos(yardDir(c))*4.6:YB[c][0]+(c==1||c==2?5
 async function play(){let c=seats.findIndex(s=>s),six=0,pc=-1;const n=seats.filter(s=>s).length;
  while(true){const same=c===pc;pc=c;if(!net&&seats[c]==1)faceTo(c);active=c;ui();glow.color.set(C[c]);halo.material.color.set(C[c]);const cpu=seats[c]==2,prod=cpu?(!net||host):(!net||owner[c]===me);say(same?`${PN(c)} rolls again`:'');if(!same)await moveDice(c);
   const nr=dn++;if(ff&&!inbox[nr])ff=false;let v;if(inbox[nr]&&inbox[nr].k=='r')v=inbox[nr].v|0;
-  else if(net&&!cpu)v=(await human(nr,c,async()=>{rollBtn.disabled=false;sfx.chime();say('Tap the dice 🎲');await new Promise(r=>rollRes=r);rollBtn.disabled=true;return{k:'r',v:1+Math.random()*6|0}},()=>({k:'r',v:1+Math.random()*6|0}))).v;
-  else if(prod){if(cpu)await sleep(450);else{rollBtn.disabled=false;sfx.chime();say(`${PN(c)} — tap the dice`);await new Promise(r=>rollRes=r);rollBtn.disabled=true}if(inbox[nr]&&inbox[nr].k=='r')v=inbox[nr].v|0;else{v=1+Math.random()*6|0;dec(nr,{k:'r',v})}}else v=(await take(nr,c,()=>({k:'r',v:1+Math.random()*6|0}))).v;
+  else if(net&&!cpu)v=(await human(nr,c,async()=>{rollBtn.disabled=false;sfx.chime();say('Tap the dice 🎲');await new Promise(r=>rollRes=r);rollBtn.disabled=true;return{k:'r'}},()=>({k:'r'}))).v;
+  else if(prod){if(cpu)await sleep(450);else{rollBtn.disabled=false;sfx.chime();say(`${PN(c)} — tap the dice`);await new Promise(r=>rollRes=r);rollBtn.disabled=true}if(inbox[nr]&&inbox[nr].k=='r')v=inbox[nr].v|0;else if(net)v=(await decW(nr,{k:'r'})).v;else{v=die();dec(nr,{k:'r',v})}}else v=(await take(nr,c,()=>({k:'r'}))).v;
   await rollDice(v);say(`${PN(c)} rolled ${v}`);let extra=v==6;six=v==6?six+1:0;
   if(six==3){say('Three sixes — turn lost!');six=0;extra=false;await sleep(750)}
   else{const mv=T[c].filter(t=>can(t,v));
@@ -227,12 +229,12 @@ async function human(n,c,ask,fb){
    const hurry=0;
    const r=await raceWait(ask(),TURN_MS+EXTRA_MS,n);clearTimeout(hurry);turnT=null;
    if(inbox[n])return inbox[n];
-   if(r){dec(n,r);return inbox[n]}
+   if(r)return decW(n,r);
    cancelAsk();say('');                     // time's up
    if(!host)return take(n,c,fb);            // the host's bot plays this move
    setBot(c,true);                          // I'm the host: my own bot covers me
   }
-  if(host){await sleep(600);if(!inbox[n])dec(n,fb());return inbox[n]}
+  if(host){await sleep(600);return inbox[n]||decW(n,fb())}
   await Promise.race([take(n,c,fb),waitBack()]);   // the host's bot plays, unless I come back first
  }
 }
