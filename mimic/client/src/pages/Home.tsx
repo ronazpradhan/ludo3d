@@ -80,8 +80,8 @@ export function Home({ inviteCode }: { inviteCode: string }) {
 
       <section className="home__how" aria-label="How to play">
         <ol className="how">
-          <li><span className="how__n">1</span><span><b>Everyone hears the same sound</b>: a tune, a siren, a beat or a silly noise.</span></li>
-          <li><span className="how__n">2</span><span><b>Copy it into your mic</b>: hum, whistle, clap or make the noise.</span></li>
+          <li><span className="how__n">1</span><span><b>Everyone hears the same sound once</b>: a meme, a dialogue, a viral clip.</span></li>
+          <li><span className="how__n">2</span><span><b>Copy it into your mic</b> right after the 3-2-1. Say it, sing it, make the noise.</span></li>
           <li><span className="how__n">3</span><span><b>The game scores how close you got</b> (0–100). Best copy each round gets a bonus.</span></li>
         </ol>
         <p className="home__fine">{MIN_PLAYERS}–{MAX_PLAYERS} players · microphone needed · no sign-up</p>

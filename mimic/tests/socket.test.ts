@@ -9,7 +9,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { MAX_RECORDING_BYTES, POINTS, SOCKET_PATH } from '../shared/constants';
 import type { ClientToServerEvents, JoinedRoom, RoomSnapshot, ServerToClientEvents } from '../shared/types';
 import { attachMimic, type MimicHandle } from '../server/index';
-import { clips, imitate, pcmOf, silence } from './helpers';
+import { clips, imitate, library, pcmOf, silence, specOf } from './helpers';
 
 type Client = Socket<ServerToClientEvents, ClientToServerEvents> & { latest?: RoomSnapshot; inbox: string[] };
 type AnyRes = { ok: boolean; code?: string; message?: string; [k: string]: unknown };
@@ -27,6 +27,7 @@ beforeAll(async () => {
   });
   mimic = attachMimic(server, {
     clientDir,
+    library,
     timing: { listenMs: 100, recordMs: 2500, resultsMs: 200 },
     limits: { create: [3, 60_000], createIp: [500, 60_000], join: [50, 60_000], joinIp: [500, 60_000], take: [30, 10_000] },
   });
@@ -98,7 +99,7 @@ async function setupRoom(n: number, settings: Record<string, unknown> = { rounds
 /** A good copy of the round's clip, as the bytes a browser would send. */
 function goodTake(s: RoomSnapshot): Buffer {
   const clip = clips.find(c => c.id === s.round!.clip.id)!;
-  const pcm = pcmOf(imitate({ events: clip.events! }));
+  const pcm = pcmOf(imitate(specOf(clip.id)));
   return Buffer.from(pcm.buffer, pcm.byteOffset, pcm.byteLength);
 }
 const bytes = (pcm: Int16Array): Buffer => Buffer.from(pcm.buffer, pcm.byteOffset, pcm.byteLength);

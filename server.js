@@ -34,7 +34,11 @@ const server = http.createServer((req, res) => {
   fs.createReadStream(file).pipe(res);
 });
 
-const mimic = attachMimic ? attachMimic(server) : null;   // serves /mimic/ and its Socket.IO at /mimic/socket.io
+// Serves /mimic/ and its Socket.IO at /mimic/socket.io. If Mimic can't start (e.g. its sounds failed to
+// download during the build), the other games still run.
+let mimic = null;
+try { mimic = attachMimic ? attachMimic(server) : null; }
+catch (e) { console.error('Mimic is disabled: ' + e.message); }
 // The games' WebSocket takes every upgrade except Mimic's Socket.IO, which listens on the same server.
 const wss = new WebSocketServer({ noServer: true, maxPayload: 32 * 1024 });
 server.on('upgrade', (req, socket, head) => {

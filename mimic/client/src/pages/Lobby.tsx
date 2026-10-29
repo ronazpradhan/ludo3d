@@ -61,20 +61,12 @@ export function Lobby({ room }: { room: RoomSnapshot }) {
 
   return (
     <div className="lobby">
-      <section className="card lobby__code">
-        <span className="eyebrow">Room code</span>
-        <div className="code mono" aria-label={`Room code ${room.code.split('').join(' ')}`}>
-          {room.code.split('').map((ch, i) => <span key={i}>{ch}</span>)}
-        </div>
-        <button type="button" className="btn btn--lime btn--sm" onClick={() => void copy()}>
-          {copied ? 'Link copied ✓' : 'Copy invite link'}
-        </button>
-      </section>
-
       <section className="card lobby__players" aria-labelledby="players-h">
         <div className="card__head">
-          <h2 id="players-h">Players</h2>
-          <span className="muted">{room.players.length}/{MAX_PLAYERS}</span>
+          <h2 id="players-h">Players <span className="muted">{room.players.length}/{MAX_PLAYERS}</span></h2>
+          <button type="button" className="btn btn--lime btn--sm" onClick={() => void copy()}>
+            {copied ? 'Link copied ✓' : '🔗 Invite friends'}
+          </button>
         </div>
         <ul className="player-grid">
           {room.players.map(p => (

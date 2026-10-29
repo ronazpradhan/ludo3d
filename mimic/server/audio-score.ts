@@ -245,7 +245,8 @@ export function scoreImitation(ref: Reference, imitation: Float32Array, rate: nu
   } else {
     raw = 0.8 * rhythm + 0.1 * length + 0.1 * tone;
   }
-  // Spread the useful range out: a recognisable copy lands around 60-85, a great one above 90.
-  const score = Math.round(100 * Math.pow(clamp01((raw - 0.3) / 0.62), 0.85));
+  // Every real attempt earns what it got: no cut-off to 0 for being far off. The curve keeps a close copy
+  // well above a loose one (a good copy lands around 80-95, a different sound around 20-45).
+  const score = Math.max(1, Math.round(100 * Math.pow(clamp01(raw / 0.95), 1.4)));
   return { score, verdict: 'ok', parts: { melody, rhythm, length, tone } };
 }

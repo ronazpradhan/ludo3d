@@ -139,6 +139,33 @@ function Listen({ room, mic }: { room: RoomSnapshot; mic: MicState }) {
 
 type RecState = 'waiting' | 'recording' | 'sending' | 'missed';
 
+/**
+ * Ends a take once the player has made some sound and then gone quiet, so nobody records long silence.
+ * The room's own noise is measured in the first moments and the thresholds sit above it.
+ */
+class VoiceStop {
+  private t = 0;
+  private floor = Infinity;
+  private voiced = 0;
+  private quiet = 0;
+  push(data: Float32Array, rate: number): boolean {
+    let sum = 0;
+    for (const v of data) sum += v * v;
+    const rms = Math.sqrt(sum / Math.max(1, data.length));
+    const dt = data.length / rate;
+    this.t += dt;
+    if (this.t < 0.3) this.floor = Math.min(this.floor, rms);
+    const floor = Number.isFinite(this.floor) ? this.floor : 0;
+    if (rms > Math.max(0.02, floor * 3)) {
+      this.voiced += dt;
+      this.quiet = 0;
+    } else if (rms < Math.max(0.012, floor * 1.8)) {
+      this.quiet += dt;
+    }
+    return this.voiced > 0.15 && this.quiet > 0.9;
+  }
+}
+
 /** Records one take automatically, for the same length as everyone else, then sends it. */
 function RecordStage({ room, mic, setMic }: { room: RoomSnapshot; mic: MicState; setMic: (m: MicState) => void }) {
   const store = useStore();
@@ -172,10 +199,12 @@ function RecordStage({ room, mic, setMic }: { room: RoomSnapshot; mic: MicState;
     stopPlayback();
     setState('recording');
     traceRef.current = new LiveTrace();
+    const vad = new VoiceStop();
     recRef.current = await record(
       round.maxTakeSec,
       (data, rate) => {
         if (traceRef.current.push(data, rate)) setTrace([...traceRef.current.points]);
+        if (vad.push(data, rate)) void finish();
       },
       () => void finish(),
     );
@@ -214,7 +243,7 @@ function RecordStage({ room, mic, setMic }: { room: RoomSnapshot; mic: MicState;
         <>
           <span className="rec-dot" aria-hidden="true" />
           <p className="stage__big">Recording — copy it!</p>
-          <p className="muted small">Follow the line. Your voice shows up in green.</p>
+          <p className="muted small">It stops by itself when you go quiet. Your voice shows in green.</p>
         </>
       ) : state === 'sending' ? (
         <p className="stage__big">Scoring your copy…</p>

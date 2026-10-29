@@ -1,6 +1,6 @@
 // The sound library: categories and clips. `npm run build` writes it to dist/mimic/library (see
-// scripts/build-library.mjs), including recordings dropped into mimic/sounds/<category>/. Without a build
-// (tests, dev) the built-in synthesized clips are read straight from mimic/sounds.
+// scripts/build-library.mjs): the myinstants sounds listed in mimic/sounds/sources.json plus any files
+// dropped into mimic/sounds/<category>/.
 import { randomInt } from 'crypto';
 import fs from 'fs';
 import path from 'path';
@@ -11,7 +11,7 @@ import { clipDuration, renderClip } from '../shared/synth';
 import type { CategoryInfo, Clip, RoomSettings } from '../shared/types';
 import { makeReference, type Reference, SCORE_RATE } from './audio-score';
 
-export const MIN_CLIPS = 100;
+export const MIN_CLIPS = 10;
 export const MAX_CLIP_SEC = 6;
 
 const EventSchema = z
@@ -75,23 +75,19 @@ export function validateLibrary(data: unknown, recordings = new Map<string, Floa
   return { categories: used, clips, recordings };
 }
 
-/** Reads the built library from `dir` (library.json + refs/), or the synthesized clips if there's no build. */
+/** Reads the built library from `dir` (library.json + refs/). */
 export function readLibrary(dir: string): Library {
   const file = path.join(dir, 'library.json');
-  if (fs.existsSync(file)) {
-    const data = JSON.parse(fs.readFileSync(file, 'utf8')) as { clips?: { id: string; audio?: string }[] };
-    const recordings = new Map<string, Float32Array>();
-    for (const c of data.clips ?? []) {
-      if (!c.audio) continue;
-      const buf = fs.readFileSync(path.join(dir, 'refs', `${c.id}.pcm`));
-      const copy = new Uint8Array(buf);
-      recordings.set(c.id, int16ToFloat(new Int16Array(copy.buffer, 0, copy.byteLength >> 1)));
-    }
-    return validateLibrary(data, recordings);
+  if (!fs.existsSync(file)) throw new Error(`Mimic has no sound library at ${dir}. Run: npm run build`);
+  const data = JSON.parse(fs.readFileSync(file, 'utf8')) as { clips?: { id: string; audio?: string }[] };
+  const recordings = new Map<string, Float32Array>();
+  for (const c of data.clips ?? []) {
+    if (!c.audio) continue;
+    const buf = fs.readFileSync(path.join(dir, 'refs', `${c.id}.pcm`));
+    const copy = new Uint8Array(buf);
+    recordings.set(c.id, int16ToFloat(new Int16Array(copy.buffer, 0, copy.byteLength >> 1)));
   }
-  const src = path.join(__dirname, '..', 'sounds');
-  const read = (f: string): unknown => JSON.parse(fs.readFileSync(path.join(src, f), 'utf8'));
-  return validateLibrary({ categories: read('categories.json'), clips: read('synth.json') });
+  return validateLibrary(data, recordings);
 }
 
 let cached: Library | null = null;

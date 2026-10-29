@@ -9,7 +9,7 @@ import { Server } from 'socket.io';
 import { MAX_RECORDING_BYTES, SOCKET_PATH } from '../shared/constants';
 import type { ClientToServerEvents, ServerToClientEvents, SocketData } from '../shared/types';
 import { log } from './log';
-import { loadLibrary } from './sounds';
+import { type Library, loadLibrary } from './sounds';
 import { type HandlerOptions, type MimicServer, registerMimicHandlers } from './socket-handlers';
 
 export interface MimicOptions extends HandlerOptions {
@@ -19,6 +19,8 @@ export interface MimicOptions extends HandlerOptions {
   allowedOrigins?: string[];
   /** Built sound library (library.json + refs/). Defaults to dist/mimic/library. */
   libraryDir?: string;
+  /** An already-loaded library (tests). */
+  library?: Library;
   /** Trust X-Forwarded-For for the client IP (on Render this is the real visitor). */
   trustProxy?: boolean;
 }
@@ -47,7 +49,7 @@ function originAllowed(origin: string | undefined, host: string | undefined, all
 }
 
 export function attachMimic(httpServer: HttpServer, options: MimicOptions = {}): MimicHandle {
-  const lib = loadLibrary(options.libraryDir); // throws with a clear message if the library is broken
+  const lib = options.library ?? loadLibrary(options.libraryDir); // throws with a clear message if missing or broken
   const clientDir = options.clientDir ?? path.join(__dirname, '..', 'client');
   const allowed = options.allowedOrigins ?? (process.env.MIMIC_ALLOWED_ORIGINS ?? '').split(',').map(s => s.trim()).filter(Boolean);
   const trustProxy = options.trustProxy ?? (process.env.TRUST_PROXY === '1' || !!process.env.RENDER);

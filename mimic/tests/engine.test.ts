@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { COUNTDOWN_MS, LISTEN_LEAD_MS, LISTEN_TAIL_MS, MAX_PLAYERS, POINTS, UPLOAD_GRACE_MS } from '../shared/constants';
+import { COUNTDOWN_MS, LISTEN_TAIL_MS, listenLeadMs, MAX_PLAYERS, POINTS, UPLOAD_GRACE_MS } from '../shared/constants';
 import { DEFAULT_TIMING } from '../server/game-engine';
 import { roundPoints } from '../server/scoring';
 import { makeRoom, pcmOf, silence, TIMING } from './helpers';
@@ -57,7 +57,7 @@ describe('a round', () => {
     room.start('p1');
     const s = room.snapshot();
     expect(s.phase).toBe('listen');
-    expect(s.round!.clip.events!.length).toBeGreaterThan(0);
+    expect(s.round!.clip.audio).toMatch(/^sounds\//);
     expect(JSON.stringify(s)).not.toContain(`"name":"${clip().name}"`);
     clock.advance(TIMING.listenMs!);
     expect(room.snapshot().phase).toBe('record');
@@ -155,7 +155,7 @@ describe('categories and visibility', () => {
   it('lists the library categories with their sound counts', () => {
     const { room } = makeRoom(2);
     const cats = room.snapshot().categories;
-    expect(cats.map(c => c.id)).toEqual(['melody', 'glide', 'rhythm', 'fx']);
+    expect(cats.map(c => c.id)).toEqual(['melody', 'glide', 'rhythm', 'fx']); // the test library's categories
     expect(cats.every(c => c.count > 0 && c.label && c.emoji)).toBe(true);
   });
   it('is private until the host makes it public', () => {
@@ -172,7 +172,7 @@ describe('fair timing', () => {
     const { room, clock, clip } = makeRoom(2, DEFAULT_TIMING);
     room.start('p1');
     const listen = room.snapshot().round!;
-    const listenMs = Math.round(LISTEN_LEAD_MS + clip().duration * 1000 + LISTEN_TAIL_MS + COUNTDOWN_MS);
+    const listenMs = Math.round(listenLeadMs(clip()) + clip().duration * 1000 + LISTEN_TAIL_MS + COUNTDOWN_MS);
     expect(listen.phaseEndsAt - listen.phaseStartedAt).toBe(listenMs);
     clock.advance(listenMs);
     const rec = room.snapshot().round!;

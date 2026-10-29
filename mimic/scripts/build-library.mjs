@@ -1,14 +1,15 @@
 // Builds Mimic's sound library into dist/mimic (runs as part of `npm run build`).
 //
-//   mimic/sounds/categories.json      names, emoji and hints for categories
-//   mimic/sounds/synth.json           the built-in synthesized clips (from build-sounds.mjs)
-//   mimic/sounds/<category>/*.mp3     your own recordings (.mp3 or .wav), one folder per category
+//   mimic/sounds/sources.json         categories (name, emoji, hint) and their sounds on myinstants.com;
+//                                     refresh with scripts/fetch-myinstants.mjs. The audio is downloaded here,
+//                                     at build time, into mimic/sounds/.cache (never committed).
+//   mimic/sounds/<category>/*.mp3     extra sounds of your own (.mp3 or .wav), one folder per category
 //
 // Each recording is decoded, mixed to mono, trimmed of silence at both ends, capped at MAX_SEC and
 // normalised. The server scores against a 12 kHz copy (library/refs/<id>.pcm); browsers play a 22 kHz WAV
 // (client/sounds/<id>.wav), so everyone hears exactly the processed clip the scores are based on.
 // A category shows up in the game only once it has at least one sound.
-import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -144,53 +145,85 @@ const nameOf = file =>
     .trim()
     .slice(0, 40) || 'Sound';
 
-export async function buildLibrary({ soundsDir, outDir, publicDir, log = console.log }) {
-  const metas = JSON.parse(readFileSync(path.join(soundsDir, 'categories.json'), 'utf8'));
-  const synth = JSON.parse(readFileSync(path.join(soundsDir, 'synth.json'), 'utf8'));
+/** Downloads a URL into the cache once; later builds reuse the file. */
+async function cached(url, cacheDir) {
+  const file = path.join(cacheDir, slug(url.replace(/^https?:\/\/[^/]+/, '')) + path.extname(new URL(url).pathname));
+  if (existsSync(file)) return readFileSync(file);
+  const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (Mimic build)' } });
+  if (!res.ok) throw new Error(`download failed (HTTP ${res.status})`);
+  const buf = Buffer.from(await res.arrayBuffer());
+  if (buf.length > 5_000_000) throw new Error('file too big');
+  mkdirSync(cacheDir, { recursive: true });
+  writeFileSync(file, buf);
+  return buf;
+}
+
+/** Runs `fn` over `items` with at most `n` at a time, keeping the order of results. */
+async function pool(items, n, fn) {
+  const out = new Array(items.length);
+  let next = 0;
+  await Promise.all(
+    Array.from({ length: Math.min(n, items.length) }, async () => {
+      while (next < items.length) {
+        const i = next++;
+        out[i] = await fn(items[i], i);
+      }
+    }),
+  );
+  return out;
+}
+
+export async function buildLibrary({ soundsDir, outDir, publicDir, cacheDir = path.join(soundsDir, '.cache'), log = console.log }) {
+  const sourcesFile = path.join(soundsDir, 'sources.json');
+  const sources = existsSync(sourcesFile) ? JSON.parse(readFileSync(sourcesFile, 'utf8')) : [];
   mkdirSync(path.join(outDir, 'refs'), { recursive: true });
   mkdirSync(path.join(publicDir, 'sounds'), { recursive: true });
 
-  const clips = synth.map(c => ({ ...c }));
-  const ids = new Set(clips.map(c => c.id));
+  const clips = [];
+  const ids = new Set();
+  const metas = sources.map(({ sounds: _s, ...meta }) => meta);
   const known = new Set(metas.map(m => m.id));
-  const extraCats = [];
 
+  /** Decode, trim, write the scoring and playback copies, and add the clip. */
+  const add = (category, name, label, buf, isWav) =>
+    (async () => {
+      const decoded = isWav ? decodeWav(buf) : await decodeMp3(buf);
+      const { samples, rate, trimmed } = prepare(decoded);
+      const base = `${category}-${slug(name)}`;
+      let id = base;
+      for (let k = 2; ids.has(id); k++) id = `${base}-${k}`;
+      ids.add(id);
+      const ref = resample(samples, rate, SCORE_RATE);
+      const pcm = Buffer.alloc(ref.length * 2);
+      for (let i = 0; i < ref.length; i++) pcm.writeInt16LE(Math.round(Math.max(-1, Math.min(1, ref[i])) * 32767), i * 2);
+      writeFileSync(path.join(outDir, 'refs', `${id}.pcm`), pcm);
+      writeWav(path.join(publicDir, 'sounds', `${id}.wav`), resample(samples, rate, PLAY_RATE), PLAY_RATE);
+      clips.push({ id, name: name.slice(0, 40) || 'Sound', category, audio: `sounds/${id}.wav`, duration: +(samples.length / rate).toFixed(3) });
+      if (trimmed) log(`  ${label}: longer than ${MAX_SEC}s, only the first ${MAX_SEC}s is used`);
+    })().catch(e => log(`  skipped ${label}: ${e.message}`));
+
+  // Sounds listed in sources.json (from myinstants), downloaded at build time.
+  for (const cat of sources) {
+    const files = await pool(cat.sounds, 6, s => cached(s.url, cacheDir).catch(e => (log(`  skipped ${cat.id}/${s.name}: ${e.message}`), null)));
+    for (const [i, s] of cat.sounds.entries()) if (files[i]) await add(cat.id, s.name, `${cat.id}/${s.name}`, files[i], /\.wav$/i.test(s.url));
+  }
+
+  // Your own files dropped into mimic/sounds/<category>/.
   for (const dir of readdirSync(soundsDir).sort()) {
     const full = path.join(soundsDir, dir);
-    if (!statSync(full).isDirectory()) continue;
+    if (dir.startsWith('.') || !statSync(full).isDirectory()) continue;
     const category = slug(dir);
     if (!known.has(category)) {
       known.add(category);
-      extraCats.push({ id: category, label: dir.replace(/[_-]+/g, ' ').replace(/^./, c => c.toUpperCase()), emoji: '🔊', hint: 'Copy the sound' });
+      metas.push({ id: category, label: dir.replace(/[_-]+/g, ' ').replace(/^./, c => c.toUpperCase()), emoji: '🔊', hint: 'Copy the sound' });
     }
-    for (const file of readdirSync(full).sort()) {
-      if (!AUDIO.test(file)) continue;
-      const src = path.join(full, file);
-      try {
-        const buf = readFileSync(src);
-        const decoded = /\.wav$/i.test(file) ? decodeWav(buf) : await decodeMp3(buf);
-        const { samples, rate, trimmed } = prepare(decoded);
-        let id = `${category}-${slug(path.basename(file, path.extname(file)))}`;
-        for (let k = 2; ids.has(id); k++) id = `${category}-${slug(path.basename(file, path.extname(file)))}-${k}`;
-        ids.add(id);
-        const ref = resample(samples, rate, SCORE_RATE);
-        const pcm = Buffer.alloc(ref.length * 2);
-        for (let i = 0; i < ref.length; i++) pcm.writeInt16LE(Math.round(Math.max(-1, Math.min(1, ref[i])) * 32767), i * 2);
-        writeFileSync(path.join(outDir, 'refs', `${id}.pcm`), pcm);
-        writeWav(path.join(publicDir, 'sounds', `${id}.wav`), resample(samples, rate, PLAY_RATE), PLAY_RATE);
-        clips.push({ id, name: nameOf(file), category, audio: `sounds/${id}.wav`, duration: +(samples.length / rate).toFixed(3) });
-        if (trimmed) log(`  ${dir}/${file}: longer than ${MAX_SEC}s, only the first ${MAX_SEC}s is used`);
-      } catch (e) {
-        log(`  skipped ${dir}/${file}: ${e.message}`);
-      }
-    }
+    for (const file of readdirSync(full).sort())
+      if (AUDIO.test(file)) await add(category, nameOf(file), `${dir}/${file}`, readFileSync(path.join(full, file)), /\.wav$/i.test(file));
   }
 
   const counts = new Map();
   for (const c of clips) counts.set(c.category, (counts.get(c.category) ?? 0) + 1);
-  const categories = [...metas, ...extraCats].filter(m => counts.get(m.id)).map(m => ({ ...m, count: counts.get(m.id) }));
-  const orphan = clips.find(c => !categories.some(m => m.id === c.category));
-  if (orphan) throw new Error(`clip ${orphan.id} has category "${orphan.category}" with no entry in categories.json`);
+  const categories = metas.filter(m => counts.get(m.id)).map(m => ({ ...m, count: counts.get(m.id) }));
   writeFileSync(path.join(outDir, 'library.json'), JSON.stringify({ categories, clips }));
   return { categories, clips };
 }

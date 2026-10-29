@@ -1,9 +1,0 @@
-[
-  { "id": "melody", "label": "Hum it", "emoji": "🎵", "hint": "Hum or whistle the tune" },
-  { "id": "glide", "label": "Sirens & swoops", "emoji": "🚨", "hint": "Follow the pitch up and down" },
-  { "id": "rhythm", "label": "Clap it", "emoji": "👏", "hint": "Clap or tap the beat" },
-  { "id": "fx", "label": "Sound effects", "emoji": "💥", "hint": "Make the noise with your voice" },
-  { "id": "hindi", "label": "Hindi", "emoji": "🇮🇳", "hint": "Say it exactly like the clip" },
-  { "id": "nepali", "label": "Nepali", "emoji": "🇳🇵", "hint": "Say it exactly like the clip" },
-  { "id": "trendy", "label": "Trending", "emoji": "🔥", "hint": "Copy the meme sound" }
-]

@@ -1,10 +1,12 @@
 import { RECORDING_RATE } from '../shared/constants';
 import { floatToInt16 } from '../shared/dsp';
-import { type ClipSpec, renderClip, type Wave } from '../shared/synth';
+import fs from 'fs';
+import path from 'path';
+import { type ClipEvent, type ClipSpec, clipDuration, renderClip, type Wave } from '../shared/synth';
 import type { RoomSnapshot } from '../shared/types';
 import type { Clock, RoomListener, Timing } from '../server/game-engine';
 import { Room } from '../server/game-engine';
-import { loadLibrary } from '../server/sounds';
+import { validateLibrary } from '../server/sounds';
 
 /** Manual clock: timers only fire when the test advances time. */
 export class FakeClock implements Clock {
@@ -39,8 +41,20 @@ export class Recorder implements RoomListener {
   state = (room: Room): void => void this.states.push(room.snapshot());
 }
 
-/** The built-in synthesized library (tests never need a build). */
-export const library = loadLibrary();
+/**
+ * A test library: synthesized clips stored as "recordings", like the real (downloaded) library. Their event
+ * lists are kept so tests can make good and bad imitations of each one.
+ */
+const fixture = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'synth.json'), 'utf8')) as { id: string; name: string; category: string; events: ClipEvent[] }[];
+const specs = new Map(fixture.map(c => [c.id, { events: c.events }]));
+export const specOf = (id: string): ClipSpec => specs.get(id)!;
+export const library = validateLibrary(
+  {
+    categories: [...new Set(fixture.map(c => c.category))].map(id => ({ id, label: id[0]!.toUpperCase() + id.slice(1), emoji: '🔊', hint: 'Copy it' })),
+    clips: fixture.map(c => ({ id: c.id, name: c.name, category: c.category, audio: `sounds/${c.id}.wav`, duration: clipDuration(c) })),
+  },
+  new Map(fixture.map(c => [c.id, renderClip(c, RECORDING_RATE)])),
+);
 export const clips = library.clips;
 export const TIMING: Timing = { listenMs: 5000, recordMs: 20_000, resultsMs: 8000 };
 
@@ -90,7 +104,7 @@ export function makeRoom(n: number, timing: Timing = TIMING) {
     ids.push(id);
   }
   const clip = () => clips.find(c => c.id === room.snapshot().round!.clip.id)!;
-  const goodTake = () => pcmOf(imitate({ events: clip().events! }));
+  const goodTake = () => pcmOf(imitate(specOf(clip().id)));
   const score = (id: string): number => room.players.get(id)!.score;
   /** Start the match and move into the record phase of round 1. */
   const startRecording = () => {

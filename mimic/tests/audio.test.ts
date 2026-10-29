@@ -7,9 +7,10 @@ import { MAX_TAKE_SEC, RECORDING_RATE } from '../shared/constants';
 import { floatToInt16, int16ToFloat, resample } from '../shared/dsp';
 import { type ClipSpec, renderClip, type Wave } from '../shared/synth';
 import { buildLibrary } from '../scripts/build-library.mjs';
+import type { CategoryInfo, Clip } from '../shared/types';
 import { makeReference, scoreImitation } from '../server/audio-score';
-import { eligibleClips, maxTakeSec, MIN_CLIPS, pickClip, readLibrary, referenceFor, validateLibrary } from '../server/sounds';
-import { clips, imitate, library } from './helpers';
+import { eligibleClips, maxTakeSec, MIN_CLIPS, pickClip, referenceFor, validateLibrary } from '../server/sounds';
+import { clips, imitate, library, specOf } from './helpers';
 
 const R = RECORDING_RATE;
 const notes = (fs: number[], gap = 0.28): ClipSpec => ({ events: fs.map((f, i) => ({ t: i * gap, d: gap - 0.03, wave: 'triangle' as Wave, f })) });
@@ -77,15 +78,15 @@ describe('clip library', () => {
     for (const c of clips) {
       expect(c.duration).toBeLessThanOrEqual(4);
       expect(maxTakeSec(c)).toBeLessThanOrEqual(MAX_TAKE_SEC);
-      if (scoreImitation(referenceFor(c), imitate({ events: c.events! }, 0.75, 1.1), R).score < 60) low++;
+      if (scoreImitation(referenceFor(c, library), imitate(specOf(c.id), 0.75, 1.1), R).score < 60) low++;
     }
     expect(low / clips.length).toBeLessThan(0.1);
   });
 
   it('fails loudly on a broken library', () => {
     const categories = library.categories;
-    const base = clips.map(c => ({ id: c.id, name: c.name, category: c.category, events: c.events }));
-    expect(() => validateLibrary({ categories, clips: base.slice(0, 10) })).toThrow(/at least/);
+    const base = clips.map(c => ({ id: c.id, name: c.name, category: c.category, events: specOf(c.id).events }));
+    expect(() => validateLibrary({ categories, clips: base.slice(0, MIN_CLIPS - 1) })).toThrow(/at least/);
     expect(() => validateLibrary({ categories, clips: [...base, { ...base[0]! }] })).toThrow(/duplicate id/);
     expect(() => validateLibrary({ categories, clips: [...base.slice(1), { ...base[0]!, category: 'nope' }] })).toThrow(/unknown category/);
     expect(() => validateLibrary({ categories, clips: [...base.slice(1), { ...base[0]!, events: [{ t: 0, d: 9, wave: 'sine', f: 440 }] }] })).toThrow();
@@ -133,9 +134,11 @@ describe('adding your own recordings', () => {
     fs.mkdirSync(path.join(src, 'trendy'), { recursive: true });
     fs.mkdirSync(path.join(src, 'hindi'), { recursive: true }); // empty: must not show up
     fs.mkdirSync(path.join(src, 'bollywood songs'), { recursive: true }); // not in categories.json: gets a default entry
-    const real = path.join(__dirname, '..', 'sounds');
-    fs.copyFileSync(path.join(real, 'categories.json'), path.join(src, 'categories.json'));
-    fs.copyFileSync(path.join(real, 'synth.json'), path.join(src, 'synth.json'));
+    // A category with sounds to download, but no network in tests: its downloads fail and are skipped.
+    fs.writeFileSync(path.join(src, 'sources.json'), JSON.stringify([
+      { id: 'trendy', label: 'Trending', emoji: '🔥', hint: 'Copy the meme', sounds: [{ name: 'Offline', url: 'http://127.0.0.1:9/nope.mp3' }] },
+      { id: 'hindi', label: 'Hindi', emoji: '🇮🇳', hint: 'Say it', sounds: [] },
+    ]));
     // Half a second of silence around a tune, like a real clip.
     const tune = renderClip(samples.melody!, 44100);
     const padded = new Float32Array(tune.length + 44100);
@@ -148,9 +151,13 @@ describe('adding your own recordings', () => {
     const out = path.join(tmp, 'library');
     const pub = path.join(tmp, 'client');
     await buildLibrary({ soundsDir: src, outDir: out, publicDir: pub, log: m => logs.push(m) });
-    const lib = readLibrary(out);
+    // validateLibrary wants MIN_CLIPS; this tiny library is checked through the build result instead.
+    const lib = JSON.parse(fs.readFileSync(path.join(out, 'library.json'), 'utf8')) as { categories: CategoryInfo[]; clips: Clip[] };
+    const pcmFile = (id: string) => path.join(out, 'refs', `${id}.pcm`);
 
-    expect(lib.categories.map(c => c.id)).toEqual(['melody', 'glide', 'rhythm', 'fx', 'trendy', 'bollywood-songs']);
+    expect(lib.categories.map(c => c.id)).toEqual(['trendy', 'bollywood-songs']);
+    expect(lib.categories[0]).toMatchObject({ label: 'Trending', emoji: '🔥', count: 1 });
+    expect(logs.some(l => l.includes('Offline'))).toBe(true);
     expect(lib.categories.find(c => c.id === 'bollywood-songs')).toMatchObject({ label: 'Bollywood songs', count: 1 });
     const clip = lib.clips.find(c => c.category === 'trendy')!;
     expect(clip).toMatchObject({ id: 'trendy-kya-baat-hai', name: 'Kya Baat Hai', audio: 'sounds/trendy-kya-baat-hai.wav' });
@@ -160,7 +167,9 @@ describe('adding your own recordings', () => {
     expect(fs.existsSync(path.join(pub, clip.audio!))).toBe(true);
     expect(logs.some(l => l.includes('broken.mp3'))).toBe(true);
     // Scored against the recording: a good copy scores well, silence doesn't.
-    expect(scoreImitation(referenceFor(clip, lib), imitate(samples.melody!), R).score).toBeGreaterThanOrEqual(70);
+    const ref = fs.readFileSync(pcmFile(clip.id));
+    const refSamples = new Float32Array(ref.length / 2).map((_, i) => ref.readInt16LE(i * 2) / 32768);
+    expect(scoreImitation(makeReference(refSamples, R), imitate(samples.melody!), R).score).toBeGreaterThanOrEqual(70);
     fs.rmSync(tmp, { recursive: true, force: true });
   });
 });
