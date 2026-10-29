@@ -90,6 +90,9 @@ export function Game({ room }: { room: RoomSnapshot }) {
   );
 }
 
+/** Rounds whose sound this page has already played. */
+const played = new Set<string>();
+
 /** Plays the clip exactly once, at the same moment for everyone, then counts down 3-2-1. */
 function Listen({ room, mic }: { room: RoomSnapshot; mic: MicState }) {
   const store = useStore();
@@ -110,9 +113,16 @@ function Listen({ room, mic }: { room: RoomSnapshot; mic: MicState }) {
         const ok = await unlock();
         if (cancelled) return;
         if (!ok) return setBlocked(true);
-        // If it finished downloading late it still plays, right away, so nobody misses the sound.
+        // If it finished downloading late it still plays, right away, so nobody misses the sound. But only
+        // once per round: the screen can be shown again (reconnect, re-render) and must not replay it.
+        const key = `${room.code}:${roundKey(room)}:${round.clip.id}`;
+        if (played.has(key)) return;
         const delay = playAt - store.serverNow();
-        timer = setTimeout(() => void playClip(round.clip), Math.max(0, delay));
+        timer = setTimeout(() => {
+          if (cancelled || played.has(key)) return;
+          played.add(key);
+          void playClip(round.clip);
+        }, Math.max(0, delay));
       })
       .catch(() => {});
     return () => {
@@ -120,7 +130,7 @@ function Listen({ room, mic }: { room: RoomSnapshot; mic: MicState }) {
       clearTimeout(timer);
       stopPlayback();
     };
-  }, [round.clip.id, round.loading, round.number, playAt, store]);
+  }, [room.code, round.clip.id, round.loading, round.number, playAt, store]);
 
   const t = (now - playAt) / 1000;
   const playing = t >= 0 && t <= dur;

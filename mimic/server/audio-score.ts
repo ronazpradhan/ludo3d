@@ -29,6 +29,8 @@ export interface Features {
   /** seconds between the first and last loud moment */
   activeSec: number;
   peakDb: number;
+  /** seconds that stand clearly above the room's background noise (a voice right at the mic does; hiss doesn't) */
+  loudSec: number;
   /** voice tone per point: 12 mel-cepstral coefficients, mean-normalised (so mic and volume don't matter) */
   mfcc: number[][];
 }
@@ -167,6 +169,20 @@ function stretch<T>(xs: T[], n: number): T[] {
   return Array.from({ length: n }, (_, i) => xs[Math.min(xs.length - 1, Math.floor((i * xs.length) / n))]!);
 }
 
+/** How far above the room's noise a sound must be to count as someone making it. The mic's auto-gain turns
+ * silence into loud hiss, and a voice from across the room only just clears the noise; a real attempt at
+ * the mic is 25+ dB over it. */
+const LOUD_OVER_NOISE_DB = 16;
+/** A take needs at least this much clear sound to be scored at all. */
+const MIN_LOUD_SEC = 0.2;
+
+/** A sound that fills the whole take at an even level (a held note, a siren) has no quiet moment to measure the
+ * room against. It counts when it has a clear pitch: the hiss of an auto-gain mic in a silent room has none. */
+function steadyPitched(db: number[], voicedRatio: number): boolean {
+  const mid = median(db);
+  return voicedRatio >= 0.6 && db.filter(v => Math.abs(v - mid) < 8).length >= 0.9 * db.length;
+}
+
 export function extractFeatures(samples: Float32Array, rate: number): Features {
   const x = resample(samples, rate, SCORE_RATE);
   const frames = x.length >= FRAME ? Math.floor((x.length - FRAME) / HOP) + 1 : 0;
@@ -179,6 +195,8 @@ export function extractFeatures(samples: Float32Array, rate: number): Features {
   const peakDb = db.length ? Math.max(...db) : -120;
   // Loud-enough threshold: below the peak, but clearly above the room's background noise.
   const noiseDb = [...db].sort((a, b) => a - b)[Math.floor(db.length * 0.1)] ?? -120;
+  // The quietest moments: even a take that is sound almost throughout has a breath of quiet at the start or end.
+  const quietestDb = [...db].sort((a, b) => a - b)[Math.floor(db.length * 0.03)] ?? -120;
   const floor = Math.max(peakDb - 30, Math.min(noiseDb + 10, peakDb - 12), -55);
   const first = db.findIndex(v => v > floor);
   let last = -1;
@@ -187,7 +205,7 @@ export function extractFeatures(samples: Float32Array, rate: number): Features {
       last = i;
       break;
     }
-  if (first < 0 || last < first) return { env: [], semis: [], voicedRatio: 0, onsets: [], quietRatio: 0, activeSec: 0, peakDb, mfcc: [] };
+  if (first < 0 || last < first) return { env: [], semis: [], voicedRatio: 0, onsets: [], quietRatio: 0, activeSec: 0, peakDb, loudSec: 0, mfcc: [] };
 
   const env: number[] = [];
   const pitch: (number | null)[] = [];
@@ -227,6 +245,7 @@ export function extractFeatures(samples: Float32Array, rate: number): Features {
     quietRatio: env.filter((_, i) => db[first + i]! < quietDb).length / env.length,
     activeSec: ((last - first) * HOP + FRAME) / SCORE_RATE,
     peakDb,
+    loudSec: steadyPitched(db, voiced.length / pitch.length) ? ((last - first) * HOP + FRAME) / SCORE_RATE : (db.filter(v => v > quietestDb + LOUD_OVER_NOISE_DB).length * HOP) / SCORE_RATE,
     mfcc,
   };
 }
@@ -392,7 +411,7 @@ export function scoreImitation(ref: Reference, imitation: Float32Array, rate: nu
   const imiSamples = resample(imitation, rate, SCORE_RATE);
   const imi = extractFeatures(imiSamples, SCORE_RATE);
   const zero: Scored['parts'] = { tone: 0, rhythm: 0, melody: null, length: 0 };
-  if (imi.peakDb < -50 || imi.activeSec < 0.12) return { score: 0, verdict: 'silent', parts: zero };
+  if (imi.peakDb < -50 || imi.activeSec < 0.12 || imi.loudSec < MIN_LOUD_SEC) return { score: 0, verdict: 'silent', parts: zero };
   if (looksLikeReplay(ref.samples, imiSamples)) return { score: 0, verdict: 'replay', parts: zero };
   const { raw, parts } = compare(ref, imi);
   // Place the take between "unrelated sound" (about 10) and "clean copy of this sound" (about 95). Every real

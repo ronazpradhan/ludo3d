@@ -190,3 +190,34 @@ describe('adding your own recordings', () => {
     fs.rmSync(tmp, { recursive: true, force: true });
   });
 });
+
+describe('silent takes', () => {
+  const R = RECORDING_RATE;
+  const noise = (sec: number, amp: number, seed = 7) => {
+    const out = new Float32Array(Math.floor(sec * R));
+    for (let i = 0; i < out.length; i++) {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      out[i] = ((seed / 0x7fffffff) * 2 - 1) * amp;
+    }
+    return out;
+  };
+  const ref = () => referenceFor(clips[0]!, library);
+
+  it('scores hiss from an auto-gain mic as silent, however loud it is', () => {
+    for (const amp of [0.01, 0.1, 0.4]) expect(scoreImitation(ref(), noise(4, amp), R).verdict).toBe('silent');
+  });
+  it('scores a voice from across the room as silent', () => {
+    const take = noise(4, 0.05);
+    const voice = imitate(specOf(clips[0]!.id));
+    for (let i = 0; i < voice.length && i < take.length; i++) take[i]! += voice[i]! * 0.04;
+    expect(scoreImitation(ref(), take, R).verdict).toBe('silent');
+  });
+  it('still scores a real copy in a noisy room', () => {
+    for (const c of clips.slice(0, 6)) {
+      const voice = imitate(specOf(c.id));
+      const take = noise(voice.length / R, 0.04);
+      for (let i = 0; i < voice.length; i++) take[i]! += voice[i]!;
+      expect(scoreImitation(referenceFor(c, library), take, R).verdict).toBe('ok');
+    }
+  });
+});
