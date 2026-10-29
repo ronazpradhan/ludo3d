@@ -132,25 +132,24 @@ export function PlayerChip({ p, hostId, meId, right }: { p: PublicPlayer; hostId
   );
 }
 
-export function Scoreboard({ players, hostId, meId, highlight, done }: { players: PublicPlayer[]; hostId: string; meId?: string | undefined; highlight?: Map<string, number>; done?: string[] }) {
+const MEDALS = ['🥇', '🥈', '🥉'];
+
+/** Ranked scores. Your own row is highlighted instead of tagged, so long names still fit. */
+export function Scoreboard({ players, meId, highlight, done }: { players: PublicPlayer[]; hostId?: string; meId?: string | undefined; highlight?: Map<string, number>; done?: string[] }) {
   const sorted = [...players].sort((a, b) => b.score - a.score);
   return (
     <ol className="scoreboard" aria-label="Scores">
       {sorted.map((p, i) => (
-        <li key={p.id} className="scoreboard__row">
-          <span className="scoreboard__rank">{i + 1}</span>
-          <PlayerChip
-            p={p}
-            hostId={hostId}
-            meId={meId}
-            right={
-              <span className="scoreboard__pts">
-                {done?.includes(p.id) ? <span className="done" title="Take sent">✓</span> : null}
-                {highlight?.get(p.id) ? <span className="delta">+{highlight.get(p.id)}</span> : null}
-                {p.score}
-              </span>
-            }
-          />
+        <li key={p.id} className={'scoreboard__row' + (p.id === meId ? ' is-me' : '') + (p.connected ? '' : ' is-away')}>
+          <span className="scoreboard__rank" aria-label={`Place ${i + 1}`}>{p.score > 0 && i < 3 ? MEDALS[i] : i + 1}</span>
+          <Avatar id={p.avatar} size={32} dim={!p.connected} />
+          <span className="scoreboard__name">
+            {p.nickname}
+            {p.id === meId && <span className="sr-only"> (you)</span>}
+          </span>
+          {done?.includes(p.id) && <span className="done" title="Take sent" aria-label="take sent">✓</span>}
+          {highlight?.get(p.id) ? <span className="delta">+{highlight.get(p.id)}</span> : null}
+          <span className="scoreboard__pts">{p.score}</span>
         </li>
       ))}
     </ol>

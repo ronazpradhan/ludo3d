@@ -54,7 +54,21 @@ export function Game({ room }: { room: RoomSnapshot }) {
   return (
     <div className="game">
       <header className="game__head">
-        <span className="eyebrow">Round {round.number} of {round.total}</span>
+        <div className="progress" aria-label={`Round ${round.number} of ${round.total}`}>
+          <span className="progress__label">Round {round.number}<span className="muted">/{round.total}</span></span>
+          <span className="progress__bar" aria-hidden="true">
+            {Array.from({ length: round.total }, (_, i) => (
+              <i key={i} className={i < round.number - 1 ? 'is-done' : i === round.number - 1 ? 'is-now' : ''} />
+            ))}
+          </span>
+        </div>
+        <ol className="steps" aria-label="This round">
+          {(['listen', 'record', 'results'] as const).map((p, i) => (
+            <li key={p} className={room.phase === p ? 'is-now' : ['listen', 'record', 'results'].indexOf(room.phase) > i ? 'is-done' : ''}>
+              {['👂 Listen', '🎙️ Copy', '🏆 Scores'][i]}
+            </li>
+          ))}
+        </ol>
         <span className="pill">{categoryOf(room, round.clip.category)?.emoji} {categoryOf(room, round.clip.category)?.label ?? round.clip.category}</span>
       </header>
       {room.phase === 'results' ? (

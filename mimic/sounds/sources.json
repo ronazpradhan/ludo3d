@@ -1,5 +1,1873 @@
 [
  {
+  "id": "memes",
+  "label": "Memes",
+  "emoji": "😂",
+  "hint": "Copy the meme sound",
+  "sounds": [
+   {
+    "name": "FAAAH",
+    "url": "https://www.myinstants.com/media/sounds/faaah.mp3"
+   },
+   {
+    "name": "Chicken on tree screaming",
+    "url": "https://www.myinstants.com/media/sounds/chicken-on-tree-screaming.mp3"
+   },
+   {
+    "name": "Are baap re yaad aya",
+    "url": "https://www.myinstants.com/media/sounds/are-baap-re-yaad-aya.mp3"
+   },
+   {
+    "name": "Dexter meme",
+    "url": "https://www.myinstants.com/media/sounds/dexter-meme.mp3"
+   },
+   {
+    "name": "Oh My God Meme",
+    "url": "https://www.myinstants.com/media/sounds/oh-my-god-meme.mp3"
+   },
+   {
+    "name": "Du bist gut genug",
+    "url": "https://www.myinstants.com/media/sounds/du-bist-gut-genug.mp3"
+   },
+   {
+    "name": "cat laugh meme 1",
+    "url": "https://www.myinstants.com/media/sounds/cat-laugh-meme-1.mp3"
+   },
+   {
+    "name": "Aayein Meme",
+    "url": "https://www.myinstants.com/media/sounds/aayein-meme.mp3"
+   },
+   {
+    "name": "Chicken tree scream",
+    "url": "https://www.myinstants.com/media/sounds/chicken-tree-scream_3fBuCLP.mp3"
+   },
+   {
+    "name": "baby laughing meme",
+    "url": "https://www.myinstants.com/media/sounds/baby-laughing-meme.mp3"
+   },
+   {
+    "name": "BRUH",
+    "url": "https://www.myinstants.com/media/sounds/movie_1.mp3"
+   },
+   {
+    "name": "CID LE MDC",
+    "url": "https://www.myinstants.com/media/sounds/cid-le-mdc.mp3"
+   },
+   {
+    "name": "Depression indian !",
+    "url": "https://www.myinstants.com/media/sounds/depression-indian.mp3"
+   },
+   {
+    "name": "Ki kore",
+    "url": "https://www.myinstants.com/media/sounds/ki-kore.mp3"
+   },
+   {
+    "name": "Rizzbot laugh",
+    "url": "https://www.myinstants.com/media/sounds/rizzbot-laugh.mp3"
+   },
+   {
+    "name": "AAAAAAAAAAAAAAAAAAAA é lutador",
+    "url": "https://www.myinstants.com/media/sounds/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-e-lutador.mp3"
+   },
+   {
+    "name": "EK jhaat bhar ka aadmi ...",
+    "url": "https://www.myinstants.com/media/sounds/ek-jhaat-bhar-ka-aadmi.mp3"
+   },
+   {
+    "name": "Raja gujjar",
+    "url": "https://www.myinstants.com/media/sounds/raja-gujjar.mp3"
+   },
+   {
+    "name": "M e o w ~",
+    "url": "https://www.myinstants.com/media/sounds/m-e-o-w.mp3"
+   },
+   {
+    "name": "spiderman meme song 2.0",
+    "url": "https://www.myinstants.com/media/sounds/spiderman-meme-song-2-0.mp3"
+   },
+   {
+    "name": "YAAAAAAAAY",
+    "url": "https://www.myinstants.com/media/sounds/kids-saying-yay-sound-effect_3.mp3"
+   },
+   {
+    "name": "CID",
+    "url": "https://www.myinstants.com/media/sounds/cid.mp3"
+   },
+   {
+    "name": "Khelega free fire",
+    "url": "https://www.myinstants.com/media/sounds/khelega-free-fire.mp3"
+   },
+   {
+    "name": "sad meow song",
+    "url": "https://www.myinstants.com/media/sounds/sad-meow-song.mp3"
+   },
+   {
+    "name": "*Snore* mimimimimimi",
+    "url": "https://www.myinstants.com/media/sounds/snore-mimimimimimi.mp3"
+   },
+   {
+    "name": "goku drip",
+    "url": "https://www.myinstants.com/media/sounds/drip-goku-meme-song-original-dragon-ball-super-music-clash-of-gods-in-description.mp3"
+   },
+   {
+    "name": "Ayyy ayyy ayyy scream",
+    "url": "https://www.myinstants.com/media/sounds/ayyy-ayyy-ayyy-scream.mp3"
+   },
+   {
+    "name": "Ab tu Gaya beta ab dekh tu (puneet",
+    "url": "https://www.myinstants.com/media/sounds/ab-tu-gaya-beta-ab-dekh-tu-puneet.mp3"
+   },
+   {
+    "name": "Lets Go Meme",
+    "url": "https://www.myinstants.com/media/sounds/lets-go-meme_m93gdas.mp3"
+   },
+   {
+    "name": "squidward walking sound",
+    "url": "https://www.myinstants.com/media/sounds/squidward-walking-sound.mp3"
+   }
+  ]
+ },
+ {
+  "id": "goofy",
+  "label": "Goofy ahh",
+  "emoji": "🤪",
+  "hint": "Go full goofy",
+  "sounds": [
+   {
+    "name": "Goofy Ahh Car Horn",
+    "url": "https://www.myinstants.com/media/sounds/goofy-ahh-car-horn.mp3"
+   },
+   {
+    "name": "goofy scream",
+    "url": "https://www.myinstants.com/media/sounds/goofy-yell_LvAybRd.mp3"
+   },
+   {
+    "name": "goofy ahh runnin",
+    "url": "https://www.myinstants.com/media/sounds/goofy-ahh-runnin.mp3"
+   },
+   {
+    "name": "goofy slip",
+    "url": "https://www.myinstants.com/media/sounds/goofy-slip.mp3"
+   },
+   {
+    "name": "Goofy Bonk",
+    "url": "https://www.myinstants.com/media/sounds/goofy-bonk.mp3"
+   },
+   {
+    "name": "goofy ahh laugh meme",
+    "url": "https://www.myinstants.com/media/sounds/goofy-ahh-laugh-meme.mp3"
+   },
+   {
+    "name": "goofy run sound",
+    "url": "https://www.myinstants.com/media/sounds/goofy-run-sound.mp3"
+   },
+   {
+    "name": "goofy spring sound",
+    "url": "https://www.myinstants.com/media/sounds/goofy-spring-sound.mp3"
+   },
+   {
+    "name": "goofy ahh samsung",
+    "url": "https://www.myinstants.com/media/sounds/goofy-ahh-samsung.mp3"
+   },
+   {
+    "name": "What the Hell Omg no way air raid goofy ",
+    "url": "https://www.myinstants.com/media/sounds/what-the-hell-omg-no-way-air-raid-goofy-ahh.mp3"
+   },
+   {
+    "name": "Goofy ahh Song",
+    "url": "https://www.myinstants.com/media/sounds/goofy-ahh-song.mp3"
+   },
+   {
+    "name": "what the hell goofy ahh (slv_sounds)",
+    "url": "https://www.myinstants.com/media/sounds/what-the-hell-goofy-ahh-slv-sounds.mp3"
+   },
+   {
+    "name": "goofy sound effects",
+    "url": "https://www.myinstants.com/media/sounds/goofy-sound-effects.mp3"
+   },
+   {
+    "name": "Goofy ahh SpongeBob sound",
+    "url": "https://www.myinstants.com/media/sounds/goofy-ahh-spongebob-sound.mp3"
+   },
+   {
+    "name": "goofy ahh fart",
+    "url": "https://www.myinstants.com/media/sounds/goofy-ahh-fart.mp3"
+   },
+   {
+    "name": "goofy mickey mouse laugh",
+    "url": "https://www.myinstants.com/media/sounds/goofy-mickey-mouse-laugh.mp3"
+   },
+   {
+    "name": "Goofy Laughh",
+    "url": "https://www.myinstants.com/media/sounds/goofy-laughh.mp3"
+   },
+   {
+    "name": "Goofy ahh music meme mp3 ildk guys what?",
+    "url": "https://www.myinstants.com/media/sounds/goofy-ahh-music-meme-mp3-ildk-guys-what.mp3"
+   },
+   {
+    "name": "Goofy Ahh Beat",
+    "url": "https://www.myinstants.com/media/sounds/goofy-ahh-beat.mp3"
+   },
+   {
+    "name": "Yodel Goofy",
+    "url": "https://www.myinstants.com/media/sounds/eene-yodel-goofy.mp3"
+   },
+   {
+    "name": "Goofy's Yell",
+    "url": "https://www.myinstants.com/media/sounds/goofys-yell.mp3"
+   },
+   {
+    "name": "Goofy ahh Spring Sound",
+    "url": "https://www.myinstants.com/media/sounds/goofy-ahh-spring-sound.mp3"
+   },
+   {
+    "name": "Goofy ahh sounds meme mp3 idk",
+    "url": "https://www.myinstants.com/media/sounds/goofy-ahh-sounds-meme-mp3-idk.mp3"
+   },
+   {
+    "name": "Goofy Ahh Ringtone",
+    "url": "https://www.myinstants.com/media/sounds/goofy-ahh-ringtone.mp3"
+   },
+   {
+    "name": "Goofy Ahh! Beat Remix",
+    "url": "https://www.myinstants.com/media/sounds/goofy-ahh-beat-remix.mp3"
+   },
+   {
+    "name": "goofy ahh android ringtone",
+    "url": "https://www.myinstants.com/media/sounds/goofy-ahh-android-ringtone.mp3"
+   },
+   {
+    "name": "RAWR (goofy ahh)",
+    "url": "https://www.myinstants.com/media/sounds/rawr-goofy-ahh.mp3"
+   },
+   {
+    "name": "goofy ahh nuh uh",
+    "url": "https://www.myinstants.com/media/sounds/goofy-ahh-nuh-uh.mp3"
+   },
+   {
+    "name": "Goofy ahh cartoon walking sounds",
+    "url": "https://www.myinstants.com/media/sounds/goofy-ahh-cartoon-walking-sounds.mp3"
+   },
+   {
+    "name": "Goofy Laugh Extreme",
+    "url": "https://www.myinstants.com/media/sounds/goofy-laugh-extreme.mp3"
+   }
+  ]
+ },
+ {
+  "id": "rizz",
+  "label": "Rizz",
+  "emoji": "😏",
+  "hint": "Bring the rizz",
+  "sounds": [
+   {
+    "name": "rizz sound effect",
+    "url": "https://www.myinstants.com/media/sounds/rizz-sound-effect.mp3"
+   },
+   {
+    "name": "White tee RIZZ",
+    "url": "https://www.myinstants.com/media/sounds/white-tee-rizz_Pw3bPh4.mp3"
+   },
+   {
+    "name": "blush (rizz) sound effect",
+    "url": "https://www.myinstants.com/media/sounds/blush-rizz-sound-effect.mp3"
+   },
+   {
+    "name": "Rizz x aura farm",
+    "url": "https://www.myinstants.com/media/sounds/rizz-x-aura-farm.mp3"
+   },
+   {
+    "name": "Mr beast rizz",
+    "url": "https://www.myinstants.com/media/sounds/mr-beast-rizz.mp3"
+   },
+   {
+    "name": "the weeknd rizz",
+    "url": "https://www.myinstants.com/media/sounds/the-weeknd-rizz.mp3"
+   },
+   {
+    "name": "Micheal Jackson rizz",
+    "url": "https://www.myinstants.com/media/sounds/micheal-jackson-rizz.mp3"
+   },
+   {
+    "name": "romance + rizz",
+    "url": "https://www.myinstants.com/media/sounds/romance-rizz.mp3"
+   },
+   {
+    "name": "Rizz walk",
+    "url": "https://www.myinstants.com/media/sounds/rizz-walk.mp3"
+   },
+   {
+    "name": "Dexter meme rizz",
+    "url": "https://www.myinstants.com/media/sounds/dexter-meme-rizz.mp3"
+   },
+   {
+    "name": "Alfons Åberg Rizz",
+    "url": "https://www.myinstants.com/media/sounds/alfons-aberg-rizz.mp3"
+   },
+   {
+    "name": "SIGMA COLD RIZZ",
+    "url": "https://www.myinstants.com/media/sounds/sigma-cold-rizz.mp3"
+   },
+   {
+    "name": "Honey RIZZ",
+    "url": "https://www.myinstants.com/media/sounds/honey-rizz_ZXQLBKM.mp3"
+   },
+   {
+    "name": "White tees rizz",
+    "url": "https://www.myinstants.com/media/sounds/white-tees-rizz.mp3"
+   },
+   {
+    "name": "Rizz Music",
+    "url": "https://www.myinstants.com/media/sounds/rizz-music.mp3"
+   },
+   {
+    "name": "girl you loud - rizz",
+    "url": "https://www.myinstants.com/media/sounds/girl-you-loud-rizz.mp3"
+   },
+   {
+    "name": "rizzing sounds",
+    "url": "https://www.myinstants.com/media/sounds/rizzing-sounds.mp3"
+   },
+   {
+    "name": "the weekend rizz (extended)",
+    "url": "https://www.myinstants.com/media/sounds/the-weekend-rizz-extended.mp3"
+   },
+   {
+    "name": "the weeknd earned it rizz song",
+    "url": "https://www.myinstants.com/media/sounds/the-weeknd-earned-it-rizz-song.mp3"
+   },
+   {
+    "name": "Oui Rizz - Slowed",
+    "url": "https://www.myinstants.com/media/sounds/oui-rizz-slowed.mp3"
+   },
+   {
+    "name": "Lightskin Rizz (Sin City)",
+    "url": "https://www.myinstants.com/media/sounds/lightskin-rizz-sin-city.mp3"
+   },
+   {
+    "name": "Streets Rizz",
+    "url": "https://www.myinstants.com/media/sounds/streets-rizz.mp3"
+   },
+   {
+    "name": "Rizz meme sound effect MP3",
+    "url": "https://www.myinstants.com/media/sounds/rizz-meme-sound-effect-mp3.mp3"
+   },
+   {
+    "name": "Rizz song",
+    "url": "https://www.myinstants.com/media/sounds/rizz-song.mp3"
+   },
+   {
+    "name": "want u rizz",
+    "url": "https://www.myinstants.com/media/sounds/want-u-rizz.mp3"
+   },
+   {
+    "name": "Rizz White Tee Sound",
+    "url": "https://www.myinstants.com/media/sounds/rizz-white-tee-sound.mp3"
+   },
+   {
+    "name": "Rizz broken",
+    "url": "https://www.myinstants.com/media/sounds/rizz-broken.mp3"
+   },
+   {
+    "name": "Oui - rizz meme song",
+    "url": "https://www.myinstants.com/media/sounds/oui-rizz-meme-song.mp3"
+   },
+   {
+    "name": "rizz efecto de sonido",
+    "url": "https://www.myinstants.com/media/sounds/rizz-efecto-de-sonido.mp3"
+   },
+   {
+    "name": "[RIZZ] OUI - JEREMIH",
+    "url": "https://www.myinstants.com/media/sounds/rizz-oui-jeremih.mp3"
+   }
+  ]
+ },
+ {
+  "id": "reactions",
+  "label": "Reactions",
+  "emoji": "😱",
+  "hint": "React exactly like that",
+  "sounds": [
+   {
+    "name": "Sad Violin (the meme one)",
+    "url": "https://www.myinstants.com/media/sounds/tf_nemesis.mp3"
+   },
+   {
+    "name": "Koun hai re",
+    "url": "https://www.myinstants.com/media/sounds/koun-hai-re_8ep4nAR.mp3"
+   },
+   {
+    "name": "Wrong Answer GameShow",
+    "url": "https://www.myinstants.com/media/sounds/wrong_5.mp3"
+   },
+   {
+    "name": "Laughing dog meme",
+    "url": "https://www.myinstants.com/media/sounds/laughing-dog-meme.mp3"
+   },
+   {
+    "name": "Huh? Ceeday",
+    "url": "https://www.myinstants.com/media/sounds/ceeday-huh-sound-effect.mp3"
+   },
+   {
+    "name": "Tudun tadau",
+    "url": "https://www.myinstants.com/media/sounds/tudun-tadau_BJviW12.mp3"
+   },
+   {
+    "name": "Michael Jackson Hee Hee",
+    "url": "https://www.myinstants.com/media/sounds/michael-jackson-hee-hee.mp3"
+   },
+   {
+    "name": "Road Rash 64 - First Place",
+    "url": "https://www.myinstants.com/media/sounds/road-rash-64-first-place.mp3"
+   },
+   {
+    "name": "sudden suspense",
+    "url": "https://www.myinstants.com/media/sounds/sudden-suspense-sound-effect.mp3"
+   },
+   {
+    "name": "Anime punch",
+    "url": "https://www.myinstants.com/media/sounds/strongpunch.mp3"
+   },
+   {
+    "name": "Cartoon Slip",
+    "url": "https://www.myinstants.com/media/sounds/cartoonslip.mp3"
+   },
+   {
+    "name": "FAH PERFECT SYNC",
+    "url": "https://www.myinstants.com/media/sounds/fah-perfect-sync.mp3"
+   },
+   {
+    "name": "oh my god, wow!",
+    "url": "https://www.myinstants.com/media/sounds/omgwow.mp3"
+   },
+   {
+    "name": "Leave me alone! | (Take #1)",
+    "url": "https://www.myinstants.com/media/sounds/leave-me-alone-take-1.mp3"
+   },
+   {
+    "name": "Leave me alone! | (Take #2)",
+    "url": "https://www.myinstants.com/media/sounds/leave-me-alone-take-2_bRDgrmS.mp3"
+   },
+   {
+    "name": "Munch (eating / biting)",
+    "url": "https://www.myinstants.com/media/sounds/munch-sound-effect.mp3"
+   },
+   {
+    "name": "Shock Sound Effect",
+    "url": "https://www.myinstants.com/media/sounds/shock-sound-effect.mp3"
+   },
+   {
+    "name": "Cringe Sus Anime Girl",
+    "url": "https://www.myinstants.com/media/sounds/cringe-sus-anime-girl.mp3"
+   },
+   {
+    "name": "aree cid",
+    "url": "https://www.myinstants.com/media/sounds/aree-cid.mp3"
+   },
+   {
+    "name": "confused binyot",
+    "url": "https://www.myinstants.com/media/sounds/confused-binyot.mp3"
+   },
+   {
+    "name": "Meow ghop ghop ghop",
+    "url": "https://www.myinstants.com/media/sounds/meow-ghop-ghop-ghop.mp3"
+   },
+   {
+    "name": "Rahul Gandhi khatam",
+    "url": "https://www.myinstants.com/media/sounds/tmp8ljn9e7h.mp3"
+   },
+   {
+    "name": "Cid yeh kya back rahe ho mcd",
+    "url": "https://www.myinstants.com/media/sounds/cid-yeh-kya-back-rahe-ho-mcd.mp3"
+   },
+   {
+    "name": "chup tmkc",
+    "url": "https://www.myinstants.com/media/sounds/chup-tmkc.mp3"
+   },
+   {
+    "name": "Chalti Firti Cocaine ...",
+    "url": "https://www.myinstants.com/media/sounds/chalti-firti-cocaine.mp3"
+   },
+   {
+    "name": "Tadaaa!",
+    "url": "https://www.myinstants.com/media/sounds/tadaaa.mp3"
+   },
+   {
+    "name": "bongo hit",
+    "url": "https://www.myinstants.com/media/sounds/bongo-hit.mp3"
+   },
+   {
+    "name": "chacha ahh",
+    "url": "https://www.myinstants.com/media/sounds/chacha-ahh.mp3"
+   },
+   {
+    "name": "Sonic Ring Sound Effect",
+    "url": "https://www.myinstants.com/media/sounds/sonic-ring-sound-effect-in-stereo.mp3"
+   },
+   {
+    "name": "Awkward - Cricket Silence",
+    "url": "https://www.myinstants.com/media/sounds/awkward-cricket-silence.mp3"
+   }
+  ]
+ },
+ {
+  "id": "viral",
+  "label": "Viral",
+  "emoji": "🔥",
+  "hint": "Copy the viral sound",
+  "sounds": [
+   {
+    "name": "spiderman meme song",
+    "url": "https://www.myinstants.com/media/sounds/spiderman-meme-song.mp3"
+   },
+   {
+    "name": "Awkward cricket",
+    "url": "https://www.myinstants.com/media/sounds/awkward-cricket-sound-effect.mp3"
+   },
+   {
+    "name": "Nahi nahi saluke yaha kuchh to gadbad ha",
+    "url": "https://www.myinstants.com/media/sounds/nahi-nahi-saluke-yaha-kuchh-to-gadbad-hai.mp3"
+   },
+   {
+    "name": "phir Teri Maiya chodta hu CID",
+    "url": "https://www.myinstants.com/media/sounds/phir-teri-maiya-chodta-hu-cid.mp3"
+   },
+   {
+    "name": "Whoooooo yeleeee laudeeee",
+    "url": "https://www.myinstants.com/media/sounds/whoooooo-yeleeee-laudeeee_Nk6JpCP.mp3"
+   },
+   {
+    "name": "yoooooooooooo",
+    "url": "https://www.myinstants.com/media/sounds/yooooooooooooooooooooooooo_4_objp8XX.mp3"
+   },
+   {
+    "name": "Youtube subscribe and like bell sound",
+    "url": "https://www.myinstants.com/media/sounds/youtube-subscribe-and-like-bell-sound.mp3"
+   },
+   {
+    "name": "3.2.1. Go",
+    "url": "https://www.myinstants.com/media/sounds/3-2-1-go-green-screen-footage-2xoehcl8evq.mp3"
+   },
+   {
+    "name": "Oh Kevin de Bruybe",
+    "url": "https://www.myinstants.com/media/sounds/oh-kevin-de-bruybe.mp3"
+   },
+   {
+    "name": "Screw on this loose (2)",
+    "url": "https://www.myinstants.com/media/sounds/screw-on-this-loose-2.mp3"
+   },
+   {
+    "name": "Tum Dum Tedau",
+    "url": "https://www.myinstants.com/media/sounds/tum-dum-tedau.mp3"
+   },
+   {
+    "name": "im dying help me",
+    "url": "https://www.myinstants.com/media/sounds/im-dying.mp3"
+   },
+   {
+    "name": "tehelka omlette",
+    "url": "https://www.myinstants.com/media/sounds/tehelka-omlette.mp3"
+   },
+   {
+    "name": "Chipmunk Laugh",
+    "url": "https://www.myinstants.com/media/sounds/funny_82hiegE.mp3"
+   },
+   {
+    "name": "Kis color chaddi pehne ho",
+    "url": "https://www.myinstants.com/media/sounds/kis-color-chaddi-pehne-ho.mp3"
+   },
+   {
+    "name": "Wait, What!?",
+    "url": "https://www.myinstants.com/media/sounds/wait-what.mp3"
+   },
+   {
+    "name": "mai gali",
+    "url": "https://www.myinstants.com/media/sounds/mai-gali.mp3"
+   },
+   {
+    "name": "teri gand mari",
+    "url": "https://www.myinstants.com/media/sounds/teri-gand-mari.mp3"
+   },
+   {
+    "name": "shocking!",
+    "url": "https://www.myinstants.com/media/sounds/shocking_0NL2w3I.mp3"
+   },
+   {
+    "name": "Africa crying laugh commercial",
+    "url": "https://www.myinstants.com/media/sounds/africa-crying-laugh-commercial.mp3"
+   },
+   {
+    "name": "Amongus Sus",
+    "url": "https://www.myinstants.com/media/sounds/53b1bab6-a8c3-4a1a-82db-7110ce1c29ef_6KNDGWD.mp3"
+   },
+   {
+    "name": "CHACHAA",
+    "url": "https://www.myinstants.com/media/sounds/chachaa.mp3"
+   },
+   {
+    "name": "Chicken screaming on a tree",
+    "url": "https://www.myinstants.com/media/sounds/chicken-screaming-on-a-tree.mp3"
+   },
+   {
+    "name": "Angry Indian Scammer",
+    "url": "https://www.myinstants.com/media/sounds/getfromytcom-the-angriest-scamme-1.mp3"
+   },
+   {
+    "name": "Whip",
+    "url": "https://www.myinstants.com/media/sounds/crack_the_whip.mp3"
+   },
+   {
+    "name": "tung dung tananeo",
+    "url": "https://www.myinstants.com/media/sounds/tung-dung-tananeo.mp3"
+   },
+   {
+    "name": "Are you sure about that? JCena",
+    "url": "https://www.myinstants.com/media/sounds/are-you-sure-about-that_3D0ngHY.mp3"
+   },
+   {
+    "name": "crying over dead internet",
+    "url": "https://www.myinstants.com/media/sounds/zzzz.mp3"
+   },
+   {
+    "name": "chodu CID",
+    "url": "https://www.myinstants.com/media/sounds/chodu-cid.mp3"
+   },
+   {
+    "name": "he he yeah boy",
+    "url": "https://www.myinstants.com/media/sounds/yeah-boy_HegSyfp.mp3"
+   }
+  ]
+ },
+ {
+  "id": "discord",
+  "label": "Discord",
+  "emoji": "🎧",
+  "hint": "Copy the Discord sound",
+  "sounds": [
+   {
+    "name": "Discord Notification",
+    "url": "https://www.myinstants.com/media/sounds/discord-notification.mp3"
+   },
+   {
+    "name": "discord call",
+    "url": "https://www.myinstants.com/media/sounds/discord-call-sound.mp3"
+   },
+   {
+    "name": "discord join call",
+    "url": "https://www.myinstants.com/media/sounds/yt1s_nYWSz5R.mp3"
+   },
+   {
+    "name": "Discord Leave Noise",
+    "url": "https://www.myinstants.com/media/sounds/discord-leave-noise.mp3"
+   },
+   {
+    "name": "Discord Calling",
+    "url": "https://www.myinstants.com/media/sounds/discord-call-sound_tvxg95l.mp3"
+   },
+   {
+    "name": "Discord Leaving",
+    "url": "https://www.myinstants.com/media/sounds/discord_leave_sound_effect_download.mp3"
+   },
+   {
+    "name": "discord nofications",
+    "url": "https://www.myinstants.com/media/sounds/discord-nofications.mp3"
+   },
+   {
+    "name": "Disconnect discord",
+    "url": "https://www.myinstants.com/media/sounds/y2mate_VKI8qDn.mp3"
+   },
+   {
+    "name": "Discord Halloween",
+    "url": "https://www.myinstants.com/media/sounds/discord-halloween_n0hDV3q.mp3"
+   },
+   {
+    "name": "discord troll",
+    "url": "https://www.myinstants.com/media/sounds/mikejebait-3.mp3"
+   },
+   {
+    "name": "uwu discord gorl",
+    "url": "https://www.myinstants.com/media/sounds/uwu-discord-gorl.mp3"
+   },
+   {
+    "name": "discord mute",
+    "url": "https://www.myinstants.com/media/sounds/discordmute_IZNcLx2.mp3"
+   },
+   {
+    "name": "Discord Ping",
+    "url": "https://www.myinstants.com/media/sounds/discord_ping_sound_effect.mp3"
+   },
+   {
+    "name": "Discord Halloween Notification",
+    "url": "https://www.myinstants.com/media/sounds/discord-halloween-notification.mp3"
+   },
+   {
+    "name": "Discord Jumpscare",
+    "url": "https://www.myinstants.com/media/sounds/discord-jumpscare.mp3"
+   },
+   {
+    "name": "discord join halloween 2026",
+    "url": "https://www.myinstants.com/media/sounds/discord-join-halloween-2026.mp3"
+   },
+   {
+    "name": "discord cat scream",
+    "url": "https://www.myinstants.com/media/sounds/discord-cat-scream.mp3"
+   },
+   {
+    "name": "DISCORD CALL MEME",
+    "url": "https://www.myinstants.com/media/sounds/discord-call-meme.mp3"
+   },
+   {
+    "name": "BASS BOOST discord call",
+    "url": "https://www.myinstants.com/media/sounds/bass-boost-discord-call.mp3"
+   },
+   {
+    "name": "Discord Halloween 2025",
+    "url": "https://www.myinstants.com/media/sounds/discord-halloween-2025.mp3"
+   },
+   {
+    "name": "Discord spam",
+    "url": "https://www.myinstants.com/media/sounds/discord-spam.mp3"
+   },
+   {
+    "name": "Discord boom",
+    "url": "https://www.myinstants.com/media/sounds/discord-boom.mp3"
+   },
+   {
+    "name": "discord kitten",
+    "url": "https://www.myinstants.com/media/sounds/discord-kitten.mp3"
+   },
+   {
+    "name": "Discord Halloween ping",
+    "url": "https://www.myinstants.com/media/sounds/discord-halloween-ping.mp3"
+   },
+   {
+    "name": "Discord Mute Sound Effect",
+    "url": "https://www.myinstants.com/media/sounds/discord-mute-sound-effect.mp3"
+   },
+   {
+    "name": "discord leave sound :)",
+    "url": "https://www.myinstants.com/media/sounds/discord-leave-sound_JKEVidU.mp3"
+   },
+   {
+    "name": "\"Discordo\" - Discord",
+    "url": "https://www.myinstants.com/media/sounds/discordo-discord.mp3"
+   },
+   {
+    "name": "Discord notification sound",
+    "url": "https://www.myinstants.com/media/sounds/discord-notification_at5DQrf.mp3"
+   },
+   {
+    "name": "Discord join",
+    "url": "https://www.myinstants.com/media/sounds/discord-join.mp3"
+   },
+   {
+    "name": "discord pranks",
+    "url": "https://www.myinstants.com/media/sounds/discord-pranks.mp3"
+   }
+  ]
+ },
+ {
+  "id": "roblox",
+  "label": "Roblox",
+  "emoji": "🧱",
+  "hint": "Copy the Roblox sound",
+  "sounds": [
+   {
+    "name": "ROBLOX oof",
+    "url": "https://www.myinstants.com/media/sounds/roblox-death-sound_1.mp3"
+   },
+   {
+    "name": "Roblox Explosion Sound",
+    "url": "https://www.myinstants.com/media/sounds/roblox-explosion-sound.mp3"
+   },
+   {
+    "name": "angry roblox",
+    "url": "https://www.myinstants.com/media/sounds/angry-roblox.mp3"
+   },
+   {
+    "name": "roblox bye",
+    "url": "https://www.myinstants.com/media/sounds/roblox-bye.mp3"
+   },
+   {
+    "name": "roblox horror",
+    "url": "https://www.myinstants.com/media/sounds/do-not-open.mp3"
+   },
+   {
+    "name": "Roblox Death Sound Effect",
+    "url": "https://www.myinstants.com/media/sounds/roblox-death-sound-effect.mp3"
+   },
+   {
+    "name": "Roblox old winning sound effect",
+    "url": "https://www.myinstants.com/media/sounds/roblox-old-winning-sound-effect.mp3"
+   },
+   {
+    "name": "Roblox Hi Sound",
+    "url": "https://www.myinstants.com/media/sounds/roblox-hi-sound.mp3"
+   },
+   {
+    "name": "roblox wow",
+    "url": "https://www.myinstants.com/media/sounds/roblox-wow.mp3"
+   },
+   {
+    "name": "psst (roblox doors)",
+    "url": "https://www.myinstants.com/media/sounds/psst-roblox-doors.mp3"
+   },
+   {
+    "name": "cry (roblox)",
+    "url": "https://www.myinstants.com/media/sounds/cry-roblox.mp3"
+   },
+   {
+    "name": "om nom nom roblox",
+    "url": "https://www.myinstants.com/media/sounds/roblox-eating-sound-effect-nom-nom-nom.mp3"
+   },
+   {
+    "name": "Hmm - Roblox Pizza Place SE",
+    "url": "https://www.myinstants.com/media/sounds/hmm-roblox-pizza-place-se.mp3"
+   },
+   {
+    "name": "Roblox ghost",
+    "url": "https://www.myinstants.com/media/sounds/roblox-ghost.mp3"
+   },
+   {
+    "name": "roblox laugh",
+    "url": "https://www.myinstants.com/media/sounds/roblox-laugh.mp3"
+   },
+   {
+    "name": "huh (roblox)",
+    "url": "https://www.myinstants.com/media/sounds/huh-roblox.mp3"
+   },
+   {
+    "name": "ROBLOX bass sound effect",
+    "url": "https://www.myinstants.com/media/sounds/bass_vCrw3wU.mp3"
+   },
+   {
+    "name": "yay roblox",
+    "url": "https://www.myinstants.com/media/sounds/yay-roblox.mp3"
+   },
+   {
+    "name": "ROBLOX Button SFX",
+    "url": "https://www.myinstants.com/media/sounds/roblox-button-sfx.mp3"
+   },
+   {
+    "name": "roblox classic jump",
+    "url": "https://www.myinstants.com/media/sounds/roblox-classic-jump.mp3"
+   },
+   {
+    "name": "Roblox Yummy",
+    "url": "https://www.myinstants.com/media/sounds/roblox-yummy.mp3"
+   },
+   {
+    "name": "OG Roblox Death sound effect (uhh, oof)",
+    "url": "https://www.myinstants.com/media/sounds/og-roblox-death-sound-effect-uhh-oof.mp3"
+   },
+   {
+    "name": "Mmm Cheezburger ROBLOX",
+    "url": "https://www.myinstants.com/media/sounds/mmm-cheezburger.mp3"
+   },
+   {
+    "name": "Roblox Sword",
+    "url": "https://www.myinstants.com/media/sounds/roblox-sword.mp3"
+   },
+   {
+    "name": "old roblox glass break sound",
+    "url": "https://www.myinstants.com/media/sounds/old-roblox-glass-break-sound.mp3"
+   },
+   {
+    "name": "roblox jump",
+    "url": "https://www.myinstants.com/media/sounds/action_jump.mp3"
+   },
+   {
+    "name": "Roblox Walking",
+    "url": "https://www.myinstants.com/media/sounds/roblox-walking.mp3"
+   },
+   {
+    "name": "roblox footsteps",
+    "url": "https://www.myinstants.com/media/sounds/action_footsteps_plastic.mp3"
+   },
+   {
+    "name": "roblox laser gun",
+    "url": "https://www.myinstants.com/media/sounds/roblox-laser-gun.mp3"
+   },
+   {
+    "name": "Roblox Tycoon Music",
+    "url": "https://www.myinstants.com/media/sounds/roblox-tycoon-music.mp3"
+   }
+  ]
+ },
+ {
+  "id": "among-us",
+  "label": "Among Us",
+  "emoji": "🔪",
+  "hint": "Sus. Copy it.",
+  "sounds": [
+   {
+    "name": "Among Us role reveal sound",
+    "url": "https://www.myinstants.com/media/sounds/among-us-role-reveal-sound.mp3"
+   },
+   {
+    "name": "among us role reveal sound effect",
+    "url": "https://www.myinstants.com/media/sounds/among-us-role-reveal-sound-effect.mp3"
+   },
+   {
+    "name": "Imposter Kill (Among Us)",
+    "url": "https://www.myinstants.com/media/sounds/stationary-kill_gDwMUvN.mp3"
+   },
+   {
+    "name": "Among us",
+    "url": "https://www.myinstants.com/media/sounds/among.mp3"
+   },
+   {
+    "name": "Among us Imposter Reveal SE",
+    "url": "https://www.myinstants.com/media/sounds/among-us-imposter-reveal-se.mp3"
+   },
+   {
+    "name": "Among Us Drip Theme Song",
+    "url": "https://www.myinstants.com/media/sounds/record-online-voice-recorder_kIwejRI.mp3"
+   },
+   {
+    "name": "Among us Roundstart",
+    "url": "https://www.myinstants.com/media/sounds/among-us-roundstart.mp3"
+   },
+   {
+    "name": "Emergency meeting - Among Us",
+    "url": "https://www.myinstants.com/media/sounds/emergency-meeting.mp3"
+   },
+   {
+    "name": "Among Us Emergency Meeting",
+    "url": "https://www.myinstants.com/media/sounds/emergency-meeting-sound-among-us.mp3"
+   },
+   {
+    "name": "AMOGUS SCREAMING",
+    "url": "https://www.myinstants.com/media/sounds/guy-yelling-among-us-sound-effect.mp3"
+   },
+   {
+    "name": "Among us(kill)",
+    "url": "https://www.myinstants.com/media/sounds/among-us-kill.mp3"
+   },
+   {
+    "name": "Impostor kill sound",
+    "url": "https://www.myinstants.com/media/sounds/among-us-impostor-kill-music_01.mp3"
+   },
+   {
+    "name": "Amogus Full",
+    "url": "https://www.myinstants.com/media/sounds/2021-04-07-213841761.mp3"
+   },
+   {
+    "name": "DEAD BODY REPORTED (Among Us)",
+    "url": "https://www.myinstants.com/media/sounds/among-us-dead-body-reported-sound-effect_BsczDVE.mp3"
+   },
+   {
+    "name": "Among Us Vent",
+    "url": "https://www.myinstants.com/media/sounds/among-us-vents-sound-effect.mp3"
+   },
+   {
+    "name": "Among us typing",
+    "url": "https://www.myinstants.com/media/sounds/among-us-typing.mp3"
+   },
+   {
+    "name": "among us impostor sound",
+    "url": "https://www.myinstants.com/media/sounds/among-us-impostor-sound.mp3"
+   },
+   {
+    "name": "Among Us Death Sound",
+    "url": "https://www.myinstants.com/media/sounds/final_5f65c7eaa80098002910ff9d_342213-2.mp3"
+   },
+   {
+    "name": "Crewmate Victory (Among Us)",
+    "url": "https://www.myinstants.com/media/sounds/yay_cRiHGGR.mp3"
+   },
+   {
+    "name": "Among us Alert Buzzer",
+    "url": "https://www.myinstants.com/media/sounds/alert_tA9mlYb.mp3"
+   },
+   {
+    "name": "among us - crisis alarm",
+    "url": "https://www.myinstants.com/media/sounds/alarm_QenbR8T.mp3"
+   },
+   {
+    "name": "Among us imposter",
+    "url": "https://www.myinstants.com/media/sounds/you-are-impostor-sound.mp3"
+   },
+   {
+    "name": "Among us Vote locking",
+    "url": "https://www.myinstants.com/media/sounds/among-us-vote-locking_01.mp3"
+   },
+   {
+    "name": "among us task complete",
+    "url": "https://www.myinstants.com/media/sounds/69_inWxWuv.mp3"
+   },
+   {
+    "name": "Among us Eject",
+    "url": "https://www.myinstants.com/media/sounds/among-us-eject-sound-effect.mp3"
+   },
+   {
+    "name": "Among us impostor sound effect 0.5x spee",
+    "url": "https://www.myinstants.com/media/sounds/among-us-impostor-sound-effect-0-5x-speed.mp3"
+   },
+   {
+    "name": "Among Us Walking",
+    "url": "https://www.myinstants.com/media/sounds/the-among-us-walking-sound-effect.mp3"
+   },
+   {
+    "name": "Among Us role reveal",
+    "url": "https://www.myinstants.com/media/sounds/tmp0wyb54t7.mp3"
+   },
+   {
+    "name": "Among Us Imposter Kill",
+    "url": "https://www.myinstants.com/media/sounds/amongus_imposter-kill_dw4gj648sd.mp3"
+   },
+   {
+    "name": "Player Spawn In Among Us",
+    "url": "https://www.myinstants.com/media/sounds/player_spawnin2-online-audio-converter.mp3"
+   }
+  ]
+ },
+ {
+  "id": "fnaf",
+  "label": "FNAF",
+  "emoji": "🐻",
+  "hint": "Copy the jumpscare",
+  "sounds": [
+   {
+    "name": "FNAF Jumpscare Scream",
+    "url": "https://www.myinstants.com/media/sounds/five-nights-at-freddys-full-scream-sound_2.mp3"
+   },
+   {
+    "name": "fnaf2 ambience",
+    "url": "https://www.myinstants.com/media/sounds/fnaf2-ambience.mp3"
+   },
+   {
+    "name": "Fnaf 1 music box",
+    "url": "https://www.myinstants.com/media/sounds/fnaf-1-music-box.mp3"
+   },
+   {
+    "name": "FNAF Yay Children",
+    "url": "https://www.myinstants.com/media/sounds/crowd_small_chil_ec049202_9klCwI6.mp3"
+   },
+   {
+    "name": "FNAF Balloon Boy Hello",
+    "url": "https://www.myinstants.com/media/sounds/echo3b.mp3"
+   },
+   {
+    "name": "[FNAF] 6 AM",
+    "url": "https://www.myinstants.com/media/sounds/five-nights-at-freddys-6-am.mp3"
+   },
+   {
+    "name": "fnaf 2 scream",
+    "url": "https://www.myinstants.com/media/sounds/five-nights-at-freddys-2-full-scream-sound.mp3"
+   },
+   {
+    "name": "Fnaf 2 Hallway",
+    "url": "https://www.myinstants.com/media/sounds/hallway-ambiance-extended-five-nights-at-freddys-2-music.mp3"
+   },
+   {
+    "name": "Freddy beatbox",
+    "url": "https://www.myinstants.com/media/sounds/freddy-beatbox.mp3"
+   },
+   {
+    "name": "Fnaf Freddy’s laugh",
+    "url": "https://www.myinstants.com/media/sounds/fnaf-freddys-laugh.mp3"
+   },
+   {
+    "name": "fnaf phone ringing sound",
+    "url": "https://www.myinstants.com/media/sounds/fnaf-phone-ringing-sound.mp3"
+   },
+   {
+    "name": "FNaF Golden Freddy Scream",
+    "url": "https://www.myinstants.com/media/sounds/full-golden-freddy-scream.mp3"
+   },
+   {
+    "name": "I see you Fnaf springtrap",
+    "url": "https://www.myinstants.com/media/sounds/i-see-you-fnaf-springtrap.mp3"
+   },
+   {
+    "name": "Fnaf Ambient Noise",
+    "url": "https://www.myinstants.com/media/sounds/fnaf-ambience-extended_trim.mp3"
+   },
+   {
+    "name": "FNAF 4 Jumpscare",
+    "url": "https://www.myinstants.com/media/sounds/jumpscare-sound-fnaf-4.mp3"
+   },
+   {
+    "name": "FNAF Balloon Boy Hi",
+    "url": "https://www.myinstants.com/media/sounds/echo1.mp3"
+   },
+   {
+    "name": "Fnaf meme Har Har",
+    "url": "https://www.myinstants.com/media/sounds/fnaf-meme-har-har.mp3"
+   },
+   {
+    "name": "fnaf foxy scream sfx",
+    "url": "https://www.myinstants.com/media/sounds/fnaf-foxy-scream-sfx.mp3"
+   },
+   {
+    "name": "FNAF Balloon Boy Laugh",
+    "url": "https://www.myinstants.com/media/sounds/echo4b.mp3"
+   },
+   {
+    "name": "Fnaf 6 Jumpscare Sound",
+    "url": "https://www.myinstants.com/media/sounds/fnaf-6-jumpscare-sound-effect.mp3"
+   },
+   {
+    "name": "foxy jumpscare fnaf 2",
+    "url": "https://www.myinstants.com/media/sounds/foxy-jumpscare-fnaf-2_wQsvjbR.mp3"
+   },
+   {
+    "name": "FNAF 2 Hallway Ambience",
+    "url": "https://www.myinstants.com/media/sounds/fnaf-2-hallway-ambience.mp3"
+   },
+   {
+    "name": "fnaf 1 door",
+    "url": "https://www.myinstants.com/media/sounds/door-slamming-fnaf-1-sound-effects.mp3"
+   },
+   {
+    "name": "FNaF Open Camera Sound",
+    "url": "https://www.myinstants.com/media/sounds/fnaf-open-camera-sound.mp3"
+   },
+   {
+    "name": "FNAF 3 Night start",
+    "url": "https://www.myinstants.com/media/sounds/fnaf-3-start-sound.mp3"
+   },
+   {
+    "name": "FNAF windows scare",
+    "url": "https://www.myinstants.com/media/sounds/fnaf-windows-scare.mp3"
+   },
+   {
+    "name": "FNAF 3 Death Scream",
+    "url": "https://www.myinstants.com/media/sounds/five-nights-at-freddys-3-springtraps-jumpscare-brightened.mp3"
+   },
+   {
+    "name": "Bonnie's lullaby",
+    "url": "https://www.myinstants.com/media/sounds/bonnies-lullaby.mp3"
+   },
+   {
+    "name": "foxy song dum dum dum",
+    "url": "https://www.myinstants.com/media/sounds/foxy-song-dum-dum-dum.mp3"
+   },
+   {
+    "name": "fnaf running",
+    "url": "https://www.myinstants.com/media/sounds/fnaf-running.mp3"
+   }
+  ]
+ },
+ {
+  "id": "peter-griffin",
+  "label": "Peter Griffin",
+  "emoji": "🍺",
+  "hint": "Do the Peter voice",
+  "sounds": [
+   {
+    "name": "peter griffin laugh",
+    "url": "https://www.myinstants.com/media/sounds/laugh-3_9wVKqU7.mp3"
+   },
+   {
+    "name": "Peter Griffin YOU STUPID N",
+    "url": "https://www.myinstants.com/media/sounds/peter-griffin-you-stupid-n_FwLkIRO.mp3"
+   },
+   {
+    "name": "peter griffin song",
+    "url": "https://www.myinstants.com/media/sounds/peter-griffin-song.mp3"
+   },
+   {
+    "name": "Peter Griffin: Oh my god who the hell ca",
+    "url": "https://www.myinstants.com/media/sounds/peter-griffin-who-the-hell-cares.mp3"
+   },
+   {
+    "name": "Peter Griffin falls",
+    "url": "https://www.myinstants.com/media/sounds/peter-griffin-falls.mp3"
+   },
+   {
+    "name": "Peter Griffin Im coming",
+    "url": "https://www.myinstants.com/media/sounds/peter-griffin-im-coming.mp3"
+   },
+   {
+    "name": "Family Guy - Shut The Fսck Up",
+    "url": "https://www.myinstants.com/media/sounds/family-guy-shut-the-fsck-up.mp3"
+   },
+   {
+    "name": "Peter Griffin/Family Guy \"Whoa, whoa, wh",
+    "url": "https://www.myinstants.com/media/sounds/peter-griffin-family-guy-whoa-whoa-whoa.mp3"
+   },
+   {
+    "name": "\"WAIT A MINUTE WHAT THE HELL?!\" -Stewie",
+    "url": "https://www.myinstants.com/media/sounds/wait-a-minute-what-the-hell-stewie.mp3"
+   },
+   {
+    "name": "peter griffin meme",
+    "url": "https://www.myinstants.com/media/sounds/peter-griffin-meme.mp3"
+   },
+   {
+    "name": "Peter Griffin screaming",
+    "url": "https://www.myinstants.com/media/sounds/peter-griffin-screaming.mp3"
+   },
+   {
+    "name": "Peter griffin laugh sound meme MP3",
+    "url": "https://www.myinstants.com/media/sounds/peter-griffin-laugh-sound-meme-mp3.mp3"
+   },
+   {
+    "name": "Peter Griffin Fortnite",
+    "url": "https://www.myinstants.com/media/sounds/peter-griffin-fortnite.mp3"
+   },
+   {
+    "name": "Peter Griffin Jurassic Park",
+    "url": "https://www.myinstants.com/media/sounds/peter-griffin-fakes-quagmires-death_0PH2TSR.mp3"
+   },
+   {
+    "name": "Peter griffin aww",
+    "url": "https://www.myinstants.com/media/sounds/peter-griffin-aww.mp3"
+   },
+   {
+    "name": "Peter Griffin Falling Down The Stairs",
+    "url": "https://www.myinstants.com/media/sounds/peter-griffin-falling-down-the-stairs.mp3"
+   },
+   {
+    "name": "Peter Griffin Misery",
+    "url": "https://www.myinstants.com/media/sounds/peter-griffin-misery.mp3"
+   },
+   {
+    "name": "Peter Griffin screaming meme",
+    "url": "https://www.myinstants.com/media/sounds/peter-griffin-screaming-meme.mp3"
+   },
+   {
+    "name": "peter griffin is in my",
+    "url": "https://www.myinstants.com/media/sounds/peter-griffin-is-in-my.mp3"
+   },
+   {
+    "name": "Fart Peter Griffin",
+    "url": "https://www.myinstants.com/media/sounds/fart-peter-griffin.mp3"
+   },
+   {
+    "name": "gimme money Peter Griffin",
+    "url": "https://www.myinstants.com/media/sounds/gimme-money2.mp3"
+   },
+   {
+    "name": "Peter Griffin Vomiting (Funny)",
+    "url": "https://www.myinstants.com/media/sounds/peter-griffin-vomiting-funny.mp3"
+   },
+   {
+    "name": "ihn peter griffin",
+    "url": "https://www.myinstants.com/media/sounds/ihn-peter-griffin.mp3"
+   },
+   {
+    "name": "que p1nt0 enorme - peter griffin",
+    "url": "https://www.myinstants.com/media/sounds/que-p1nt0-enorme-peter-griffin.mp3"
+   },
+   {
+    "name": "Peter Griffin Laugh hehehehehehe",
+    "url": "https://www.myinstants.com/media/sounds/peter-griffin-laugh-hehehehehehe.mp3"
+   },
+   {
+    "name": "hehehehehehe - Peter Griffin",
+    "url": "https://www.myinstants.com/media/sounds/peter-hehehe.mp3"
+   },
+   {
+    "name": "Family guy - star wars",
+    "url": "https://www.myinstants.com/media/sounds/petergriffinstarwars.mp3"
+   },
+   {
+    "name": "Griffin Sushi",
+    "url": "https://www.myinstants.com/media/sounds/audiocutter_i-griffin-il-ristorante-sushi-di-peter2.mp3"
+   },
+   {
+    "name": "Peter Griffin as Swiper - Ahh Pissssssss",
+    "url": "https://www.myinstants.com/media/sounds/peter-griffin-as-swiper-ahh-pissssssss.mp3"
+   },
+   {
+    "name": "Peter griffin im poo",
+    "url": "https://www.myinstants.com/media/sounds/peter-griffin-im-poo.mp3"
+   }
+  ]
+ },
+ {
+  "id": "spongebob",
+  "label": "SpongeBob",
+  "emoji": "🧽",
+  "hint": "Copy the Bikini Bottom sound",
+  "sounds": [
+   {
+    "name": "SpongeBob Fail",
+    "url": "https://www.myinstants.com/media/sounds/spongebob-fail.mp3"
+   },
+   {
+    "name": "spongebob boowomp",
+    "url": "https://www.myinstants.com/media/sounds/spongebob-boowomp.mp3"
+   },
+   {
+    "name": "spongebob sad song",
+    "url": "https://www.myinstants.com/media/sounds/spongebob-sad-song.mp3"
+   },
+   {
+    "name": "spongebob walk",
+    "url": "https://www.myinstants.com/media/sounds/spongebob-walk.mp3"
+   },
+   {
+    "name": "Sponge Bob Disgusting",
+    "url": "https://www.myinstants.com/media/sounds/sponge-bob-disgusting.mp3"
+   },
+   {
+    "name": "Sponge Stank Noise",
+    "url": "https://www.myinstants.com/media/sounds/sponge-stank-noise.mp3"
+   },
+   {
+    "name": "Spongebob disappointed",
+    "url": "https://www.myinstants.com/media/sounds/spongebob-disappointed-sound-effect.mp3"
+   },
+   {
+    "name": "Squidward Walking",
+    "url": "https://www.myinstants.com/media/sounds/squidward-walking.mp3"
+   },
+   {
+    "name": "spongebob laugh",
+    "url": "https://www.myinstants.com/media/sounds/spongebob-laughing-sound-effect.mp3"
+   },
+   {
+    "name": "Spongebob fog horn",
+    "url": "https://www.myinstants.com/media/sounds/spongebob-fog-horn.mp3"
+   },
+   {
+    "name": "im spongebob",
+    "url": "https://www.myinstants.com/media/sounds/im-spongebob.mp3"
+   },
+   {
+    "name": "squidward walk effect",
+    "url": "https://www.myinstants.com/media/sounds/squidward-walk-effect.mp3"
+   },
+   {
+    "name": "SPONGEBOB 2000 YEARS LATER",
+    "url": "https://www.myinstants.com/media/sounds/spongebob-2000-years-later-2019-download-link.mp3"
+   },
+   {
+    "name": "Spongebob Bubble Transition",
+    "url": "https://www.myinstants.com/media/sounds/spongebob-bubble-transition.mp3"
+   },
+   {
+    "name": "SPONGEBOB A FEW MOMENTS LATER",
+    "url": "https://www.myinstants.com/media/sounds/a-few-moments-later-hd.mp3"
+   },
+   {
+    "name": "5 minutes later - Spongebob",
+    "url": "https://www.myinstants.com/media/sounds/5-minutes-later-spongebob.mp3"
+   },
+   {
+    "name": "Sad spongebob",
+    "url": "https://www.myinstants.com/media/sounds/spongebob-disappointed-sound-effect_isePyIO.mp3"
+   },
+   {
+    "name": "Spongebob - Grass Skirt Chase",
+    "url": "https://www.myinstants.com/media/sounds/spongebob-music_-grass-skirt-chase-1.mp3"
+   },
+   {
+    "name": "fail spongebobs",
+    "url": "https://www.myinstants.com/media/sounds/fail-spongebobs.mp3"
+   },
+   {
+    "name": "SpongeBob sad song meme mp3",
+    "url": "https://www.myinstants.com/media/sounds/spongebob-sad-song-meme-mp3.mp3"
+   },
+   {
+    "name": "SpongeBob - A Few Moments Later",
+    "url": "https://www.myinstants.com/media/sounds/a-few-moments-later-hd_LNSwAQR.mp3"
+   },
+   {
+    "name": "boo womp (spongebob)",
+    "url": "https://www.myinstants.com/media/sounds/boo-womp-spongebob.mp3"
+   },
+   {
+    "name": "Spongebob Screaming",
+    "url": "https://www.myinstants.com/media/sounds/spongebob-screaming.mp3"
+   },
+   {
+    "name": "Spongebob foghorn",
+    "url": "https://www.myinstants.com/media/sounds/spongebob-foghorn_0rxbod9.mp3"
+   },
+   {
+    "name": "Earl's Revenge - Spongebob",
+    "url": "https://www.myinstants.com/media/sounds/earls-revenge-spongebob.mp3"
+   },
+   {
+    "name": "SPONGEBOB ONE HOUR LATER",
+    "url": "https://www.myinstants.com/media/sounds/one-hour-later-spongebob-time-card-96.mp3"
+   },
+   {
+    "name": "Oh brother this guy STINKS spongebob",
+    "url": "https://www.myinstants.com/media/sounds/oh-brother-this-guy-stinks_FFdigtm.mp3"
+   },
+   {
+    "name": "spongebob walking sound effect",
+    "url": "https://www.myinstants.com/media/sounds/spongebob-walking-sound-effect.mp3"
+   },
+   {
+    "name": "Spongebob Bleep",
+    "url": "https://www.myinstants.com/media/sounds/spongebob-bleep.mp3"
+   },
+   {
+    "name": "SpongeBob Tra la la",
+    "url": "https://www.myinstants.com/media/sounds/spongebob-tra-la-la.mp3"
+   }
+  ]
+ },
+ {
+  "id": "anime",
+  "label": "Anime",
+  "emoji": "🍥",
+  "hint": "Copy the anime line",
+  "sounds": [
+   {
+    "name": "anime ahh",
+    "url": "https://www.myinstants.com/media/sounds/anime-ahh.mp3"
+   },
+   {
+    "name": "Awkward Moment",
+    "url": "https://www.myinstants.com/media/sounds/awkward-moment.mp3"
+   },
+   {
+    "name": "Cartoon run take off",
+    "url": "https://www.myinstants.com/media/sounds/take-off_2YqCEjc.mp3"
+   },
+   {
+    "name": "eh?eh?ehhhh?",
+    "url": "https://www.myinstants.com/media/sounds/eh-eh-ehhhh.mp3"
+   },
+   {
+    "name": "anime girl voice",
+    "url": "https://www.myinstants.com/media/sounds/anime-girl-voice.mp3"
+   },
+   {
+    "name": "Sukuna's ryoiki tenkai",
+    "url": "https://www.myinstants.com/media/sounds/sukunas-ryoiki-tenkai.mp3"
+   },
+   {
+    "name": "hehe boi ainsley harriott",
+    "url": "https://www.myinstants.com/media/sounds/ainsley_harriott_and_his_spicy_meatconverttoaudio.mp3"
+   },
+   {
+    "name": "Goku teleport sound",
+    "url": "https://www.myinstants.com/media/sounds/goku-teleport-sound.mp3"
+   },
+   {
+    "name": "Sharingan",
+    "url": "https://www.myinstants.com/media/sounds/collen-eyes-efect.mp3"
+   },
+   {
+    "name": "RADWIMPS10",
+    "url": "https://www.myinstants.com/media/sounds/radwimps10.mp3"
+   },
+   {
+    "name": "Yui Hirasawa - Yahooo",
+    "url": "https://www.myinstants.com/media/sounds/yui-hirasawa-yahooo.mp3"
+   },
+   {
+    "name": "IHIHIHIHI HAHAHAHA - Starcasm Nyx Yander",
+    "url": "https://www.myinstants.com/media/sounds/starcasm-nyx-yandere-laugh_RTnF27y.mp3"
+   },
+   {
+    "name": "I AM ATOMIC!!!",
+    "url": "https://www.myinstants.com/media/sounds/i-am-atomic_a1qHWQ9.mp3"
+   },
+   {
+    "name": "Why are we still here",
+    "url": "https://www.myinstants.com/media/sounds/why-are-we-still-here-kaz-short-speech-10.mp3"
+   },
+   {
+    "name": "Anime Pop SFX",
+    "url": "https://www.myinstants.com/media/sounds/anime-pop-sfx.mp3"
+   },
+   {
+    "name": "Sukuna femboy",
+    "url": "https://www.myinstants.com/media/sounds/sukuna-femboy.mp3"
+   },
+   {
+    "name": "Thank You For Your Patronage",
+    "url": "https://www.myinstants.com/media/sounds/thank-you-for-your-patronage.mp3"
+   },
+   {
+    "name": "Donquixote Doflamingo Laugh",
+    "url": "https://www.myinstants.com/media/sounds/donquixote-doflamingo-laugh.mp3"
+   },
+   {
+    "name": "hungry pumkin eat",
+    "url": "https://www.myinstants.com/media/sounds/asmr_eAIA313.mp3"
+   },
+   {
+    "name": "Tanjiro Scream",
+    "url": "https://www.myinstants.com/media/sounds/tanjiro-scream.mp3"
+   },
+   {
+    "name": "Meme final",
+    "url": "https://www.myinstants.com/media/sounds/meme-de-creditos-finales.mp3"
+   },
+   {
+    "name": "Aizen Yokoso Full",
+    "url": "https://www.myinstants.com/media/sounds/aizen-yokoso-full.mp3"
+   },
+   {
+    "name": "Bob Dhaki Tiki",
+    "url": "https://www.myinstants.com/media/sounds/bob-dhaki-tiki.mp3"
+   },
+   {
+    "name": "I'm Very Angry goku",
+    "url": "https://www.myinstants.com/media/sounds/im-very-angry-goku.mp3"
+   },
+   {
+    "name": "Oh my god anime",
+    "url": "https://www.myinstants.com/media/sounds/oh-my-god-anime.mp3"
+   },
+   {
+    "name": "Mangekyo Sharingan activating",
+    "url": "https://www.myinstants.com/media/sounds/sonido-sharingan-activado.mp3"
+   },
+   {
+    "name": "Jampier TooN",
+    "url": "https://www.myinstants.com/media/sounds/jampier-toon.mp3"
+   },
+   {
+    "name": "cute horse interview",
+    "url": "https://www.myinstants.com/media/sounds/cute-horse-interview.mp3"
+   },
+   {
+    "name": "Ichigo Bankai",
+    "url": "https://www.myinstants.com/media/sounds/ichigo-bankai_91wUa6g.mp3"
+   },
+   {
+    "name": "Luffy!! Orewa",
+    "url": "https://www.myinstants.com/media/sounds/luffy-orewa.mp3"
+   }
+  ]
+ },
+ {
+  "id": "games",
+  "label": "Games",
+  "emoji": "🎮",
+  "hint": "Copy the game sound",
+  "sounds": [
+   {
+    "name": "Matlab wo alag hi level ka banda tha",
+    "url": "https://www.myinstants.com/media/sounds/matlab-wo-alag-hi-level-ka-banda-tha.mp3"
+   },
+   {
+    "name": "danger alarm sound effect meme",
+    "url": "https://www.myinstants.com/media/sounds/danger-alarm-sound-effect-meme.mp3"
+   },
+   {
+    "name": "Pop SFX",
+    "url": "https://www.myinstants.com/media/sounds/pop_7e9Is8L.mp3"
+   },
+   {
+    "name": "Subway Surfers",
+    "url": "https://www.myinstants.com/media/sounds/subway-surfers.mp3"
+   },
+   {
+    "name": "B SWORD WOOSH",
+    "url": "https://www.myinstants.com/media/sounds/woosh_s21KzKN.mp3"
+   },
+   {
+    "name": "ак47 короткая очередь",
+    "url": "https://www.myinstants.com/media/sounds/ak47-korotkaia-ochered.mp3"
+   },
+   {
+    "name": "Finger Snap",
+    "url": "https://www.myinstants.com/media/sounds/finger-snap.mp3"
+   },
+   {
+    "name": "nope",
+    "url": "https://www.myinstants.com/media/sounds/engineer_no01_1.mp3"
+   },
+   {
+    "name": "GTA V Wasted (Death Sound)",
+    "url": "https://www.myinstants.com/media/sounds/gta-v-wasted-death-sound.mp3"
+   },
+   {
+    "name": "doue aura",
+    "url": "https://www.myinstants.com/media/sounds/doue-aura.mp3"
+   },
+   {
+    "name": "Skyrim - Sword Swing Sound Effect",
+    "url": "https://www.myinstants.com/media/sounds/skyrim-sword-swing-sound-effect.mp3"
+   },
+   {
+    "name": "Counter Strike - Ok, let's go!",
+    "url": "https://www.myinstants.com/media/sounds/counter-strike-jingle-cs-radio-ok-lets-go.mp3"
+   },
+   {
+    "name": "Cyberpunk 2077 phone call",
+    "url": "https://www.myinstants.com/media/sounds/cyberpunk-2077-phone-call.mp3"
+   },
+   {
+    "name": "Cashh Money",
+    "url": "https://www.myinstants.com/media/sounds/para-sesi-efekti_PaUswM1.mp3"
+   },
+   {
+    "name": "nice",
+    "url": "https://www.myinstants.com/media/sounds/-click-nice.mp3"
+   },
+   {
+    "name": "fahhh pump sound",
+    "url": "https://www.myinstants.com/media/sounds/fahhh-pump-sound.mp3"
+   },
+   {
+    "name": "NARUTO BATTLE",
+    "url": "https://www.myinstants.com/media/sounds/naruto-the-raising-fighting-spirit-extended-audiotrimmer_7wvXRts.mp3"
+   },
+   {
+    "name": "Minecraft eat",
+    "url": "https://www.myinstants.com/media/sounds/minecraft-eat.mp3"
+   },
+   {
+    "name": "This is where I make my stand",
+    "url": "https://www.myinstants.com/media/sounds/this-is-where-i-make-my-stand.mp3"
+   },
+   {
+    "name": "HI HI HI HA clash royale",
+    "url": "https://www.myinstants.com/media/sounds/hi-hi-hi-ha-clash-royale.mp3"
+   },
+   {
+    "name": "snd - Shotgun Blast",
+    "url": "https://www.myinstants.com/media/sounds/snd-shotgun_blast.mp3"
+   },
+   {
+    "name": "Creeper Hiss",
+    "url": "https://www.myinstants.com/media/sounds/creeper.mp3"
+   },
+   {
+    "name": "wee weee weee",
+    "url": "https://www.myinstants.com/media/sounds/weeeee_original_1193597514938524841.mp3"
+   },
+   {
+    "name": "Ok, let's go CS",
+    "url": "https://www.myinstants.com/media/sounds/ok-lets-go-cs.mp3"
+   },
+   {
+    "name": "Valorant ace sound",
+    "url": "https://www.myinstants.com/media/sounds/valorant-ace-sound.mp3"
+   },
+   {
+    "name": "two hours later",
+    "url": "https://www.myinstants.com/media/sounds/spongebob-two-hours-later-2019-download-link.mp3"
+   },
+   {
+    "name": "Minecraft XP aura sound",
+    "url": "https://www.myinstants.com/media/sounds/minecraft-xp-aura-sound.mp3"
+   },
+   {
+    "name": "Minecraft Hit Sound",
+    "url": "https://www.myinstants.com/media/sounds/y2mate_XL9ozUG.mp3"
+   },
+   {
+    "name": "Tekken 3 Good Morning",
+    "url": "https://www.myinstants.com/media/sounds/tekken-3-good-morning.mp3"
+   },
+   {
+    "name": "Evil laugh Joker",
+    "url": "https://www.myinstants.com/media/sounds/joker-laughing.mp3"
+   }
+  ]
+ },
+ {
+  "id": "movies",
+  "label": "Movies",
+  "emoji": "🍿",
+  "hint": "Copy the movie line",
+  "sounds": [
+   {
+    "name": "Baat to sahi hai",
+    "url": "https://www.myinstants.com/media/sounds/baat-to-sahi-hai.mp3"
+   },
+   {
+    "name": "Kanchana",
+    "url": "https://www.myinstants.com/media/sounds/kanchana.mp3"
+   },
+   {
+    "name": "ki ki ki ma ma ma - jason vorhees",
+    "url": "https://www.myinstants.com/media/sounds/ki-ki-ki-ma-ma-ma-jason-vorhees.mp3"
+   },
+   {
+    "name": "Crow Sound Caw",
+    "url": "https://www.myinstants.com/media/sounds/raven-caw-caw.mp3"
+   },
+   {
+    "name": "Apple Pay",
+    "url": "https://www.myinstants.com/media/sounds/applepay.mp3"
+   },
+   {
+    "name": "Prowler Sound Effect",
+    "url": "https://www.myinstants.com/media/sounds/prowler-sound-effect_6bXErot.mp3"
+   },
+   {
+    "name": "Bone crack meme sound effect",
+    "url": "https://www.myinstants.com/media/sounds/bone-crack-meme-sound-effect.mp3"
+   },
+   {
+    "name": "Plane Flying",
+    "url": "https://www.myinstants.com/media/sounds/plane-flying.mp3"
+   },
+   {
+    "name": "sad music indian",
+    "url": "https://www.myinstants.com/media/sounds/tmpauxfo4ff.mp3"
+   },
+   {
+    "name": "High Fall Whistle, Drum Roll, and Crash",
+    "url": "https://www.myinstants.com/media/sounds/high-fall-whistle-drum-roll-and-crash.mp3"
+   },
+   {
+    "name": "Bello Minion dialogue",
+    "url": "https://www.myinstants.com/media/sounds/bello-minion-dialogue.mp3"
+   },
+   {
+    "name": "Watch out randy orton",
+    "url": "https://www.myinstants.com/media/sounds/randyortonrko-soundeffect.mp3"
+   },
+   {
+    "name": "Bhai ne bola karnekka",
+    "url": "https://www.myinstants.com/media/sounds/bhai-ne-bola-karnekka.mp3"
+   },
+   {
+    "name": "pain theme naruto",
+    "url": "https://www.myinstants.com/media/sounds/pain-2.mp3"
+   },
+   {
+    "name": "Bhag Arjun",
+    "url": "https://www.myinstants.com/media/sounds/bhag-arjun.mp3"
+   },
+   {
+    "name": "It was at this moment he knew",
+    "url": "https://www.myinstants.com/media/sounds/heknew.mp3"
+   },
+   {
+    "name": "Yahoo!",
+    "url": "https://www.myinstants.com/media/sounds/yahoo_real.mp3"
+   }
+  ]
+ },
+ {
+  "id": "farts",
+  "label": "Farts",
+  "emoji": "💨",
+  "hint": "You know what to do",
+  "sounds": [
+   {
+    "name": "Fart",
+    "url": "https://www.myinstants.com/media/sounds/dry-fart.mp3"
+   },
+   {
+    "name": "Fart Button",
+    "url": "https://www.myinstants.com/media/sounds/perfect-fart.mp3"
+   },
+   {
+    "name": "bark&fart",
+    "url": "https://www.myinstants.com/media/sounds/bark-fart_XRsy1HE.mp3"
+   },
+   {
+    "name": "Long brain fart",
+    "url": "https://www.myinstants.com/media/sounds/long-brain-fart.mp3"
+   },
+   {
+    "name": "fart with reverb",
+    "url": "https://www.myinstants.com/media/sounds/fart-with-reverb.mp3"
+   },
+   {
+    "name": "Fart Meme Sound",
+    "url": "https://www.myinstants.com/media/sounds/fart-meme-sound.mp3"
+   },
+   {
+    "name": "Bark Fart Sound",
+    "url": "https://www.myinstants.com/media/sounds/bark-fart-sound.mp3"
+   },
+   {
+    "name": "Fart Funk",
+    "url": "https://www.myinstants.com/media/sounds/fart-funk.mp3"
+   },
+   {
+    "name": "Fart Meme Sound (Better and louder)",
+    "url": "https://www.myinstants.com/media/sounds/fartmeme.mp3"
+   },
+   {
+    "name": "fart with extra reverb",
+    "url": "https://www.myinstants.com/media/sounds/fart-with-extra-reverb.mp3"
+   },
+   {
+    "name": "The Ting Goes Bark Fart",
+    "url": "https://www.myinstants.com/media/sounds/the-ting-goes-bark-fart.mp3"
+   },
+   {
+    "name": "tiki tiki bark fart",
+    "url": "https://www.myinstants.com/media/sounds/tiki-tiki-bark-fart.mp3"
+   },
+   {
+    "name": "brain fart slowed",
+    "url": "https://www.myinstants.com/media/sounds/brain-fart-slowed.mp3"
+   },
+   {
+    "name": "Burp & Fart",
+    "url": "https://www.myinstants.com/media/sounds/burp-fart.mp3"
+   },
+   {
+    "name": "Fart Effect",
+    "url": "https://www.myinstants.com/media/sounds/09037.mp3"
+   },
+   {
+    "name": "Le fart de Simon",
+    "url": "https://www.myinstants.com/media/sounds/le-fart-de-simon.mp3"
+   },
+   {
+    "name": "brain fart",
+    "url": "https://www.myinstants.com/media/sounds/brain-fart.mp3"
+   },
+   {
+    "name": "Bark fart yara yara phonk",
+    "url": "https://www.myinstants.com/media/sounds/bark-fart-yara-yara-phonk.mp3"
+   },
+   {
+    "name": "cuffem fart noise",
+    "url": "https://www.myinstants.com/media/sounds/cuffem-fart-noise.mp3"
+   },
+   {
+    "name": "Dog bark fart",
+    "url": "https://www.myinstants.com/media/sounds/dog-bark-fart.mp3"
+   },
+   {
+    "name": "67 brain fart",
+    "url": "https://www.myinstants.com/media/sounds/67-brain-fart.mp3"
+   },
+   {
+    "name": "Nuclear Fart",
+    "url": "https://www.myinstants.com/media/sounds/nuclear-fart-1.mp3"
+   },
+   {
+    "name": "Wet fart meme",
+    "url": "https://www.myinstants.com/media/sounds/wet-fart-meme.mp3"
+   },
+   {
+    "name": "Wet Slow Fart",
+    "url": "https://www.myinstants.com/media/sounds/fartmemereloaded.mp3"
+   },
+   {
+    "name": "Mi bombo with fart",
+    "url": "https://www.myinstants.com/media/sounds/mi-bombo-with-fart.mp3"
+   },
+   {
+    "name": "fart echo",
+    "url": "https://www.myinstants.com/media/sounds/fart-with-reverb_NcgStsA.mp3"
+   },
+   {
+    "name": "dry fart",
+    "url": "https://www.myinstants.com/media/sounds/dry-fart_3.mp3"
+   },
+   {
+    "name": "iraqi fart",
+    "url": "https://www.myinstants.com/media/sounds/iraqi-fart.mp3"
+   },
+   {
+    "name": "Loud Fart",
+    "url": "https://www.myinstants.com/media/sounds/fart_2.mp3"
+   },
+   {
+    "name": "Fart with echo and reverb",
+    "url": "https://www.myinstants.com/media/sounds/fart-with-echo-and-reverb.mp3"
+   }
+  ]
+ },
+ {
   "id": "nepal-trending",
   "label": "Nepal trending",
   "emoji": "📈",
@@ -10,64 +1878,24 @@
     "url": "https://www.myinstants.com/media/sounds/fahhhhhhhhhhhhhh.mp3"
    },
    {
-    "name": "FAAAH",
-    "url": "https://www.myinstants.com/media/sounds/faaah.mp3"
-   },
-   {
-    "name": "Fart",
-    "url": "https://www.myinstants.com/media/sounds/dry-fart.mp3"
-   },
-   {
     "name": "VINE BOOM SOUND",
     "url": "https://www.myinstants.com/media/sounds/vine-boom.mp3"
-   },
-   {
-    "name": "Chicken on tree screaming",
-    "url": "https://www.myinstants.com/media/sounds/chicken-on-tree-screaming.mp3"
    },
    {
     "name": "Anime Wow",
     "url": "https://www.myinstants.com/media/sounds/anime-wow-sound-effect.mp3"
    },
    {
-    "name": "Among Us role reveal sound",
-    "url": "https://www.myinstants.com/media/sounds/among-us-role-reveal-sound.mp3"
-   },
-   {
-    "name": "spiderman meme song",
-    "url": "https://www.myinstants.com/media/sounds/spiderman-meme-song.mp3"
-   },
-   {
     "name": "Shocked sound",
     "url": "https://www.myinstants.com/media/sounds/shocked-sound-effect.mp3"
-   },
-   {
-    "name": "anime ahh",
-    "url": "https://www.myinstants.com/media/sounds/anime-ahh.mp3"
-   },
-   {
-    "name": "Are baap re yaad aya",
-    "url": "https://www.myinstants.com/media/sounds/are-baap-re-yaad-aya.mp3"
    },
    {
     "name": "Tuco: GET OUT",
     "url": "https://www.myinstants.com/media/sounds/tuco-get-out.mp3"
    },
    {
-    "name": "SpongeBob Fail",
-    "url": "https://www.myinstants.com/media/sounds/spongebob-fail.mp3"
-   },
-   {
     "name": "Bone Crack",
     "url": "https://www.myinstants.com/media/sounds/bone-crack.mp3"
-   },
-   {
-    "name": "Dexter meme",
-    "url": "https://www.myinstants.com/media/sounds/dexter-meme.mp3"
-   },
-   {
-    "name": "Sad Violin (the meme one)",
-    "url": "https://www.myinstants.com/media/sounds/tf_nemesis.mp3"
    },
    {
     "name": "HAha funny laugh",
@@ -76,26 +1904,6 @@
    {
     "name": "GopGopGop",
     "url": "https://www.myinstants.com/media/sounds/gopgopgop.mp3"
-   },
-   {
-    "name": "rizz sound effect",
-    "url": "https://www.myinstants.com/media/sounds/rizz-sound-effect.mp3"
-   },
-   {
-    "name": "Matlab wo alag hi level ka banda tha",
-    "url": "https://www.myinstants.com/media/sounds/matlab-wo-alag-hi-level-ka-banda-tha.mp3"
-   },
-   {
-    "name": "Du bist gut genug",
-    "url": "https://www.myinstants.com/media/sounds/du-bist-gut-genug.mp3"
-   },
-   {
-    "name": "Fart Button",
-    "url": "https://www.myinstants.com/media/sounds/perfect-fart.mp3"
-   },
-   {
-    "name": "cat laugh meme 1",
-    "url": "https://www.myinstants.com/media/sounds/cat-laugh-meme-1.mp3"
    },
    {
     "name": "Chalo",
@@ -110,16 +1918,8 @@
     "url": "https://www.myinstants.com/media/sounds/dun-dun-dun-sound-effect-brass_8nFBccR.mp3"
    },
    {
-    "name": "Aayein Meme",
-    "url": "https://www.myinstants.com/media/sounds/aayein-meme.mp3"
-   },
-   {
     "name": "romanceeeeeeeeeeeeee",
     "url": "https://www.myinstants.com/media/sounds/romanceeeeeeeeeeeeee.mp3"
-   },
-   {
-    "name": "BRUH",
-    "url": "https://www.myinstants.com/media/sounds/movie_1.mp3"
    },
    {
     "name": "Fahhh",
@@ -134,10 +1934,6 @@
     "url": "https://www.myinstants.com/media/sounds/ding-sound-effect_2.mp3"
    },
    {
-    "name": "danger alarm sound effect meme",
-    "url": "https://www.myinstants.com/media/sounds/danger-alarm-sound-effect-meme.mp3"
-   },
-   {
     "name": "a few moments later sponge bob sfx fun",
     "url": "https://www.myinstants.com/media/sounds/a-few-moments-later-sponge-bob-sfx-fun.mp3"
    },
@@ -146,24 +1942,56 @@
     "url": "https://www.myinstants.com/media/sounds/popular-riser-metallic-sound-effect.mp3"
    },
    {
-    "name": "Pop SFX",
-    "url": "https://www.myinstants.com/media/sounds/pop_7e9Is8L.mp3"
-   },
-   {
     "name": "Mac Quack",
     "url": "https://www.myinstants.com/media/sounds/mac-quack.mp3"
    },
    {
-    "name": "Awkward cricket",
-    "url": "https://www.myinstants.com/media/sounds/awkward-cricket-sound-effect.mp3"
-   },
-   {
-    "name": "CID LE MDC",
-    "url": "https://www.myinstants.com/media/sounds/cid-le-mdc.mp3"
-   },
-   {
     "name": "Lekin ye sala",
     "url": "https://www.myinstants.com/media/sounds/lekin-ye-sala.mp3"
+   },
+   {
+    "name": "messi messi messi golgolgolgol",
+    "url": "https://www.myinstants.com/media/sounds/gol-messi-vs-getafe-narrat-per-puyal-full-hd-1080p-audiotrimmer-1.mp3"
+   },
+   {
+    "name": "Meme mp3",
+    "url": "https://www.myinstants.com/media/sounds/meme-de-creditos-finales_qHtIjyQ.mp3"
+   },
+   {
+    "name": "instagram thud",
+    "url": "https://www.myinstants.com/media/sounds/vine-boom-sound-effect_KT89XIq.mp3"
+   },
+   {
+    "name": "indian song",
+    "url": "https://www.myinstants.com/media/sounds/indian-song.mp3"
+   },
+   {
+    "name": "Correct Answer GameShow",
+    "url": "https://www.myinstants.com/media/sounds/correct.mp3"
+   },
+   {
+    "name": "I've Got This FAAAAAAAAAHHHHH",
+    "url": "https://www.myinstants.com/media/sounds/ive-got-this-faaaaaaaaahhhhh.mp3"
+   },
+   {
+    "name": "Kaching Sound FX",
+    "url": "https://www.myinstants.com/media/sounds/kaching-sound-fx.mp3"
+   },
+   {
+    "name": "Quick Ting",
+    "url": "https://www.myinstants.com/media/sounds/quick-ting.mp3"
+   },
+   {
+    "name": "Incorrect sound effect",
+    "url": "https://www.myinstants.com/media/sounds/answer-wrong.mp3"
+   },
+   {
+    "name": "asian meme huh?",
+    "url": "https://www.myinstants.com/media/sounds/huh_37bAoRo.mp3"
+   },
+   {
+    "name": "ACK",
+    "url": "https://www.myinstants.com/media/sounds/ack.mp3"
    }
   ]
  },
@@ -206,14 +2034,6 @@
   "hint": "Copy the desi meme",
   "sounds": [
    {
-    "name": "Raja gujjar",
-    "url": "https://www.myinstants.com/media/sounds/raja-gujjar.mp3"
-   },
-   {
-    "name": "Koun hai re",
-    "url": "https://www.myinstants.com/media/sounds/koun-hai-re_8ep4nAR.mp3"
-   },
-   {
     "name": "Maa tari oo bhai",
     "url": "https://www.myinstants.com/media/sounds/maa-tari-oo-bhai.mp3"
    },
@@ -222,136 +2042,64 @@
     "url": "https://www.myinstants.com/media/sounds/slap-soundmaster13-49669815_4L20wGP.mp3"
    },
    {
-    "name": "Nahi nahi saluke yaha kuchh to gadbad ha",
-    "url": "https://www.myinstants.com/media/sounds/nahi-nahi-saluke-yaha-kuchh-to-gadbad-hai.mp3"
-   },
-   {
-    "name": "baby laughing meme",
-    "url": "https://www.myinstants.com/media/sounds/baby-laughing-meme.mp3"
-   },
-   {
-    "name": "Depression indian !",
-    "url": "https://www.myinstants.com/media/sounds/depression-indian.mp3"
-   },
-   {
-    "name": "Chicken tree scream",
-    "url": "https://www.myinstants.com/media/sounds/chicken-tree-scream_3fBuCLP.mp3"
-   },
-   {
-    "name": "eh?eh?ehhhh?",
-    "url": "https://www.myinstants.com/media/sounds/eh-eh-ehhhh.mp3"
-   },
-   {
     "name": "Ruko jara",
     "url": "https://www.myinstants.com/media/sounds/tmp_z5b93np.mp3"
-   },
-   {
-    "name": "instagram thud",
-    "url": "https://www.myinstants.com/media/sounds/vine-boom-sound-effect_KT89XIq.mp3"
-   },
-   {
-    "name": "Ki kore",
-    "url": "https://www.myinstants.com/media/sounds/ki-kore.mp3"
-   },
-   {
-    "name": "asian meme huh?",
-    "url": "https://www.myinstants.com/media/sounds/huh_37bAoRo.mp3"
    },
    {
     "name": "running sound",
     "url": "https://www.myinstants.com/media/sounds/1-108.mp3"
    },
    {
-    "name": "yoooooooooooo",
-    "url": "https://www.myinstants.com/media/sounds/yooooooooooooooooooooooooo_4_objp8XX.mp3"
-   },
-   {
-    "name": "indian song",
-    "url": "https://www.myinstants.com/media/sounds/indian-song.mp3"
-   },
-   {
-    "name": "abhi maza ayagga",
-    "url": "https://www.myinstants.com/media/sounds/abhi-maza-ayagga.mp3"
+    "name": "Duck toy sound",
+    "url": "https://www.myinstants.com/media/sounds/duck-toy-sound.mp3"
    },
    {
     "name": "Arkh",
     "url": "https://www.myinstants.com/media/sounds/arkh.mp3"
    },
    {
-    "name": "Duck toy sound",
-    "url": "https://www.myinstants.com/media/sounds/duck-toy-sound.mp3"
-   },
-   {
-    "name": "I've Got This FAAAAAAAAAHHHHH",
-    "url": "https://www.myinstants.com/media/sounds/ive-got-this-faaaaaaaaahhhhh.mp3"
-   },
-   {
-    "name": "Ab tu Gaya beta ab dekh tu (puneet",
-    "url": "https://www.myinstants.com/media/sounds/ab-tu-gaya-beta-ab-dekh-tu-puneet.mp3"
+    "name": "abhi maza ayagga",
+    "url": "https://www.myinstants.com/media/sounds/abhi-maza-ayagga.mp3"
    },
    {
     "name": "Error SOUNDSS",
     "url": "https://www.myinstants.com/media/sounds/error_CDOxCYm.mp3"
    },
    {
-    "name": "Apple Pay",
-    "url": "https://www.myinstants.com/media/sounds/applepay.mp3"
-   },
-   {
-    "name": "CID",
-    "url": "https://www.myinstants.com/media/sounds/cid.mp3"
-   },
-   {
-    "name": "Tum Dum Tedau",
-    "url": "https://www.myinstants.com/media/sounds/tum-dum-tedau.mp3"
-   },
-   {
-    "name": "tehelka omlette",
-    "url": "https://www.myinstants.com/media/sounds/tehelka-omlette.mp3"
-   },
-   {
     "name": "Meri jung Emotional",
     "url": "https://www.myinstants.com/media/sounds/meri-jung-emotional.mp3"
-   },
-   {
-    "name": "Acha ji aisa hai kya",
-    "url": "https://www.myinstants.com/media/sounds/acha-ji-aisa-hai-kya.mp3"
    },
    {
     "name": "The Undertaker Bell",
     "url": "https://www.myinstants.com/media/sounds/undertakers-bell_2UwFCIe.mp3"
    },
    {
+    "name": "Acha ji aisa hai kya",
+    "url": "https://www.myinstants.com/media/sounds/acha-ji-aisa-hai-kya.mp3"
+   },
+   {
     "name": "Ammi bacha la re",
     "url": "https://www.myinstants.com/media/sounds/ammi-bacha-la-re.mp3"
-   },
-   {
-    "name": "Chaloo",
-    "url": "https://www.myinstants.com/media/sounds/chaloo.mp3"
-   },
-   {
-    "name": "Rizzbot laugh",
-    "url": "https://www.myinstants.com/media/sounds/rizzbot-laugh.mp3"
-   },
-   {
-    "name": "Kuchu puchu tum kaha ho",
-    "url": "https://www.myinstants.com/media/sounds/kuchu-puchu-tum-kaha-ho.mp3"
-   },
-   {
-    "name": "Tiki tiki boosted",
-    "url": "https://www.myinstants.com/media/sounds/tiki-tiki-boosted.mp3"
    },
    {
     "name": "Jo gareeb hove naa",
     "url": "https://www.myinstants.com/media/sounds/jo-gareeb-hove-naa.mp3"
    },
    {
-    "name": "oh no no no laugh",
-    "url": "https://www.myinstants.com/media/sounds/oh-no-no-no-no-laugh.mp3"
+    "name": "Chaloo",
+    "url": "https://www.myinstants.com/media/sounds/chaloo.mp3"
    },
    {
-    "name": "Oh My God Meme",
-    "url": "https://www.myinstants.com/media/sounds/oh-my-god-meme.mp3"
+    "name": "Tiki tiki boosted",
+    "url": "https://www.myinstants.com/media/sounds/tiki-tiki-boosted.mp3"
+   },
+   {
+    "name": "Kuchu puchu tum kaha ho",
+    "url": "https://www.myinstants.com/media/sounds/kuchu-puchu-tum-kaha-ho.mp3"
+   },
+   {
+    "name": "oh no no no laugh",
+    "url": "https://www.myinstants.com/media/sounds/oh-no-no-no-no-laugh.mp3"
    },
    {
     "name": "Abe Sale",
@@ -364,6 +2112,46 @@
    {
     "name": "Kyu re madarchod cid",
     "url": "https://www.myinstants.com/media/sounds/kyu-re-madarchod-cid.mp3"
+   },
+   {
+    "name": "-999 Social Credit Siren",
+    "url": "https://www.myinstants.com/media/sounds/999-social-credit-siren.mp3"
+   },
+   {
+    "name": "Comedy",
+    "url": "https://www.myinstants.com/media/sounds/comedy_sms_tonewapspell.mp3"
+   },
+   {
+    "name": "Звук фотоаппарата",
+    "url": "https://www.myinstants.com/media/sounds/zvuk-fotoapparata.mp3"
+   },
+   {
+    "name": "Galaxy meme",
+    "url": "https://www.myinstants.com/media/sounds/galaxy-meme.mp3"
+   },
+   {
+    "name": "RUN vine",
+    "url": "https://www.myinstants.com/media/sounds/run-vine-sound-effect.mp3"
+   },
+   {
+    "name": "Metal pipe clang",
+    "url": "https://www.myinstants.com/media/sounds/metal-pipe-clang.mp3"
+   },
+   {
+    "name": "Wow Anime meme",
+    "url": "https://www.myinstants.com/media/sounds/anime-wow-sound-effect-mp3cut.mp3"
+   },
+   {
+    "name": "is ka karan narendar modi",
+    "url": "https://www.myinstants.com/media/sounds/is-ka-karan-narendar-modi.mp3"
+   },
+   {
+    "name": "Ale le le",
+    "url": "https://www.myinstants.com/media/sounds/ale-le-le.mp3"
+   },
+   {
+    "name": "Is Sajjan Ko Kya Takleef Hai Bhai",
+    "url": "https://www.myinstants.com/media/sounds/is-sajjan-ko-kya-takleef-hai-bhai.mp3"
    }
   ]
  },
@@ -374,32 +2162,12 @@
   "hint": "Daya, darwaza tod do",
   "sounds": [
    {
-    "name": "Ale le le",
-    "url": "https://www.myinstants.com/media/sounds/ale-le-le.mp3"
-   },
-   {
     "name": "Cid ACP MC",
     "url": "https://www.myinstants.com/media/sounds/cid-acp-mc.mp3"
    },
    {
-    "name": "Whoooooo yeleeee laudeeee",
-    "url": "https://www.myinstants.com/media/sounds/whoooooo-yeleeee-laudeeee_Nk6JpCP.mp3"
-   },
-   {
     "name": "masti dekho bc, CID dubbing",
     "url": "https://www.myinstants.com/media/sounds/masti-dekho-bc-cid-dubbing.mp3"
-   },
-   {
-    "name": "EK jhaat bhar ka aadmi ...",
-    "url": "https://www.myinstants.com/media/sounds/ek-jhaat-bhar-ka-aadmi.mp3"
-   },
-   {
-    "name": "phir Teri Maiya chodta hu CID",
-    "url": "https://www.myinstants.com/media/sounds/phir-teri-maiya-chodta-hu-cid.mp3"
-   },
-   {
-    "name": "chodu CID",
-    "url": "https://www.myinstants.com/media/sounds/chodu-cid.mp3"
    },
    {
     "name": "Ek Gand pe Repta mara n Sarak pe Hagta f",
@@ -412,10 +2180,6 @@
    {
     "name": "CID ACP Pradhuman Fasi",
     "url": "https://www.myinstants.com/media/sounds/cid-acp-pradhuman-fasi.mp3"
-   },
-   {
-    "name": "Cid yeh kya back rahe ho mcd",
-    "url": "https://www.myinstants.com/media/sounds/cid-yeh-kya-back-rahe-ho-mcd.mp3"
    },
    {
     "name": "Kya cheda bhosdi",
@@ -470,10 +2234,6 @@
     "url": "https://www.myinstants.com/media/sounds/chodu-cid-tum-ek.mp3"
    },
    {
-    "name": "aree cid",
-    "url": "https://www.myinstants.com/media/sounds/aree-cid.mp3"
-   },
-   {
     "name": "CID CHUT",
     "url": "https://www.myinstants.com/media/sounds/cid-chut.mp3"
    },
@@ -520,18 +2280,6 @@
    {
     "name": "Cid ( lode ak rspte)",
     "url": "https://www.myinstants.com/media/sounds/cid-lode-ak-rspte.mp3"
-   },
-   {
-    "name": "chodu cid pyaar",
-    "url": "https://www.myinstants.com/media/sounds/chodu-cid-pyaar.mp3"
-   },
-   {
-    "name": "cid suno bhen ke lawdo",
-    "url": "https://www.myinstants.com/media/sounds/cid-suno-bhen-ke-lawdo.mp3"
-   },
-   {
-    "name": "Seal todu cid",
-    "url": "https://www.myinstants.com/media/sounds/seal-todu-cid.mp3"
    }
   ]
  },
@@ -660,1090 +2408,6 @@
    {
     "name": "KGF Custom 5 by VJ",
     "url": "https://www.myinstants.com/media/sounds/kgf-custom-5-by-vj.mp3"
-   },
-   {
-    "name": "KGF Custom 2 by VJ",
-    "url": "https://www.myinstants.com/media/sounds/kgf-custom-2-by-vj.mp3"
-   },
-   {
-    "name": "Proper Patola by VJ",
-    "url": "https://www.myinstants.com/media/sounds/proper-patola-by-vj.mp3"
-   },
-   {
-    "name": "Barishon Me- Darshan Raval by VJ",
-    "url": "https://www.myinstants.com/media/sounds/barishon-me-darshan-raval-by-vj.mp3"
-   },
-   {
-    "name": "KGF Custom 11 by VJ",
-    "url": "https://www.myinstants.com/media/sounds/kgf-custom-11-by-vj.mp3"
-   },
-   {
-    "name": "Bollywood Meme",
-    "url": "https://www.myinstants.com/media/sounds/bollywood-meme.mp3"
-   },
-   {
-    "name": "KGF Custom 10 by VJ",
-    "url": "https://www.myinstants.com/media/sounds/kgf-custom-10-by-vj.mp3"
-   },
-   {
-    "name": "Main Ho Tere Sath by VJ",
-    "url": "https://www.myinstants.com/media/sounds/main-ho-tere-sath-by-vj.mp3"
-   },
-   {
-    "name": "Thoda Thoda Pyar 2 by VJ",
-    "url": "https://www.myinstants.com/media/sounds/thoda-thoda-pyar-2-by-vj.mp3"
-   },
-   {
-    "name": "Shootout AT Lokhandwala THEME by VJ",
-    "url": "https://www.myinstants.com/media/sounds/shootout-at-lokhandwala-theme-by-vj.mp3"
-   },
-   {
-    "name": "Shayad Kabhi Na by VJ",
-    "url": "https://www.myinstants.com/media/sounds/shayad-kabhi-na-by-vj.mp3"
-   }
-  ]
- },
- {
-  "id": "memes",
-  "label": "Memes",
-  "emoji": "😂",
-  "hint": "Copy the meme sound",
-  "sounds": [
-   {
-    "name": "AAAAAAAAAAAAAAAAAAAA é lutador",
-    "url": "https://www.myinstants.com/media/sounds/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-e-lutador.mp3"
-   },
-   {
-    "name": "M e o w ~",
-    "url": "https://www.myinstants.com/media/sounds/m-e-o-w.mp3"
-   },
-   {
-    "name": "spiderman meme song 2.0",
-    "url": "https://www.myinstants.com/media/sounds/spiderman-meme-song-2-0.mp3"
-   },
-   {
-    "name": "YAAAAAAAAY",
-    "url": "https://www.myinstants.com/media/sounds/kids-saying-yay-sound-effect_3.mp3"
-   },
-   {
-    "name": "Khelega free fire",
-    "url": "https://www.myinstants.com/media/sounds/khelega-free-fire.mp3"
-   },
-   {
-    "name": "sad meow song",
-    "url": "https://www.myinstants.com/media/sounds/sad-meow-song.mp3"
-   },
-   {
-    "name": "*Snore* mimimimimimi",
-    "url": "https://www.myinstants.com/media/sounds/snore-mimimimimimi.mp3"
-   },
-   {
-    "name": "goku drip",
-    "url": "https://www.myinstants.com/media/sounds/drip-goku-meme-song-original-dragon-ball-super-music-clash-of-gods-in-description.mp3"
-   },
-   {
-    "name": "Ayyy ayyy ayyy scream",
-    "url": "https://www.myinstants.com/media/sounds/ayyy-ayyy-ayyy-scream.mp3"
-   },
-   {
-    "name": "Lets Go Meme",
-    "url": "https://www.myinstants.com/media/sounds/lets-go-meme_m93gdas.mp3"
-   },
-   {
-    "name": "squidward walking sound",
-    "url": "https://www.myinstants.com/media/sounds/squidward-walking-sound.mp3"
-   },
-   {
-    "name": "The Ting Goes Bark Fart",
-    "url": "https://www.myinstants.com/media/sounds/the-ting-goes-bark-fart.mp3"
-   },
-   {
-    "name": "Band karo",
-    "url": "https://www.myinstants.com/media/sounds/band-karo.mp3"
-   },
-   {
-    "name": "roblox wow",
-    "url": "https://www.myinstants.com/media/sounds/roblox-wow.mp3"
-   },
-   {
-    "name": "Comedy",
-    "url": "https://www.myinstants.com/media/sounds/comedy_sms_tonewapspell.mp3"
-   },
-   {
-    "name": "Cat laughing at you",
-    "url": "https://www.myinstants.com/media/sounds/cat-laughing-at-you.mp3"
-   },
-   {
-    "name": "oh my god bro oh hell nah man",
-    "url": "https://www.myinstants.com/media/sounds/oh-my-god-bro-oh-hell-nah-man.mp3"
-   },
-   {
-    "name": "parte cristiano suiii",
-    "url": "https://www.myinstants.com/media/sounds/parte-cristiano-suiii.mp3"
-   },
-   {
-    "name": "*Pulls out a AK47* >:)",
-    "url": "https://www.myinstants.com/media/sounds/shooting-the-crap-out-of-somone.mp3"
-   },
-   {
-    "name": "Shut up!",
-    "url": "https://www.myinstants.com/media/sounds/shutup.swf.mp3"
-   },
-   {
-    "name": "Cartoon running sound tiptoe",
-    "url": "https://www.myinstants.com/media/sounds/cartoon-running-sound-tiptoe.mp3"
-   },
-   {
-    "name": "Oh My Gah - Osaka (No Background Music)",
-    "url": "https://www.myinstants.com/media/sounds/oh-my-gah-osaka-no-background-music.mp3"
-   },
-   {
-    "name": "Evil laugh from Roblox game",
-    "url": "https://www.myinstants.com/media/sounds/evil-laugh-from-roblox-game.mp3"
-   },
-   {
-    "name": "spongebob walking sound effect",
-    "url": "https://www.myinstants.com/media/sounds/spongebob-walking-sound-effect.mp3"
-   },
-   {
-    "name": "Cartoon Mr. Krab Walking",
-    "url": "https://www.myinstants.com/media/sounds/cartoon-mr-krab-walking.mp3"
-   },
-   {
-    "name": "YEPIII",
-    "url": "https://www.myinstants.com/media/sounds/yepiii.mp3"
-   },
-   {
-    "name": "Sad Piano Tune",
-    "url": "https://www.myinstants.com/media/sounds/_up_-sad-scene.mp3"
-   },
-   {
-    "name": "iPhone Notification",
-    "url": "https://www.myinstants.com/media/sounds/notification_o14egLP.mp3"
-   },
-   {
-    "name": "omg bruh oh hell nah",
-    "url": "https://www.myinstants.com/media/sounds/omg-bruh-oh-hell-nah.mp3"
-   },
-   {
-    "name": "slap sound effect funny memes",
-    "url": "https://www.myinstants.com/media/sounds/slap-sound-effect-funny-memes.mp3"
-   },
-   {
-    "name": "minecraft eating sound",
-    "url": "https://www.myinstants.com/media/sounds/nom-nom-nom_gPJiWn4.mp3"
-   },
-   {
-    "name": "Beta Rok Re Meme",
-    "url": "https://www.myinstants.com/media/sounds/beta-rok-re-meme.mp3"
-   },
-   {
-    "name": "Windows XP Critical Error (Full Version)",
-    "url": "https://www.myinstants.com/media/sounds/windows-xp-critical-error-full-version.mp3"
-   },
-   {
-    "name": "loading..",
-    "url": "https://www.myinstants.com/media/sounds/loading-lost-connection-green-screen-with-sound-effect-2.mp3"
-   },
-   {
-    "name": "RUN vine",
-    "url": "https://www.myinstants.com/media/sounds/run-vine-sound-effect.mp3"
-   },
-   {
-    "name": "Wow Anime meme",
-    "url": "https://www.myinstants.com/media/sounds/anime-wow-sound-effect-mp3cut.mp3"
-   },
-   {
-    "name": "Long brain fart",
-    "url": "https://www.myinstants.com/media/sounds/long-brain-fart.mp3"
-   },
-   {
-    "name": "Wait a minute who are you",
-    "url": "https://www.myinstants.com/media/sounds/wait-a-minute-who-are-you.mp3"
-   },
-   {
-    "name": "app",
-    "url": "https://www.myinstants.com/media/sounds/aplausos_3.mp3"
-   },
-   {
-    "name": "пердеж",
-    "url": "https://www.myinstants.com/media/sounds/perdezh_YQ5l54B.mp3"
-   }
-  ]
- },
- {
-  "id": "reactions",
-  "label": "Reactions",
-  "emoji": "😱",
-  "hint": "React exactly like that",
-  "sounds": [
-   {
-    "name": "Wrong Answer GameShow",
-    "url": "https://www.myinstants.com/media/sounds/wrong_5.mp3"
-   },
-   {
-    "name": "Laughing dog meme",
-    "url": "https://www.myinstants.com/media/sounds/laughing-dog-meme.mp3"
-   },
-   {
-    "name": "Huh? Ceeday",
-    "url": "https://www.myinstants.com/media/sounds/ceeday-huh-sound-effect.mp3"
-   },
-   {
-    "name": "Tudun tadau",
-    "url": "https://www.myinstants.com/media/sounds/tudun-tadau_BJviW12.mp3"
-   },
-   {
-    "name": "Michael Jackson Hee Hee",
-    "url": "https://www.myinstants.com/media/sounds/michael-jackson-hee-hee.mp3"
-   },
-   {
-    "name": "Road Rash 64 - First Place",
-    "url": "https://www.myinstants.com/media/sounds/road-rash-64-first-place.mp3"
-   },
-   {
-    "name": "sudden suspense",
-    "url": "https://www.myinstants.com/media/sounds/sudden-suspense-sound-effect.mp3"
-   },
-   {
-    "name": "Anime punch",
-    "url": "https://www.myinstants.com/media/sounds/strongpunch.mp3"
-   },
-   {
-    "name": "Cartoon Slip",
-    "url": "https://www.myinstants.com/media/sounds/cartoonslip.mp3"
-   },
-   {
-    "name": "FAH PERFECT SYNC",
-    "url": "https://www.myinstants.com/media/sounds/fah-perfect-sync.mp3"
-   },
-   {
-    "name": "oh my god, wow!",
-    "url": "https://www.myinstants.com/media/sounds/omgwow.mp3"
-   },
-   {
-    "name": "Leave me alone! | (Take #1)",
-    "url": "https://www.myinstants.com/media/sounds/leave-me-alone-take-1.mp3"
-   },
-   {
-    "name": "Leave me alone! | (Take #2)",
-    "url": "https://www.myinstants.com/media/sounds/leave-me-alone-take-2_bRDgrmS.mp3"
-   },
-   {
-    "name": "Munch (eating / biting)",
-    "url": "https://www.myinstants.com/media/sounds/munch-sound-effect.mp3"
-   },
-   {
-    "name": "Shock Sound Effect",
-    "url": "https://www.myinstants.com/media/sounds/shock-sound-effect.mp3"
-   },
-   {
-    "name": "Cringe Sus Anime Girl",
-    "url": "https://www.myinstants.com/media/sounds/cringe-sus-anime-girl.mp3"
-   },
-   {
-    "name": "confused binyot",
-    "url": "https://www.myinstants.com/media/sounds/confused-binyot.mp3"
-   },
-   {
-    "name": "Meow ghop ghop ghop",
-    "url": "https://www.myinstants.com/media/sounds/meow-ghop-ghop-ghop.mp3"
-   },
-   {
-    "name": "Rahul Gandhi khatam",
-    "url": "https://www.myinstants.com/media/sounds/tmp8ljn9e7h.mp3"
-   },
-   {
-    "name": "chup tmkc",
-    "url": "https://www.myinstants.com/media/sounds/chup-tmkc.mp3"
-   },
-   {
-    "name": "Chalti Firti Cocaine ...",
-    "url": "https://www.myinstants.com/media/sounds/chalti-firti-cocaine.mp3"
-   },
-   {
-    "name": "Tadaaa!",
-    "url": "https://www.myinstants.com/media/sounds/tadaaa.mp3"
-   },
-   {
-    "name": "bongo hit",
-    "url": "https://www.myinstants.com/media/sounds/bongo-hit.mp3"
-   },
-   {
-    "name": "chacha ahh",
-    "url": "https://www.myinstants.com/media/sounds/chacha-ahh.mp3"
-   },
-   {
-    "name": "Sonic Ring Sound Effect",
-    "url": "https://www.myinstants.com/media/sounds/sonic-ring-sound-effect-in-stereo.mp3"
-   },
-   {
-    "name": "Awkward - Cricket Silence",
-    "url": "https://www.myinstants.com/media/sounds/awkward-cricket-silence.mp3"
-   },
-   {
-    "name": "EAS Alert (USA)",
-    "url": "https://www.myinstants.com/media/sounds/eas-alert-sound-fx.mp3"
-   },
-   {
-    "name": "Oh! Shit! Not good!!!!!!!!!",
-    "url": "https://www.myinstants.com/media/sounds/oh-shit-not-good_ZUcKH4I.mp3"
-   },
-   {
-    "name": "Another shocked sound!!",
-    "url": "https://www.myinstants.com/media/sounds/another-shocked-sound.mp3"
-   }
-  ]
- },
- {
-  "id": "viral",
-  "label": "Viral",
-  "emoji": "🔥",
-  "hint": "Copy the viral sound",
-  "sounds": [
-   {
-    "name": "Screw on this loose (2)",
-    "url": "https://www.myinstants.com/media/sounds/screw-on-this-loose-2.mp3"
-   },
-   {
-    "name": "Kis color chaddi pehne ho",
-    "url": "https://www.myinstants.com/media/sounds/kis-color-chaddi-pehne-ho.mp3"
-   },
-   {
-    "name": "mai gali",
-    "url": "https://www.myinstants.com/media/sounds/mai-gali.mp3"
-   },
-   {
-    "name": "teri gand mari",
-    "url": "https://www.myinstants.com/media/sounds/teri-gand-mari.mp3"
-   },
-   {
-    "name": "3.2.1. Go",
-    "url": "https://www.myinstants.com/media/sounds/3-2-1-go-green-screen-footage-2xoehcl8evq.mp3"
-   },
-   {
-    "name": "Chipmunk Laugh",
-    "url": "https://www.myinstants.com/media/sounds/funny_82hiegE.mp3"
-   },
-   {
-    "name": "Africa crying laugh commercial",
-    "url": "https://www.myinstants.com/media/sounds/africa-crying-laugh-commercial.mp3"
-   },
-   {
-    "name": "Wait, What!?",
-    "url": "https://www.myinstants.com/media/sounds/wait-what.mp3"
-   },
-   {
-    "name": "Oh Kevin de Bruybe",
-    "url": "https://www.myinstants.com/media/sounds/oh-kevin-de-bruybe.mp3"
-   },
-   {
-    "name": "CHACHAA",
-    "url": "https://www.myinstants.com/media/sounds/chachaa.mp3"
-   },
-   {
-    "name": "shocking!",
-    "url": "https://www.myinstants.com/media/sounds/shocking_0NL2w3I.mp3"
-   },
-   {
-    "name": "Youtube subscribe and like bell sound",
-    "url": "https://www.myinstants.com/media/sounds/youtube-subscribe-and-like-bell-sound.mp3"
-   },
-   {
-    "name": "Chicken screaming on a tree",
-    "url": "https://www.myinstants.com/media/sounds/chicken-screaming-on-a-tree.mp3"
-   },
-   {
-    "name": "Angry Indian Scammer",
-    "url": "https://www.myinstants.com/media/sounds/getfromytcom-the-angriest-scamme-1.mp3"
-   },
-   {
-    "name": "Whip",
-    "url": "https://www.myinstants.com/media/sounds/crack_the_whip.mp3"
-   },
-   {
-    "name": "tung dung tananeo",
-    "url": "https://www.myinstants.com/media/sounds/tung-dung-tananeo.mp3"
-   },
-   {
-    "name": "Are you sure about that? JCena",
-    "url": "https://www.myinstants.com/media/sounds/are-you-sure-about-that_3D0ngHY.mp3"
-   },
-   {
-    "name": "camera",
-    "url": "https://www.myinstants.com/media/sounds/camera_RoEAelf.mp3"
-   },
-   {
-    "name": "Gian hain aap",
-    "url": "https://www.myinstants.com/media/sounds/gian-hain-aap.mp3"
-   },
-   {
-    "name": "Amongus Sus",
-    "url": "https://www.myinstants.com/media/sounds/53b1bab6-a8c3-4a1a-82db-7110ce1c29ef_6KNDGWD.mp3"
-   },
-   {
-    "name": "MU HEHEHEHE CAT",
-    "url": "https://www.myinstants.com/media/sounds/mu-hehehehe-cat.mp3"
-   },
-   {
-    "name": "gogogogogo",
-    "url": "https://www.myinstants.com/media/sounds/gogogogogo.mp3"
-   },
-   {
-    "name": "Boom! Headshot!",
-    "url": "https://www.myinstants.com/media/sounds/boomheadshot.swf.mp3"
-   },
-   {
-    "name": "oi oi oe oi a eye eye",
-    "url": "https://www.myinstants.com/media/sounds/oi-oi-oe-oi-a-eye-eye.mp3"
-   },
-   {
-    "name": "Chal hatt",
-    "url": "https://www.myinstants.com/media/sounds/tmp0e30dvim.mp3"
-   },
-   {
-    "name": "Nintendo Switch Click",
-    "url": "https://www.myinstants.com/media/sounds/switch-sound.mp3"
-   },
-   {
-    "name": "Naruto Sad Song",
-    "url": "https://www.myinstants.com/media/sounds/naruto-sad-music-instant.mp3"
-   },
-   {
-    "name": "Record scratch funny",
-    "url": "https://www.myinstants.com/media/sounds/record-scratch_iHoP6I8.mp3"
-   }
-  ]
- },
- {
-  "id": "tiktok",
-  "label": "TikTok trends",
-  "emoji": "🎵",
-  "hint": "Copy the trend",
-  "sounds": [
-   {
-    "name": "bark&fart",
-    "url": "https://www.myinstants.com/media/sounds/bark-fart_XRsy1HE.mp3"
-   },
-   {
-    "name": "Core Sound Effect",
-    "url": "https://www.myinstants.com/media/sounds/core-sound-effect.mp3"
-   },
-   {
-    "name": "Tung tung sahur",
-    "url": "https://www.myinstants.com/media/sounds/tung-tung-sahur.mp3"
-   },
-   {
-    "name": "TikTok Core",
-    "url": "https://www.myinstants.com/media/sounds/tiktok-core.mp3"
-   },
-   {
-    "name": "Ocean meme",
-    "url": "https://www.myinstants.com/media/sounds/ocean-meme.mp3"
-   },
-   {
-    "name": "IA IA AHH YEYE YEYE - lovely sad",
-    "url": "https://www.myinstants.com/media/sounds/ia-ia-ahh-yeye-yeye-lovely-sad.mp3"
-   },
-   {
-    "name": "Oh No No No Tik Tok Song Sound Effect",
-    "url": "https://www.myinstants.com/media/sounds/oh-no-no-no-tik-tok-song-sound-effect.mp3"
-   },
-   {
-    "name": "Skeleton with shield",
-    "url": "https://www.myinstants.com/media/sounds/skeleton-with-shield.mp3"
-   },
-   {
-    "name": "Yara Yara Phonk Aura Tuff",
-    "url": "https://www.myinstants.com/media/sounds/yara-yara-phonk-aura-tuff.mp3"
-   },
-   {
-    "name": "Hey let her go!",
-    "url": "https://www.myinstants.com/media/sounds/let-her-go.mp3"
-   },
-   {
-    "name": "Le fart de Simon",
-    "url": "https://www.myinstants.com/media/sounds/le-fart-de-simon.mp3"
-   },
-   {
-    "name": "blue shirt guy",
-    "url": "https://www.myinstants.com/media/sounds/blue-shirt-guy.mp3"
-   },
-   {
-    "name": "Si el tomate es fruta",
-    "url": "https://www.myinstants.com/media/sounds/si-el-tomate-es-fruta.mp3"
-   },
-   {
-    "name": "Oh No Meme (2020)",
-    "url": "https://www.myinstants.com/media/sounds/oh-no-meme-2020_hX2n56J.mp3"
-   },
-   {
-    "name": "are you serious right now bro?",
-    "url": "https://www.myinstants.com/media/sounds/are-you-serious-right-now-bro_b4pklZp.mp3"
-   },
-   {
-    "name": "side eye",
-    "url": "https://www.myinstants.com/media/sounds/side-eye.mp3"
-   },
-   {
-    "name": "Ashley look at me",
-    "url": "https://www.myinstants.com/media/sounds/ashley-look-at-me.mp3"
-   },
-   {
-    "name": "AUUGHHH",
-    "url": "https://www.myinstants.com/media/sounds/auughhh.mp3"
-   }
-  ]
- },
- {
-  "id": "anime",
-  "label": "Anime",
-  "emoji": "🍥",
-  "hint": "Copy the anime line",
-  "sounds": [
-   {
-    "name": "Awkward Moment",
-    "url": "https://www.myinstants.com/media/sounds/awkward-moment.mp3"
-   },
-   {
-    "name": "Cartoon run take off",
-    "url": "https://www.myinstants.com/media/sounds/take-off_2YqCEjc.mp3"
-   },
-   {
-    "name": "anime girl voice",
-    "url": "https://www.myinstants.com/media/sounds/anime-girl-voice.mp3"
-   },
-   {
-    "name": "Sukuna's ryoiki tenkai",
-    "url": "https://www.myinstants.com/media/sounds/sukunas-ryoiki-tenkai.mp3"
-   },
-   {
-    "name": "uwu discord gorl",
-    "url": "https://www.myinstants.com/media/sounds/uwu-discord-gorl.mp3"
-   },
-   {
-    "name": "hehe boi ainsley harriott",
-    "url": "https://www.myinstants.com/media/sounds/ainsley_harriott_and_his_spicy_meatconverttoaudio.mp3"
-   },
-   {
-    "name": "Goku teleport sound",
-    "url": "https://www.myinstants.com/media/sounds/goku-teleport-sound.mp3"
-   },
-   {
-    "name": "Sharingan",
-    "url": "https://www.myinstants.com/media/sounds/collen-eyes-efect.mp3"
-   },
-   {
-    "name": "RADWIMPS10",
-    "url": "https://www.myinstants.com/media/sounds/radwimps10.mp3"
-   },
-   {
-    "name": "Yui Hirasawa - Yahooo",
-    "url": "https://www.myinstants.com/media/sounds/yui-hirasawa-yahooo.mp3"
-   },
-   {
-    "name": "IHIHIHIHI HAHAHAHA - Starcasm Nyx Yander",
-    "url": "https://www.myinstants.com/media/sounds/starcasm-nyx-yandere-laugh_RTnF27y.mp3"
-   },
-   {
-    "name": "I AM ATOMIC!!!",
-    "url": "https://www.myinstants.com/media/sounds/i-am-atomic_a1qHWQ9.mp3"
-   },
-   {
-    "name": "Why are we still here",
-    "url": "https://www.myinstants.com/media/sounds/why-are-we-still-here-kaz-short-speech-10.mp3"
-   },
-   {
-    "name": "Anime Pop SFX",
-    "url": "https://www.myinstants.com/media/sounds/anime-pop-sfx.mp3"
-   },
-   {
-    "name": "Sukuna femboy",
-    "url": "https://www.myinstants.com/media/sounds/sukuna-femboy.mp3"
-   },
-   {
-    "name": "Thank You For Your Patronage",
-    "url": "https://www.myinstants.com/media/sounds/thank-you-for-your-patronage.mp3"
-   },
-   {
-    "name": "Donquixote Doflamingo Laugh",
-    "url": "https://www.myinstants.com/media/sounds/donquixote-doflamingo-laugh.mp3"
-   },
-   {
-    "name": "hungry pumkin eat",
-    "url": "https://www.myinstants.com/media/sounds/asmr_eAIA313.mp3"
-   },
-   {
-    "name": "Tanjiro Scream",
-    "url": "https://www.myinstants.com/media/sounds/tanjiro-scream.mp3"
-   },
-   {
-    "name": "Meme final",
-    "url": "https://www.myinstants.com/media/sounds/meme-de-creditos-finales.mp3"
-   },
-   {
-    "name": "Aizen Yokoso Full",
-    "url": "https://www.myinstants.com/media/sounds/aizen-yokoso-full.mp3"
-   },
-   {
-    "name": "Bob Dhaki Tiki",
-    "url": "https://www.myinstants.com/media/sounds/bob-dhaki-tiki.mp3"
-   },
-   {
-    "name": "I'm Very Angry goku",
-    "url": "https://www.myinstants.com/media/sounds/im-very-angry-goku.mp3"
-   },
-   {
-    "name": "Oh my god anime",
-    "url": "https://www.myinstants.com/media/sounds/oh-my-god-anime.mp3"
-   },
-   {
-    "name": "FNAF Balloon Boy Hello",
-    "url": "https://www.myinstants.com/media/sounds/echo3b.mp3"
-   },
-   {
-    "name": "Mangekyo Sharingan activating",
-    "url": "https://www.myinstants.com/media/sounds/sonido-sharingan-activado.mp3"
-   },
-   {
-    "name": "Jampier TooN",
-    "url": "https://www.myinstants.com/media/sounds/jampier-toon.mp3"
-   },
-   {
-    "name": "cute horse interview",
-    "url": "https://www.myinstants.com/media/sounds/cute-horse-interview.mp3"
-   },
-   {
-    "name": "Ichigo Bankai",
-    "url": "https://www.myinstants.com/media/sounds/ichigo-bankai_91wUa6g.mp3"
-   },
-   {
-    "name": "Luffy!! Orewa",
-    "url": "https://www.myinstants.com/media/sounds/luffy-orewa.mp3"
-   },
-   {
-    "name": "come on!",
-    "url": "https://www.myinstants.com/media/sounds/sweetie-belle-oh-come-on.mp3"
-   },
-   {
-    "name": "Formula 1 Car",
-    "url": "https://www.myinstants.com/media/sounds/formula-1-car.mp3"
-   },
-   {
-    "name": "โคนันสารภาพ",
-    "url": "https://www.myinstants.com/media/sounds/okhnansaarphaaph.mp3"
-   },
-   {
-    "name": "Stop! Wait-A-Minute-",
-    "url": "https://www.myinstants.com/media/sounds/mark-ronson-uptown-funk-ft.mp3"
-   }
-  ]
- },
- {
-  "id": "games",
-  "label": "Games",
-  "emoji": "🎮",
-  "hint": "Copy the game sound",
-  "sounds": [
-   {
-    "name": "Subway Surfers",
-    "url": "https://www.myinstants.com/media/sounds/subway-surfers.mp3"
-   },
-   {
-    "name": "B SWORD WOOSH",
-    "url": "https://www.myinstants.com/media/sounds/woosh_s21KzKN.mp3"
-   },
-   {
-    "name": "ак47 короткая очередь",
-    "url": "https://www.myinstants.com/media/sounds/ak47-korotkaia-ochered.mp3"
-   },
-   {
-    "name": "Finger Snap",
-    "url": "https://www.myinstants.com/media/sounds/finger-snap.mp3"
-   },
-   {
-    "name": "nope",
-    "url": "https://www.myinstants.com/media/sounds/engineer_no01_1.mp3"
-   },
-   {
-    "name": "GTA V Wasted (Death Sound)",
-    "url": "https://www.myinstants.com/media/sounds/gta-v-wasted-death-sound.mp3"
-   },
-   {
-    "name": "doue aura",
-    "url": "https://www.myinstants.com/media/sounds/doue-aura.mp3"
-   },
-   {
-    "name": "Skyrim - Sword Swing Sound Effect",
-    "url": "https://www.myinstants.com/media/sounds/skyrim-sword-swing-sound-effect.mp3"
-   },
-   {
-    "name": "ROBLOX oof",
-    "url": "https://www.myinstants.com/media/sounds/roblox-death-sound_1.mp3"
-   },
-   {
-    "name": "Counter Strike - Ok, let's go!",
-    "url": "https://www.myinstants.com/media/sounds/counter-strike-jingle-cs-radio-ok-lets-go.mp3"
-   },
-   {
-    "name": "Cyberpunk 2077 phone call",
-    "url": "https://www.myinstants.com/media/sounds/cyberpunk-2077-phone-call.mp3"
-   },
-   {
-    "name": "Cashh Money",
-    "url": "https://www.myinstants.com/media/sounds/para-sesi-efekti_PaUswM1.mp3"
-   },
-   {
-    "name": "nice",
-    "url": "https://www.myinstants.com/media/sounds/-click-nice.mp3"
-   },
-   {
-    "name": "fahhh pump sound",
-    "url": "https://www.myinstants.com/media/sounds/fahhh-pump-sound.mp3"
-   },
-   {
-    "name": "NARUTO BATTLE",
-    "url": "https://www.myinstants.com/media/sounds/naruto-the-raising-fighting-spirit-extended-audiotrimmer_7wvXRts.mp3"
-   },
-   {
-    "name": "Minecraft eat",
-    "url": "https://www.myinstants.com/media/sounds/minecraft-eat.mp3"
-   },
-   {
-    "name": "This is where I make my stand",
-    "url": "https://www.myinstants.com/media/sounds/this-is-where-i-make-my-stand.mp3"
-   },
-   {
-    "name": "HI HI HI HA clash royale",
-    "url": "https://www.myinstants.com/media/sounds/hi-hi-hi-ha-clash-royale.mp3"
-   },
-   {
-    "name": "snd - Shotgun Blast",
-    "url": "https://www.myinstants.com/media/sounds/snd-shotgun_blast.mp3"
-   },
-   {
-    "name": "Creeper Hiss",
-    "url": "https://www.myinstants.com/media/sounds/creeper.mp3"
-   },
-   {
-    "name": "wee weee weee",
-    "url": "https://www.myinstants.com/media/sounds/weeeee_original_1193597514938524841.mp3"
-   },
-   {
-    "name": "Ok, let's go CS",
-    "url": "https://www.myinstants.com/media/sounds/ok-lets-go-cs.mp3"
-   },
-   {
-    "name": "angry roblox",
-    "url": "https://www.myinstants.com/media/sounds/angry-roblox.mp3"
-   },
-   {
-    "name": "Valorant ace sound",
-    "url": "https://www.myinstants.com/media/sounds/valorant-ace-sound.mp3"
-   },
-   {
-    "name": "two hours later",
-    "url": "https://www.myinstants.com/media/sounds/spongebob-two-hours-later-2019-download-link.mp3"
-   },
-   {
-    "name": "Minecraft XP aura sound",
-    "url": "https://www.myinstants.com/media/sounds/minecraft-xp-aura-sound.mp3"
-   },
-   {
-    "name": "Minecraft Hit Sound",
-    "url": "https://www.myinstants.com/media/sounds/y2mate_XL9ozUG.mp3"
-   },
-   {
-    "name": "Tekken 3 Good Morning",
-    "url": "https://www.myinstants.com/media/sounds/tekken-3-good-morning.mp3"
-   },
-   {
-    "name": "Evil laugh Joker",
-    "url": "https://www.myinstants.com/media/sounds/joker-laughing.mp3"
-   },
-   {
-    "name": "Wrong Answer Buzzer",
-    "url": "https://www.myinstants.com/media/sounds/wrong-answer-buzzer.mp3"
-   },
-   {
-    "name": "what da dog doin",
-    "url": "https://www.myinstants.com/media/sounds/yt1s_wU4BGgD.mp3"
-   },
-   {
-    "name": "Enemy Spotted",
-    "url": "https://www.myinstants.com/media/sounds/counter-strike-jingle-cs-radio-enemy-spotted.mp3"
-   },
-   {
-    "name": "Minecraft Lava",
-    "url": "https://www.myinstants.com/media/sounds/minecraft-lava.mp3"
-   },
-   {
-    "name": "universe tiktok",
-    "url": "https://www.myinstants.com/media/sounds/universe-tiktok.mp3"
-   },
-   {
-    "name": "Best Screaming Goat",
-    "url": "https://www.myinstants.com/media/sounds/screaming-goat2.mp3"
-   },
-   {
-    "name": "Drum Roll Sound Effect",
-    "url": "https://www.myinstants.com/media/sounds/drum-roll-gaming-sound-effect-hd.mp3"
-   },
-   {
-    "name": "Light Machine Gun",
-    "url": "https://www.myinstants.com/media/sounds/shooting-ak-47.mp3"
-   },
-   {
-    "name": "CSGO Okay Let's Go",
-    "url": "https://www.myinstants.com/media/sounds/csgo-okay-lets-go.mp3"
-   },
-   {
-    "name": "NO GOD! PLEASE NO!!! NOOOOOOOO",
-    "url": "https://www.myinstants.com/media/sounds/no-god-please-no-noooooooooo.mp3"
-   },
-   {
-    "name": "FANTASTICO!!! from shelly",
-    "url": "https://www.myinstants.com/media/sounds/fantastico-from-shelly.mp3"
-   }
-  ]
- },
- {
-  "id": "movies",
-  "label": "Movies",
-  "emoji": "🍿",
-  "hint": "Copy the movie line",
-  "sounds": [
-   {
-    "name": "Baat to sahi hai",
-    "url": "https://www.myinstants.com/media/sounds/baat-to-sahi-hai.mp3"
-   },
-   {
-    "name": "Kanchana",
-    "url": "https://www.myinstants.com/media/sounds/kanchana.mp3"
-   },
-   {
-    "name": "ki ki ki ma ma ma - jason vorhees",
-    "url": "https://www.myinstants.com/media/sounds/ki-ki-ki-ma-ma-ma-jason-vorhees.mp3"
-   },
-   {
-    "name": "Crow Sound Caw",
-    "url": "https://www.myinstants.com/media/sounds/raven-caw-caw.mp3"
-   },
-   {
-    "name": "Prowler Sound Effect",
-    "url": "https://www.myinstants.com/media/sounds/prowler-sound-effect_6bXErot.mp3"
-   },
-   {
-    "name": "Bone crack meme sound effect",
-    "url": "https://www.myinstants.com/media/sounds/bone-crack-meme-sound-effect.mp3"
-   },
-   {
-    "name": "Plane Flying",
-    "url": "https://www.myinstants.com/media/sounds/plane-flying.mp3"
-   },
-   {
-    "name": "sad music indian",
-    "url": "https://www.myinstants.com/media/sounds/tmpauxfo4ff.mp3"
-   },
-   {
-    "name": "High Fall Whistle, Drum Roll, and Crash",
-    "url": "https://www.myinstants.com/media/sounds/high-fall-whistle-drum-roll-and-crash.mp3"
-   },
-   {
-    "name": "Bello Minion dialogue",
-    "url": "https://www.myinstants.com/media/sounds/bello-minion-dialogue.mp3"
-   },
-   {
-    "name": "Watch out randy orton",
-    "url": "https://www.myinstants.com/media/sounds/randyortonrko-soundeffect.mp3"
-   },
-   {
-    "name": "Bhai ne bola karnekka",
-    "url": "https://www.myinstants.com/media/sounds/bhai-ne-bola-karnekka.mp3"
-   },
-   {
-    "name": "pain theme naruto",
-    "url": "https://www.myinstants.com/media/sounds/pain-2.mp3"
-   },
-   {
-    "name": "Bhag Arjun",
-    "url": "https://www.myinstants.com/media/sounds/bhag-arjun.mp3"
-   },
-   {
-    "name": "It was at this moment he knew",
-    "url": "https://www.myinstants.com/media/sounds/heknew.mp3"
-   },
-   {
-    "name": "Yahoo!",
-    "url": "https://www.myinstants.com/media/sounds/yahoo_real.mp3"
-   }
-  ]
- },
- {
-  "id": "sound-effects",
-  "label": "Sound effects",
-  "emoji": "💥",
-  "hint": "Make the noise with your voice",
-  "sounds": [
-   {
-    "name": "Quick Ting",
-    "url": "https://www.myinstants.com/media/sounds/quick-ting.mp3"
-   },
-   {
-    "name": "Kaching Sound FX",
-    "url": "https://www.myinstants.com/media/sounds/kaching-sound-fx.mp3"
-   },
-   {
-    "name": "ACK",
-    "url": "https://www.myinstants.com/media/sounds/ack.mp3"
-   },
-   {
-    "name": "Original fah",
-    "url": "https://www.myinstants.com/media/sounds/original-fah.mp3"
-   },
-   {
-    "name": "Metal pipe clang",
-    "url": "https://www.myinstants.com/media/sounds/metal-pipe-clang.mp3"
-   },
-   {
-    "name": "Whoosh Wind",
-    "url": "https://www.myinstants.com/media/sounds/whoosh-wind.mp3"
-   },
-   {
-    "name": "Mario Jump",
-    "url": "https://www.myinstants.com/media/sounds/maro-jump-sound-effect_1.mp3"
-   },
-   {
-    "name": "GHOP GOP GOP",
-    "url": "https://www.myinstants.com/media/sounds/ghop-gop-gop.mp3"
-   },
-   {
-    "name": "-999 Social Credit Siren",
-    "url": "https://www.myinstants.com/media/sounds/999-social-credit-siren.mp3"
-   },
-   {
-    "name": "Gunshot meme",
-    "url": "https://www.myinstants.com/media/sounds/gunshot-meme.mp3"
-   },
-   {
-    "name": "bonk doge",
-    "url": "https://www.myinstants.com/media/sounds/bonk_7zPAD7C.mp3"
-   },
-   {
-    "name": "Hub Intro Sound",
-    "url": "https://www.myinstants.com/media/sounds/hub-intro-sound.mp3"
-   },
-   {
-    "name": "Cartoon Director intro sound",
-    "url": "https://www.myinstants.com/media/sounds/cartoon-director-intro-sound.mp3"
-   },
-   {
-    "name": "Звук фотоаппарата",
-    "url": "https://www.myinstants.com/media/sounds/zvuk-fotoapparata.mp3"
-   },
-   {
-    "name": "Camera Flash Sound Effect",
-    "url": "https://www.myinstants.com/media/sounds/camera-flash-sound-effect.mp3"
-   },
-   {
-    "name": "Attitude sd effect",
-    "url": "https://www.myinstants.com/media/sounds/attitude-sd-effect.mp3"
-   },
-   {
-    "name": "AUGHHHHH... AUGHHHHH",
-    "url": "https://www.myinstants.com/media/sounds/aughhhhh-aughhhhh.mp3"
-   },
-   {
-    "name": "Message Tone",
-    "url": "https://www.myinstants.com/media/sounds/message-tone_tezPBhx.mp3"
-   },
-   {
-    "name": "HEY HEY BOY",
-    "url": "https://www.myinstants.com/media/sounds/hey-hey-boy-meme.mp3"
-   },
-   {
-    "name": "Ghostly sound",
-    "url": "https://www.myinstants.com/media/sounds/ghostly-sound.mp3"
-   },
-   {
-    "name": "Mosquito At Night",
-    "url": "https://www.myinstants.com/media/sounds/mosquito-at-night.mp3"
-   },
-   {
-    "name": "Lagging/loading",
-    "url": "https://www.myinstants.com/media/sounds/loading-lost-connection-green-screen-with-sound-effect-2_K8HORkT.mp3"
-   },
-   {
-    "name": "metal gear alert sound effect",
-    "url": "https://www.myinstants.com/media/sounds/metal-gear-alert-sound-effect_XKoHReZ.mp3"
-   },
-   {
-    "name": "Kick sound effect meme",
-    "url": "https://www.myinstants.com/media/sounds/kick-sound-effect-meme.mp3"
-   },
-   {
-    "name": "Money SoundFX",
-    "url": "https://www.myinstants.com/media/sounds/money-soundfx.mp3"
-   },
-   {
-    "name": "ENRIQUE!",
-    "url": "https://www.myinstants.com/media/sounds/enrique.mp3"
-   },
-   {
-    "name": "mouse click by ek6",
-    "url": "https://www.myinstants.com/media/sounds/mouse-click-by-ek6_VR0O6PL.mp3"
-   },
-   {
-    "name": "Divine steal an egg",
-    "url": "https://www.myinstants.com/media/sounds/divine-steal-an-egg.mp3"
-   },
-   {
-    "name": "nuagghhhh scream",
-    "url": "https://www.myinstants.com/media/sounds/nuagghhhh-scream_H3TDo14.mp3"
-   },
-   {
-    "name": "Pistol-shot",
-    "url": "https://www.myinstants.com/media/sounds/pistol-shot.mp3"
-   },
-   {
-    "name": "Fart Funk",
-    "url": "https://www.myinstants.com/media/sounds/fart-funk.mp3"
-   },
-   {
-    "name": "Aww",
-    "url": "https://www.myinstants.com/media/sounds/studio-audience-awwww-sound-fx.mp3"
-   },
-   {
-    "name": "Discord Notification",
-    "url": "https://www.myinstants.com/media/sounds/discord-notification.mp3"
-   },
-   {
-    "name": "BRUH sound effect!",
-    "url": "https://www.myinstants.com/media/sounds/bruh-sound-effect_WstdzdM.mp3"
-   },
-   {
-    "name": "Fart Meme Sound",
-    "url": "https://www.myinstants.com/media/sounds/fart-meme-sound.mp3"
-   },
-   {
-    "name": "yeah boiii i i i",
-    "url": "https://www.myinstants.com/media/sounds/yeah-boiii-i-i-i.mp3"
-   },
-   {
-    "name": "piano man",
-    "url": "https://www.myinstants.com/media/sounds/piano_man_1.mp3"
-   },
-   {
-    "name": "Lаսghtеr",
-    "url": "https://www.myinstants.com/media/sounds/lasghter.mp3"
-   },
-   {
-    "name": "Boom god damn",
-    "url": "https://www.myinstants.com/media/sounds/boom-god-damn.mp3"
-   },
-   {
-    "name": "Meow 1",
-    "url": "https://www.myinstants.com/media/sounds/meow-1.mp3"
    }
   ]
  }

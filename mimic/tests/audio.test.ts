@@ -98,7 +98,7 @@ describe('clip library', () => {
       if (scoreImitation(referenceFor(c, library), imitate(specOf(c.id), 0.75, 1.1), R).score < 40) low++;
     }
     expect(low / clips.length).toBeLessThan(0.1);
-  });
+  }, 120_000); // analyses and calibrates every test sound
 
   it('fails loudly on a broken library', () => {
     const categories = library.categories;

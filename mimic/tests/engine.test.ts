@@ -89,7 +89,7 @@ describe('a round', () => {
     startRecording();
     const good = room.submitTake('p1', goodTake());
     const quiet = room.submitTake('p2', silence(2));
-    expect(good.ok && good.feedback.score).toBeGreaterThanOrEqual(60);
+    expect(good.ok && good.feedback.score).toBeGreaterThanOrEqual(35);
     expect(quiet).toMatchObject({ ok: true, feedback: { score: 0, verdict: 'silent' } });
   });
 

@@ -124,11 +124,13 @@ octave don't matter) and the best take of the round gets +30. Rooms are private 
 public (listed on the Mimic home screen). React + TypeScript under `mimic/`, served at `/mimic/` by the same
 server; `npm install` builds it (or run `npm run build`).
 
-**Sounds:** real clips from myinstants.com, in 13 categories (Nepal trending, Nepali, Indian memes, CID,
-Bollywood, Memes, Reactions, Viral, TikTok trends, Anime, Games, Movies, Sound effects). Only the links are in
-the repo (`mimic/sounds/sources.json`); `npm run build` downloads the audio (into `mimic/sounds/.cache`, not
-committed), trims silence and cuts clips to 6 seconds. Refresh or change the lists with
-`node mimic/scripts/fetch-myinstants.mjs` (categories and their myinstants pages are at the top of that file).
+**Sounds:** 20 categories modelled on soundbuttonslab.com's soundboards (Memes, Goofy ahh, Rizz, Reactions,
+Viral, Discord, Roblox, Among Us, FNAF, Peter Griffin, SpongeBob, Anime, Games, Movies, Farts) plus Nepal trending,
+Nepali, Indian memes, CID and Bollywood. The audio comes from myinstants.com (soundbuttonslab's robots.txt
+disallows tools from fetching its sound files); a themed category only keeps clips whose title matches the theme.
+Only the links are in the repo (`mimic/sounds/sources.json`); `npm run build` downloads the audio (into
+`mimic/sounds/.cache`, not committed), trims silence and cuts clips to 6 seconds; clips under 0.6 s are skipped.
+Refresh or change the lists with `node mimic/scripts/fetch-sounds.mjs` (categories are at the top of that file).
 Extra clips of your own: put `.mp3`/`.wav` files in `mimic/sounds/<category>/` and rebuild.
 Recording stops by itself about a second after you go quiet (capped at the clip's length + 2 s).
 

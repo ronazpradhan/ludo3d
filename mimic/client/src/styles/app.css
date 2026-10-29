@@ -211,10 +211,19 @@ b { font-weight: 700; }
 
 /* ---------- game ---------- */
 .game__head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 16px; }
+.progress { display: flex; align-items: center; gap: 10px; }
+.progress__label { font: 800 15px var(--display); white-space: nowrap; }
+.progress__bar { display: flex; gap: 4px; }
+.progress__bar i { width: 18px; height: 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.1); }
+.progress__bar i.is-done { background: var(--purple-hi); }
+.progress__bar i.is-now { background: var(--lime); box-shadow: 0 0 8px rgba(200, 245, 96, 0.6); }
+.steps { list-style: none; display: flex; gap: 4px; margin: 0 auto; padding: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--line); }
+.steps li { padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; color: #6f6c93; white-space: nowrap; }
+.steps li.is-done { color: var(--muted); }
+.steps li.is-now { background: var(--purple); color: #fff; }
 .game__mimic { display: flex; align-items: center; gap: 10px; font-size: 17px; }
-.game__head .eyebrow { width: 100%; }
 .game__body { display: grid; gap: 16px; }
-.stage { position: relative; display: grid; justify-items: center; text-align: center; gap: 12px; padding: 26px 18px; min-height: 340px; align-content: start; }
+.stage { position: relative; display: grid; justify-items: center; text-align: center; gap: 12px; padding: 26px 18px; align-content: center; }
 .stage__timer { margin-bottom: 4px; }
 .stage__big { margin: 0; font: 800 26px/1.15 var(--display); }
 .stage__hint { margin: 0; font-size: 18px; color: var(--muted); }
@@ -256,12 +265,13 @@ b { font-weight: 700; }
 .got-it p { margin: 0; }
 .got-it__check { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: var(--ok); color: var(--ink); font-size: 34px; font-weight: 800; animation: pop 0.4s var(--ease) both; }
 
-.scoreboard { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.scoreboard__row { display: flex; align-items: center; gap: 10px; padding: 6px 10px 6px 6px; border-radius: 14px; background: rgba(255, 255, 255, 0.03); }
-.scoreboard__row .chip { flex: 1; }
-.scoreboard__rank { width: 22px; text-align: center; font: 800 15px var(--display); color: var(--muted); }
-.scoreboard__row:first-child .scoreboard__rank { color: var(--lime); }
-.scoreboard__pts { font: 800 18px var(--display); font-variant-numeric: tabular-nums; display: flex; gap: 8px; align-items: center; }
+.scoreboard { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.scoreboard__row { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 6px 12px 6px 8px; border-radius: 14px; background: rgba(255, 255, 255, 0.03); border: 1.5px solid transparent; }
+.scoreboard__row.is-me { background: rgba(139, 92, 246, 0.14); border-color: rgba(167, 139, 250, 0.45); }
+.scoreboard__row.is-away { opacity: 0.55; }
+.scoreboard__rank { flex: none; width: 24px; text-align: center; font: 800 15px var(--display); color: var(--muted); }
+.scoreboard__name { flex: 1; min-width: 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scoreboard__pts { flex: none; min-width: 2ch; text-align: right; font: 800 18px var(--display); font-variant-numeric: tabular-nums; }
 .delta { font-size: 13px; color: var(--lime); padding: 2px 7px; border-radius: 999px; background: rgba(200, 245, 96, 0.12); animation: pop 0.4s var(--ease) both; }
 
 /* ---------- results ---------- */
@@ -306,9 +316,7 @@ b { font-weight: 700; }
   .lobby__actions { grid-column: 1 / -1; }
   .lobby__actions { position: static; max-width: 420px; justify-self: center; width: 100%; }
   .game__body { grid-template-columns: 1fr 300px; align-items: start; }
-  .game__head .eyebrow { width: auto; }
-  .game__head .pill { margin-left: auto; }
-  .stage { min-height: 460px; padding: 34px 28px; }
+  .stage { min-height: 380px; padding: 30px 28px; }
   .feed { max-height: 280px; }
   .results, .final { grid-template-columns: 1.2fr 1fr; align-items: start; }
   .final__actions { grid-column: 1 / -1; }
@@ -401,7 +409,10 @@ b { font-weight: 700; }
   .lobby__actions { margin: 0 -16px; padding: 18px 16px calc(12px + env(safe-area-inset-bottom)); bottom: 0; background: linear-gradient(transparent, var(--bg) 30%); }
 
   .game__head { gap: 8px 10px; margin-bottom: 12px; }
-  .game__head .eyebrow { width: auto; margin-right: auto; }
+  .game__head .pill { margin-left: auto; }
+  .steps { order: 3; width: 100%; justify-content: space-between; }
+  .steps li { flex: 1; text-align: center; padding: 5px 6px; font-size: 12px; }
+  .progress__bar i { width: 10px; }
   .game__body { gap: 12px; }
   .stage { min-height: 0; padding: 22px 16px; gap: 10px; }
   .speaker { width: 96px; height: 96px; font-size: 38px; }
@@ -412,8 +423,9 @@ b { font-weight: 700; }
   .review .btn:not(.btn--big) { flex: 1 1 0; min-width: 0; padding: 0 8px; font-size: 14px; }
   .game__side { padding: 14px; }
   .game__side .side-h { margin-bottom: 8px; font-size: 14px; }
-  .game__side .scoreboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .game__side .scoreboard:has(> li:nth-child(5)) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .game__side .scoreboard__row { gap: 6px; padding: 4px 8px 4px 4px; }
+  .game__side .scoreboard__name { font-size: 14px; }
   .game__side .scoreboard__rank { width: 14px; font-size: 13px; }
   .game__side .avatar { width: 28px !important; height: 28px !important; font-size: 16px !important; }
   .game__side .tag { display: none; }
