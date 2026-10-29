@@ -287,6 +287,12 @@ export function registerMimicHandlers(io: MimicServer, lib: Library, options: Ha
       guarded('list_rooms', reply => reply({ ok: true, rooms: manager.openRooms() })),
     );
 
+    socket.on('clip_ready', (payload: unknown) => {
+      const round = (payload as { round?: unknown } | null)?.round;
+      const s = seat(socket);
+      if (s && typeof round === 'number') s.room.clipReady(s.player.id, round);
+    });
+
     // Not rate-limited through `guarded`: clients call it on connect and every so often to line up clocks.
     socket.on('sync_clock', (ack: unknown) => {
       if (typeof ack === 'function') (ack as (n: number) => void)(manager.clock.now());

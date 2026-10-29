@@ -209,6 +209,11 @@ export class MimicStore {
   rematch = (): Promise<void> => this.simple('request_rematch');
   backToLobby = (): Promise<void> => this.simple('back_to_lobby');
 
+  /** Tells the server this round's sound is downloaded, so it can play for everyone together. */
+  clipReady(round: number): void {
+    this.socket.emit('clip_ready', { round });
+  }
+
   /** Sends my recorded take; the server scores it and answers with my score. */
   async submitTake(pcm: Int16Array): Promise<TakeFeedback | null> {
     const key = roundKey(this.state.room);

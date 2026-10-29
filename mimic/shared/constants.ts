@@ -22,6 +22,8 @@ export const MAX_RECORDING_BYTES = MAX_TAKE_SEC * RECORDING_RATE * 2;
 export const LISTEN_LEAD_MS = 2000;
 export const listenLeadMs = (_clip: { audio?: string }): number => LISTEN_LEAD_MS;
 export const LISTEN_TAIL_MS = 400;
+/** Longest the round waits for every player to download the sound before it plays for everyone together. */
+export const LOAD_MAX_MS = 6000;
 export const COUNTDOWN_MS = 3000;
 /** Recording starts for everyone at once and runs for the round's take length. This extra time
  *  only covers sending the take to the server; nobody can record longer than the take length. */

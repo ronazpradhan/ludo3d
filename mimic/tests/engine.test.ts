@@ -190,7 +190,7 @@ describe('no repeats and the results show', () => {
   });
 
   it('plays every take, worst first, then shows its score; the results last as long as that takes', () => {
-    const { room, clock, goodTake } = makeRoom(3, DEFAULT_TIMING);
+    const { room, clock, goodTake } = makeRoom(3, { ...DEFAULT_TIMING, loadMs: 0 });
     room.start('p1');
     clock.advance(room.snapshot().round!.phaseEndsAt - clock.now());
     const good = goodTake();
@@ -213,7 +213,7 @@ describe('no repeats and the results show', () => {
 
 describe('fair timing', () => {
   it('plays the sound once, counts down 3 seconds, then gives everyone the same fixed take window', () => {
-    const { room, clock, clip } = makeRoom(2, DEFAULT_TIMING);
+    const { room, clock, clip } = makeRoom(2, { ...DEFAULT_TIMING, loadMs: 0 });
     room.start('p1');
     const listen = room.snapshot().round!;
     const listenMs = Math.round(listenLeadMs(clip()) + clip().duration * 1000 + LISTEN_TAIL_MS + COUNTDOWN_MS);
@@ -285,5 +285,40 @@ describe('a match', () => {
     room.submitTake('p1', pcmOf(new Float32Array(12_000).fill(0.123)));
     room.submitTake('p2', goodTake());
     for (const s of rec.states) expect(JSON.stringify(s).length).toBeLessThan(20_000);
+  });
+});
+
+describe('sound loading', () => {
+  const LOADING = { ...TIMING, loadMs: 6000 };
+  it('waits until every player has the sound, then plays it for everyone', () => {
+    const { room, clock } = makeRoom(2, LOADING);
+    room.start('p1');
+    expect(room.snapshot().round!.loading).toBe(true);
+    room.clipReady('p1', 1);
+    expect(room.snapshot().round!.loading).toBe(true);
+    clock.advance(1000);
+    room.clipReady('p2', 1);
+    const r = room.snapshot().round!;
+    expect(r.loading).toBe(false);
+    expect(r.phaseStartedAt).toBe(clock.now());
+    clock.advance(TIMING.listenMs);
+    expect(room.phase).toBe('record');
+  });
+  it('plays anyway when someone takes too long', () => {
+    const { room, clock } = makeRoom(2, LOADING);
+    room.start('p1');
+    room.clipReady('p1', 1);
+    clock.advance(6000);
+    expect(room.snapshot().round!.loading).toBe(false);
+    expect(room.phase).toBe('listen');
+    clock.advance(TIMING.listenMs);
+    expect(room.phase).toBe('record');
+  });
+  it('ignores ready messages for another round', () => {
+    const { room } = makeRoom(2, LOADING);
+    room.start('p1');
+    room.clipReady('p1', 2);
+    room.clipReady('p2', 2);
+    expect(room.snapshot().round!.loading).toBe(true);
   });
 });

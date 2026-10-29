@@ -56,7 +56,7 @@ export const library = validateLibrary(
   new Map(fixture.map(c => [c.id, renderClip(c, RECORDING_RATE)])),
 );
 export const clips = library.clips;
-export const TIMING = { listenMs: 5000, recordMs: 20_000, resultsMs: 8000 } satisfies Timing;
+export const TIMING = { loadMs: 0, listenMs: 5000, recordMs: 20_000, resultsMs: 8000 } satisfies Timing;
 
 /** A human-ish copy of a clip: other timbre, transposed, slower, sloppy timing, background noise. */
 export function imitate(spec: ClipSpec, shift = 0.5, stretch = 1.15, wave: Wave = 'sine', jitter = 0.03): Float32Array {

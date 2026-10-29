@@ -28,7 +28,7 @@ beforeAll(async () => {
   mimic = attachMimic(server, {
     clientDir,
     library,
-    timing: { listenMs: 100, recordMs: 2500, resultsMs: 200 },
+    timing: { loadMs: 0, listenMs: 100, recordMs: 2500, resultsMs: 200 },
     limits: { create: [3, 60_000], createIp: [500, 60_000], join: [50, 60_000], joinIp: [500, 60_000], take: [30, 10_000] },
   });
   await new Promise<void>(r => server.listen(0, '127.0.0.1', r));

@@ -103,12 +103,13 @@ function Listen({ room, mic }: { room: RoomSnapshot; mic: MicState }) {
   useEffect(() => {
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
-    void unlock()
-      .then(async ok => {
+    void clipAudio(round.clip) // download it first; the round waits until everyone has it
+      .then(async () => {
+        if (cancelled) return;
+        if (round.loading) return store.clipReady(round.number);
+        const ok = await unlock();
         if (cancelled) return;
         if (!ok) return setBlocked(true);
-        await clipAudio(round.clip); // download/prepare it before its slot
-        if (cancelled) return;
         // If it finished downloading late it still plays, right away, so nobody misses the sound.
         const delay = playAt - store.serverNow();
         timer = setTimeout(() => void playClip(round.clip), Math.max(0, delay));
@@ -119,12 +120,12 @@ function Listen({ room, mic }: { room: RoomSnapshot; mic: MicState }) {
       clearTimeout(timer);
       stopPlayback();
     };
-  }, [round.clip.id, playAt, store]);
+  }, [round.clip.id, round.loading, round.number, playAt, store]);
 
   const t = (now - playAt) / 1000;
   const playing = t >= 0 && t <= dur;
   const countdownLeft = round.phaseEndsAt - now;
-  const counting = countdownLeft <= COUNTDOWN_MS;
+  const counting = !round.loading && countdownLeft <= COUNTDOWN_MS;
   const countNum = counting ? Math.max(1, Math.ceil(countdownLeft / 1000)) : 0;
 
   // Beep on 3, 2, 1, and a higher beep right before recording starts.
@@ -150,8 +151,10 @@ function Listen({ room, mic }: { room: RoomSnapshot; mic: MicState }) {
         </>
       ) : (
         <>
-          <span className="eyebrow">{t < 0 ? 'Listen — it plays once' : playing ? 'Listen…' : 'That’s it!'}</span>
-          {t < 0 ? (
+          <span className="eyebrow">{round.loading ? 'Get ready' : t < 0 ? 'Listen — it plays once' : playing ? 'Listen…' : 'That’s it!'}</span>
+          {round.loading ? (
+            <p className="stage__big">Loading the sound…</p>
+          ) : t < 0 ? (
             <p className="stage__big">
               Sound in{' '}
               <span className="lead-num" key={Math.min(2, Math.ceil(-t))}>
@@ -164,7 +167,7 @@ function Listen({ room, mic }: { room: RoomSnapshot; mic: MicState }) {
         </>
       )}
       {/* The playhead waits at the start before the sound, so everyone sees exactly when it begins. */}
-      <AudioGraph clip={round.clip} span={round.clip.duration} at={t < 0 ? 0 : playing ? t : null} label="Shape of the sound" />
+      <AudioGraph clip={round.clip} span={round.clip.duration} at={round.loading || t < 0 ? 0 : playing ? t : null} label="Shape of the sound" />
       {blocked && (
         <button type="button" className="btn btn--primary" onClick={() => void unlock().then(ok => ok && setBlocked(false))}>
           🔈 Tap to turn on sound

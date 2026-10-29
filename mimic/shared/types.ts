@@ -57,6 +57,8 @@ export interface PublicRound {
   /** Server epoch ms when the current phase began / ends. */
   phaseStartedAt: number;
   phaseEndsAt: number;
+  /** True while players are still downloading the sound; it plays for everyone once all have it. */
+  loading: boolean;
   /** Longest take the server accepts this round, in seconds. */
   maxTakeSec: number;
   submittedIds: string[];
@@ -160,6 +162,8 @@ export interface ClientToServerEvents {
   submit_take: (pcm: ArrayBuffer, ack?: Ack<TakeFeedback>) => void;
   /** During the results: someone's take from this round, as 16-bit PCM. */
   get_take: (p: { playerId: string }, ack: Ack<{ pcm: ArrayBuffer }>) => void;
+  /** This round's sound is downloaded and ready to play. */
+  clip_ready: (p: { round: number }) => void;
   request_rematch: (ack?: Ack) => void;
   back_to_lobby: (ack?: Ack) => void;
   sync_clock: (ack: (serverNow: number) => void) => void;

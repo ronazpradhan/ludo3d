@@ -11,6 +11,7 @@ import {
   COUNTDOWN_MS,
   DEFAULT_SETTINGS,
   LISTEN_TAIL_MS,
+  LOAD_MAX_MS,
   listenLeadMs,
   MAX_PLAYERS,
   MIN_PLAYERS,
@@ -43,6 +44,8 @@ export const realClock: Clock = {
 
 /** Phase lengths. Production uses the shared constants; tests shorten them. */
 export interface Timing {
+  /** Overrides how long a round waits for everyone to download the sound (0 skips the wait). */
+  loadMs?: number;
   /** Overrides the listen phase length (normally lead-in + the clip once + pause + 3-2-1 countdown). */
   listenMs?: number;
   /** Overrides the record phase length (normally the take length + upload time). */
@@ -79,6 +82,9 @@ interface Round {
   phase: 'listen' | 'record' | 'results';
   phaseStartedAt: number;
   phaseEndsAt: number;
+  /** Still waiting for players to download the sound; `ready` is who has it. */
+  loading: boolean;
+  ready: Set<string>;
   takes: Map<string, StoredTake>;
 }
 
@@ -272,16 +278,34 @@ export class Room {
     m.used.add(clip.id);
     referenceFor(clip, this.lib); // analyse and calibrate the sound now, while everyone listens, so scoring is instant
     m.played++;
-    const r: Round = { number: m.played, clip, maxTakeSec: maxTakeSec(clip), phase: 'listen', phaseStartedAt: 0, phaseEndsAt: 0, takes: new Map() };
+    const r: Round = { number: m.played, clip, maxTakeSec: maxTakeSec(clip), phase: 'listen', phaseStartedAt: 0, phaseEndsAt: 0, loading: true, ready: new Set(), takes: new Map() };
     m.round = r;
     this.lastResult = null;
-    const listenMs = this.timing.listenMs ?? Math.round(listenLeadMs(clip) + clip.duration * 1000 + LISTEN_TAIL_MS + COUNTDOWN_MS);
+    const loadMs = this.timing.loadMs ?? LOAD_MAX_MS;
+    if (loadMs > 0) this.setPhase(r, 'listen', loadMs, () => this.startListening());
+    else this.startListening();
+  }
+
+  /** A player has downloaded this round's sound. Once everyone has, it plays. */
+  clipReady(by: string, round: number): void {
+    const r = this.match?.round;
+    if (!r || !r.loading || r.number !== round || !this.players.has(by)) return;
+    r.ready.add(by);
+    if ([...this.players.values()].every(p => !p.connected || r.ready.has(p.id))) this.startListening();
+  }
+
+  /** Plays the sound for everyone (after the lead-in), then the 3-2-1 countdown. */
+  private startListening(): void {
+    const r = this.match?.round;
+    if (!r || r.phase !== 'listen' || !r.loading) return;
+    r.loading = false;
+    const listenMs = this.timing.listenMs ?? Math.round(listenLeadMs(r.clip) + r.clip.duration * 1000 + LISTEN_TAIL_MS + COUNTDOWN_MS);
     this.setPhase(r, 'listen', listenMs, () => this.beginRecording());
   }
 
   private beginRecording(): void {
     const r = this.match?.round;
-    if (!r || r.phase !== 'listen') return;
+    if (!r || r.phase !== 'listen' || r.loading) return;
     this.setPhase(r, 'record', this.timing.recordMs ?? r.maxTakeSec * 1000 + UPLOAD_GRACE_MS, () => this.endRound());
   }
 
@@ -423,6 +447,7 @@ export class Room {
               clip: publicClip(r.clip),
               phaseStartedAt: r.phaseStartedAt,
               phaseEndsAt: r.phaseEndsAt,
+              loading: r.loading,
               maxTakeSec: r.maxTakeSec,
               submittedIds: [...r.takes.keys()],
             }
