@@ -15,7 +15,8 @@ export function roundPoints(takes: Take[]): TakeResult[] {
   return takes
     .map(t => {
       const best = top > 0 && t.score === top;
-      return { ...t, best, points: t.score + (best ? POINTS.bestTakeBonus : 0) };
+      // Copy only public fields: the caller's takes may carry the raw recording.
+      return { playerId: t.playerId, score: t.score, verdict: t.verdict, hasAudio: t.hasAudio, best, points: t.score + (best ? POINTS.bestTakeBonus : 0) };
     })
     .sort((a, b) => b.score - a.score);
 }

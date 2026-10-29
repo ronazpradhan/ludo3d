@@ -107,13 +107,14 @@ export function extractFeatures(samples: Float32Array, rate: number): Features {
   const pitch: (number | null)[] = [];
   const span = Math.max(1, last - first);
   const onsets: number[] = [];
+  // A beat starts when it gets loud and ends when it falls back towards the room's noise.
+  const quietDb = Math.max(peakDb - 20, Math.min(floor + 4, peakDb - 10));
   let quiet = true;
   for (let i = first; i <= last; i++) {
-    const rel = db[i]! - peakDb;
-    if (quiet && rel > -12) {
+    if (quiet && db[i]! > peakDb - 9) {
       onsets.push((i - first) / span);
       quiet = false;
-    } else if (!quiet && rel < -20) quiet = true;
+    } else if (!quiet && db[i]! < quietDb) quiet = true;
     env.push(Math.pow(10, (db[i]! - peakDb) / 20));
     pitch.push(db[i]! > peakDb - 25 ? yin(x, i * HOP, SCORE_RATE) : null);
   }
