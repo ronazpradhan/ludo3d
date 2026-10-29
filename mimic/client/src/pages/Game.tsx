@@ -98,7 +98,6 @@ function Listen({ room, mic }: { room: RoomSnapshot; mic: MicState }) {
   const playAt = round.phaseStartedAt + listenLeadMs(round.clip);
   const hint = categoryOf(room, round.clip.category)?.hint ?? 'Copy the sound';
   const now = useServerTime(true);
-  const [missed, setMissed] = useState(false);
   const [blocked, setBlocked] = useState(false);
 
   useEffect(() => {
@@ -110,12 +109,11 @@ function Listen({ room, mic }: { room: RoomSnapshot; mic: MicState }) {
         if (!ok) return setBlocked(true);
         await clipAudio(round.clip); // download/prepare it before its slot
         if (cancelled) return;
+        // If it finished downloading late it still plays, right away, so nobody misses the sound.
         const delay = playAt - store.serverNow();
-        // Joined, reloaded or downloaded too late: the sound isn't replayed, that would be unfair.
-        if (delay < -250) return setMissed(true);
         timer = setTimeout(() => void playClip(round.clip), Math.max(0, delay));
       })
-      .catch(() => !cancelled && setMissed(true));
+      .catch(() => {});
     return () => {
       cancelled = true;
       clearTimeout(timer);
@@ -167,7 +165,6 @@ function Listen({ room, mic }: { room: RoomSnapshot; mic: MicState }) {
       )}
       {/* The playhead waits at the start before the sound, so everyone sees exactly when it begins. */}
       <AudioGraph clip={round.clip} span={round.clip.duration} at={t < 0 ? 0 : playing ? t : null} label="Shape of the sound" />
-      {missed && <p className="mic__help">You missed the sound this time. It doesn’t repeat — follow the graph for this one.</p>}
       {blocked && (
         <button type="button" className="btn btn--primary" onClick={() => void unlock().then(ok => ok && setBlocked(false))}>
           🔈 Tap to turn on sound
