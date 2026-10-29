@@ -29,17 +29,21 @@ export function Game({ room }: { room: RoomSnapshot }) {
         <span className="pill">{CATEGORY_LABELS[round.clip.category]}</span>
         <Difficulty d={round.clip.difficulty} />
       </header>
-      <div className="game__body">
-        <div className="game__main">
-          {room.phase === 'listen' && <Listen room={room} />}
-          {room.phase === 'record' && <RecordStage room={room} />}
-          {room.phase === 'results' && <Results room={room} byId={byId} />}
+      {room.phase === 'results' ? (
+        // The results bring their own leaderboard, so they get the full width.
+        <Results room={room} byId={byId} />
+      ) : (
+        <div className="game__body">
+          <div className="game__main">
+            {room.phase === 'listen' && <Listen room={room} />}
+            {room.phase === 'record' && <RecordStage room={room} />}
+          </div>
+          <aside className="card game__side" aria-label="Scoreboard">
+            <h2 className="side-h">Scores</h2>
+            <Scoreboard players={room.players} hostId={room.hostId} meId={me?.playerId} done={round.submittedIds} />
+          </aside>
         </div>
-        <aside className="card game__side" aria-label="Scoreboard">
-          <h2 className="side-h">Scores</h2>
-          <Scoreboard players={room.players} hostId={room.hostId} meId={me?.playerId} done={round.submittedIds} />
-        </aside>
-      </div>
+      )}
     </div>
   );
 }

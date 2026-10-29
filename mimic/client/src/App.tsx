@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { ConnectionBanner, Logo, MuteButton, Toast } from './components/bits';
 import { useMimic, useStore } from './hooks/useMimic';
 import { Final } from './pages/Final';
@@ -10,6 +11,12 @@ const inviteCode = new URLSearchParams(location.search).get('room') ?? '';
 export function App() {
   const store = useStore();
   const { me, room, ended, restoring } = useMimic();
+  const view = ended ? 'ended' : !me || !room ? 'home' : `${room.phase}:${room.round?.number ?? 0}`;
+
+  // A new screen starts at the top; otherwise a phone stays scrolled down where the last one ended.
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [view]);
 
   let screen;
   if (ended) {

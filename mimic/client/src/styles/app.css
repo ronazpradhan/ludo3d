@@ -80,6 +80,7 @@ b { font-weight: 700; }
 .btn:disabled { opacity: 0.45; }
 .btn--primary { background: var(--purple); color: #fff; box-shadow: 0 6px 0 var(--purple-lo), 0 10px 24px rgba(139, 92, 246, 0.35); }
 .btn--primary:hover:not(:disabled) { background: #9a70ff; }
+.btn--primary:disabled { opacity: 1; background: #34305e; color: #9d98c7; box-shadow: 0 6px 0 #26224a; }
 .btn--primary:active:not(:disabled) { box-shadow: 0 2px 0 var(--purple-lo); transform: translateY(4px); }
 .btn--lime { background: var(--lime); color: var(--ink); }
 .btn--ghost { background: transparent; border: 1.5px solid var(--line-2); }
@@ -316,6 +317,75 @@ b { font-weight: 700; }
   .feed { max-height: 280px; }
   .results, .final { grid-template-columns: 1.2fr 1fr; align-items: start; }
   .final__actions { grid-column: 1 / -1; }
+}
+
+/* ---------- responsive: phones (320px+), tablets, desktops ---------- */
+.home { grid-template-areas: 'top' 'hero' 'card' 'how'; }
+.home .topbar { grid-area: top; }
+.home__hero { grid-area: hero; padding: 0 2px; }
+.home__card { grid-area: card; }
+.home__how { grid-area: how; padding: 0 2px; }
+.avatar-picker { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.avatar-picker__item { padding: 2px; }
+.avatar-picker__item .avatar { width: 100% !important; height: auto !important; aspect-ratio: 1; font-size: clamp(18px, 6vw, 24px) !important; }
+.player-grid { grid-template-columns: repeat(auto-fill, minmax(min(175px, 100%), 1fr)); gap: 8px; }
+@media (pointer: coarse) {
+  .icon-btn { width: 44px; height: 44px; }
+  .btn--sm { min-height: 44px; }
+}
+
+@media (max-width: 819px) {
+  .home { gap: 16px; }
+  .home__hero .logo--lg .logo__mark { width: 52px; height: 52px; }
+  .home__hero .logo--lg .logo__word { font-size: 46px; }
+  .home__tagline { margin: 6px 0 0; font-size: 20px; }
+  .home__fine { margin-top: 14px; }
+  .home__card { padding: 18px 16px; }
+
+  .lobby { gap: 12px; }
+  .lobby__code { padding: 14px 16px; gap: 10px; }
+  .code { gap: 4px; }
+  .code span { width: 1.35em; padding: 4px 0; border-radius: 10px; font-size: clamp(22px, 7.5vw, 36px); }
+  .player-grid > li { padding: 8px; }
+  .card { padding: 16px; }
+  .lobby__actions { margin: 0 -16px; padding: 18px 16px calc(12px + env(safe-area-inset-bottom)); bottom: 0; background: linear-gradient(transparent, var(--bg) 30%); }
+
+  .game__head { gap: 8px 10px; margin-bottom: 12px; }
+  .game__head .eyebrow { width: auto; margin-right: auto; }
+  .game__body { gap: 12px; }
+  .stage { min-height: 0; padding: 22px 16px; gap: 10px; }
+  .speaker { width: 96px; height: 96px; font-size: 38px; }
+  .stage__big { font-size: 23px; }
+  .big-score { font-size: 80px; }
+  .rec-btn { width: 104px; height: 104px; }
+  .rec-btn span { width: 72px; height: 72px; }
+  .review .btn:not(.btn--big) { flex: 1 1 0; min-width: 0; padding: 0 8px; font-size: 14px; }
+  .game__side { padding: 14px; }
+  .game__side .side-h { margin-bottom: 8px; font-size: 14px; }
+  .game__side .scoreboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .game__side .scoreboard__row { gap: 6px; padding: 4px 8px 4px 4px; }
+  .game__side .scoreboard__rank { width: 14px; font-size: 13px; }
+  .game__side .avatar { width: 28px !important; height: 28px !important; font-size: 16px !important; }
+  .game__side .tag { display: none; }
+  .game__side .chip { gap: 6px; }
+  .game__side .chip__name { font-size: 14px; }
+  .game__side .scoreboard__pts { font-size: 15px; gap: 4px; }
+  .reveal { padding: 22px 14px; }
+  .take { gap: 8px; padding: 8px 10px; }
+  .take__score { min-width: 34px; font-size: 20px; }
+  .final__actions .btn { flex: 1 1 100%; }
+}
+@media (max-width: 359px) {
+  .topbar__code { display: none; }
+  .game__side .scoreboard { grid-template-columns: 1fr; }
+}
+@media (min-width: 820px) {
+  .home { grid-template-areas: 'top top' 'hero card' 'how card'; row-gap: 18px; align-items: start; align-content: center; }
+  .home__hero { align-self: end; }
+  .home__card { align-self: center; }
+  .lobby { align-items: start; }
+  .lobby__settings { grid-row: span 2; }
+  .lobby__mic { grid-column: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {

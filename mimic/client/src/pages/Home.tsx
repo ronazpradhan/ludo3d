@@ -57,6 +57,9 @@ export function Home({ inviteCode }: { inviteCode: string }) {
       <section className="home__hero">
         <Logo size="lg" />
         <p className="home__tagline">Hear it. Copy it. Nail it.</p>
+      </section>
+
+      <section className="home__how" aria-label="How to play">
         <ol className="how">
           <li><span className="how__n">1</span><span><b>Everyone hears the same sound</b>: a tune, a siren, a beat or a silly noise.</span></li>
           <li><span className="how__n">2</span><span><b>Copy it into your mic</b>: hum, whistle, clap or make the noise.</span></li>
