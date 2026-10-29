@@ -108,7 +108,7 @@ export function AudioGraph({ clip, span, at, trace, label }: Props) {
             {voice && bars(voice, voiceMid, voiceHalf, 'voice', -1)}
           </>
         )}
-        {at !== null && <rect x={(at / span) * W - 3} width={6} y={0} height={H} className="wave__head" />}
+        {at !== null && <rect x={Math.min(1, Math.max(0, at / span)) * (W - 6)} width={6} y={0} height={H} className="wave__head" />}
       </svg>
     </figure>
   );

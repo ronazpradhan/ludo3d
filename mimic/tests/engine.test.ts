@@ -9,9 +9,9 @@ const ROUND = TIMING.listenMs! + TIMING.recordMs! + TIMING.resultsMs;
 describe('points', () => {
   it('pays the similarity score, plus a bonus for the best take', () => {
     const r = roundPoints([
-      { playerId: 'a', score: 80, verdict: 'ok', hasAudio: true },
-      { playerId: 'b', score: 60, verdict: 'ok', hasAudio: true },
-      { playerId: 'c', score: 0, verdict: 'none', hasAudio: false },
+      { playerId: 'a', score: 80, verdict: 'ok', hasAudio: true, parts: null },
+      { playerId: 'b', score: 60, verdict: 'ok', hasAudio: true, parts: null },
+      { playerId: 'c', score: 0, verdict: 'none', hasAudio: false, parts: null },
     ]);
     expect(r.map(t => [t.playerId, t.points, t.best])).toEqual([
       ['a', 80 + POINTS.bestTakeBonus, true],
@@ -20,8 +20,8 @@ describe('points', () => {
     ]);
   });
   it('shares the bonus on a tie and gives none when everyone scored 0', () => {
-    expect(roundPoints([{ playerId: 'a', score: 70, verdict: 'ok', hasAudio: true }, { playerId: 'b', score: 70, verdict: 'ok', hasAudio: true }]).every(t => t.best)).toBe(true);
-    expect(roundPoints([{ playerId: 'a', score: 0, verdict: 'silent', hasAudio: true }]).some(t => t.best)).toBe(false);
+    expect(roundPoints([{ playerId: 'a', score: 70, verdict: 'ok', hasAudio: true, parts: null }, { playerId: 'b', score: 70, verdict: 'ok', hasAudio: true, parts: null }]).every(t => t.best)).toBe(true);
+    expect(roundPoints([{ playerId: 'a', score: 0, verdict: 'silent', hasAudio: true, parts: null }]).some(t => t.best)).toBe(false);
   });
 });
 

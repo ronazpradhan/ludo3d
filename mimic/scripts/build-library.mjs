@@ -14,6 +14,8 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 export const MAX_SEC = 6;
+/** Shorter than this is too quick for anyone to copy fairly. */
+export const MIN_SEC = 0.6;
 const SCORE_RATE = 12_000;
 const PLAY_RATE = 22_050;
 const AUDIO = /\.(mp3|wav)$/i;
@@ -189,6 +191,7 @@ export async function buildLibrary({ soundsDir, outDir, publicDir, cacheDir = pa
     (async () => {
       const decoded = isWav ? decodeWav(buf) : await decodeMp3(buf);
       const { samples, rate, trimmed } = prepare(decoded);
+      if (samples.length / rate < MIN_SEC) throw new Error(`shorter than ${MIN_SEC}s, too quick to copy`);
       const base = `${category}-${slug(name)}`;
       let id = base;
       for (let k = 2; ids.has(id); k++) id = `${base}-${k}`;

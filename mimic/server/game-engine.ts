@@ -270,6 +270,7 @@ export class Room {
     if (pool.length === 0) return this.finish();
     const clip = pickClip(pool, this.usedClips);
     m.used.add(clip.id);
+    referenceFor(clip, this.lib); // analyse and calibrate the sound now, while everyone listens, so scoring is instant
     m.played++;
     const r: Round = { number: m.played, clip, maxTakeSec: maxTakeSec(clip), phase: 'listen', phaseStartedAt: 0, phaseEndsAt: 0, takes: new Map() };
     m.round = r;
@@ -302,10 +303,12 @@ export class Room {
     if (seconds > r.maxTakeSec + 0.25) return fail('BAD_INPUT', `Takes can be up to ${r.maxTakeSec} seconds this round.`);
     this.touch();
     const scored = scoreImitation(referenceFor(r.clip, this.lib), int16ToFloat(pcm), RECORDING_RATE);
-    r.takes.set(by, { playerId: by, score: scored.score, verdict: scored.verdict, hasAudio: true, pcm });
+    const pct = (v: number) => Math.round(v * 100);
+    const parts = scored.verdict === 'ok' ? { tone: pct(scored.parts.tone), rhythm: pct(scored.parts.rhythm), melody: scored.parts.melody === null ? null : pct(scored.parts.melody), length: pct(scored.parts.length) } : null;
+    r.takes.set(by, { playerId: by, score: scored.score, verdict: scored.verdict, hasAudio: true, parts, pcm });
     this.checkEveryoneSubmitted();
     if (r.phase === 'record') this.listener.state(this);
-    return { ok: true, feedback: { score: scored.score, verdict: scored.verdict } };
+    return { ok: true, feedback: { score: scored.score, verdict: scored.verdict, parts } };
   }
 
   private endRound(): void {
@@ -313,7 +316,7 @@ export class Room {
     const r = m?.round;
     if (!m || !r || r.phase !== 'record') return;
     const takes: Take[] = [];
-    for (const p of this.players.values()) takes.push(r.takes.get(p.id) ?? { playerId: p.id, score: 0, verdict: 'none', hasAudio: false });
+    for (const p of this.players.values()) takes.push(r.takes.get(p.id) ?? { playerId: p.id, score: 0, verdict: 'none', hasAudio: false, parts: null });
     const results = roundPoints(takes);
     for (const t of results) {
       const p = this.players.get(t.playerId);

@@ -1,13 +1,14 @@
 // Every points rule lives here. A take's similarity (0-100, from audio-score.ts) is its points, and the
 // best take of the round gets a bonus (shared on a tie). No take, silence or a replayed clip scores 0.
 import { POINTS } from '../shared/constants';
-import type { TakeResult, Verdict } from '../shared/types';
+import type { ScoreParts, TakeResult, Verdict } from '../shared/types';
 
 export interface Take {
   playerId: string;
   score: number;
   verdict: Verdict;
   hasAudio: boolean;
+  parts: ScoreParts | null;
 }
 
 export function roundPoints(takes: Take[]): TakeResult[] {
@@ -16,7 +17,7 @@ export function roundPoints(takes: Take[]): TakeResult[] {
     .map(t => {
       const best = top > 0 && t.score === top;
       // Copy only public fields: the caller's takes may carry the raw recording.
-      return { playerId: t.playerId, score: t.score, verdict: t.verdict, hasAudio: t.hasAudio, best, points: t.score + (best ? POINTS.bestTakeBonus : 0) };
+      return { playerId: t.playerId, score: t.score, verdict: t.verdict, hasAudio: t.hasAudio, parts: t.parts, best, points: t.score + (best ? POINTS.bestTakeBonus : 0) };
     })
     .sort((a, b) => b.score - a.score);
 }

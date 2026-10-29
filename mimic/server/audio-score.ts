@@ -1,6 +1,9 @@
 // How close is an imitation to the original sound? Runs on the server only, so the score can't be faked by
 // a modified browser sending a number. Both sounds go through the same feature extraction:
-//   loudness envelope (rhythm), pitch contour (melody, key- and octave-independent), and voicing (tonal vs noisy).
+//   voice tone   what it sounds like: vowels, hiss, scream, buzz (MFCCs, the standard speech-recognition features)
+//   rhythm       loudness over time and where the beats/syllables fall
+//   melody       pitch going up and down (key- and octave-independent), for sounds with a clear pitch
+//   length       how long the sound lasts
 // Contours are compared with dynamic time warping, so being a bit early or late is fine.
 
 import { RECORDING_RATE } from '../shared/constants';
@@ -21,9 +24,13 @@ export interface Features {
   voicedRatio: number;
   /** note/clap start times, as fractions (0..1) of the active part */
   onsets: number[];
+  /** share of the active part that is quiet: high for claps and knocks, low for a held scream */
+  quietRatio: number;
   /** seconds between the first and last loud moment */
   activeSec: number;
   peakDb: number;
+  /** voice tone per point: 12 mel-cepstral coefficients, mean-normalised (so mic and volume don't matter) */
+  mfcc: number[][];
 }
 
 export type Verdict = 'ok' | 'silent' | 'replay';
@@ -31,7 +38,86 @@ export type Verdict = 'ok' | 'silent' | 'replay';
 export interface Scored {
   score: number; // 0..100
   verdict: Verdict;
-  parts: { melody: number | null; rhythm: number; length: number; tone: number };
+  /** each 0..1; melody is null for sounds without a clear pitch */
+  parts: { tone: number; rhythm: number; melody: number | null; length: number };
+}
+
+// ---------- voice tone (MFCC) ----------
+const NFFT = 512;
+const MEL_BANDS = 26;
+const CEPS = 12;
+const HANN = Float32Array.from({ length: FRAME }, (_, i) => 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / (FRAME - 1)));
+const hzToMel = (f: number) => 2595 * Math.log10(1 + f / 700);
+const melToHz = (m: number) => 700 * (10 ** (m / 2595) - 1);
+/** Triangular mel filters from 80 Hz to 5.5 kHz, as [first bin, weights]. */
+const MEL: [number, Float32Array][] = (() => {
+  const lo = hzToMel(80);
+  const hi = hzToMel(5500);
+  const edges = Array.from({ length: MEL_BANDS + 2 }, (_, i) => Math.floor(((NFFT + 1) * melToHz(lo + ((hi - lo) * i) / (MEL_BANDS + 1))) / SCORE_RATE));
+  return Array.from({ length: MEL_BANDS }, (_, m) => {
+    const [a, b, c] = [edges[m]!, edges[m + 1]!, edges[m + 2]!];
+    const w = new Float32Array(c - a + 1);
+    for (let k = a; k <= c; k++) w[k - a] = k <= b ? (k - a) / Math.max(1, b - a) : (c - k) / Math.max(1, c - b);
+    return [a, w] as [number, Float32Array];
+  });
+})();
+const DCT = Array.from({ length: CEPS }, (_, k) => Float32Array.from({ length: MEL_BANDS }, (_, n) => Math.cos((Math.PI * (k + 1) * (n + 0.5)) / MEL_BANDS)));
+
+/** Power spectrum of one windowed frame (in-place radix-2 FFT). */
+function powerSpectrum(x: Float32Array, start: number): Float32Array {
+  const re = new Float64Array(NFFT);
+  const im = new Float64Array(NFFT);
+  for (let i = 0; i < FRAME; i++) re[i] = (x[start + i] ?? 0) * HANN[i]!;
+  for (let i = 1, j = 0; i < NFFT; i++) {
+    let bit = NFFT >> 1;
+    for (; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if (i < j) {
+      [re[i], re[j]] = [re[j]!, re[i]!];
+      [im[i], im[j]] = [im[j]!, im[i]!];
+    }
+  }
+  for (let len = 2; len <= NFFT; len <<= 1) {
+    const ang = (-2 * Math.PI) / len;
+    for (let i = 0; i < NFFT; i += len)
+      for (let k = 0; k < len / 2; k++) {
+        const wr = Math.cos(ang * k);
+        const wi = Math.sin(ang * k);
+        const a = i + k;
+        const b = a + len / 2;
+        const tr = re[b]! * wr - im[b]! * wi;
+        const ti = re[b]! * wi + im[b]! * wr;
+        re[b] = re[a]! - tr;
+        im[b] = im[a]! - ti;
+        re[a]! += tr;
+        im[a]! += ti;
+      }
+  }
+  const p = new Float32Array(NFFT / 2 + 1);
+  for (let k = 0; k <= NFFT / 2; k++) p[k] = re[k]! * re[k]! + im[k]! * im[k]!;
+  return p;
+}
+
+function mfccOf(x: Float32Array, start: number): number[] {
+  const p = powerSpectrum(x, start);
+  const logMel = MEL.map(([a, w]) => {
+    let e = 0;
+    for (let k = 0; k < w.length; k++) e += (p[a + k] ?? 0) * w[k]!;
+    return Math.log(e + 1e-9);
+  });
+  return DCT.map(row => row.reduce((sum, c, n) => sum + c * logMel[n]!, 0));
+}
+
+/** Averages a list of vectors down to `n` evenly spaced points. */
+function stretchVec(xs: number[][], n: number): number[][] {
+  if (!xs.length) return [];
+  return Array.from({ length: n }, (_, i) => {
+    const a = Math.floor((i * xs.length) / n);
+    const b = Math.max(a + 1, Math.floor(((i + 1) * xs.length) / n));
+    const out = new Array<number>(CEPS).fill(0);
+    for (let j = a; j < b; j++) for (let k = 0; k < CEPS; k++) out[k]! += xs[j]![k]! / (b - a);
+    return out;
+  });
 }
 
 /** YIN pitch estimate for one frame, in Hz, or null if it isn't clearly pitched. */
@@ -101,10 +187,11 @@ export function extractFeatures(samples: Float32Array, rate: number): Features {
       last = i;
       break;
     }
-  if (first < 0 || last < first) return { env: [], semis: [], voicedRatio: 0, onsets: [], activeSec: 0, peakDb };
+  if (first < 0 || last < first) return { env: [], semis: [], voicedRatio: 0, onsets: [], quietRatio: 0, activeSec: 0, peakDb, mfcc: [] };
 
   const env: number[] = [];
   const pitch: (number | null)[] = [];
+  const ceps: number[][] = [];
   const span = Math.max(1, last - first);
   const onsets: number[] = [];
   // A beat starts when it gets loud and ends when it falls back towards the room's noise.
@@ -117,7 +204,15 @@ export function extractFeatures(samples: Float32Array, rate: number): Features {
     } else if (!quiet && db[i]! < quietDb) quiet = true;
     env.push(Math.pow(10, (db[i]! - peakDb) / 20));
     pitch.push(db[i]! > peakDb - 25 ? yin(x, i * HOP, SCORE_RATE) : null);
+    if (db[i]! > floor) ceps.push(mfccOf(x, i * HOP));
   }
+  // Mean-normalise the cepstra so the microphone and room colour don't count, only the shape of the sound.
+  const means = new Array<number>(CEPS).fill(0);
+  for (const c of ceps) for (let k = 0; k < CEPS; k++) means[k]! += c[k]! / ceps.length;
+  const mfcc = stretchVec(
+    ceps.map(c => c.map((v, k) => v - means[k]!)),
+    POINTS,
+  );
   const semisRaw = pitch.map(f => (f ? 12 * Math.log2(f / 440) : null));
   const voiced = semisRaw.filter((s): s is number => s !== null);
   const mid = median(voiced);
@@ -129,8 +224,10 @@ export function extractFeatures(samples: Float32Array, rate: number): Features {
     semis: stretch(semis, POINTS),
     voicedRatio: voiced.length / pitch.length,
     onsets,
+    quietRatio: env.filter((_, i) => db[first + i]! < quietDb).length / env.length,
     activeSec: ((last - first) * HOP + FRAME) / SCORE_RATE,
     peakDb,
+    mfcc,
   };
 }
 
@@ -163,6 +260,15 @@ function dtw<T>(a: T[], b: T[], cost: (x: T, y: T) => number, band = 0.15): numb
 }
 
 const clamp01 = (v: number): number => Math.max(0, Math.min(1, v));
+
+/** Distance between two cepstral vectors (how different two moments sound). */
+function cepDistance(a: number[], b: number[]): number {
+  let d = 0;
+  for (let k = 0; k < CEPS; k++) d += (a[k]! - b[k]!) ** 2;
+  return Math.sqrt(d);
+}
+export let TONE_SCALE = 45;
+export const setToneScale = (v: number): void => void (TONE_SCALE = v);
 
 /** Same number of beats in the same places? Each beat is matched to the nearest beat in the other take. */
 function onsetMatch(a: number[], b: number[]): number {
@@ -205,29 +311,63 @@ function looksLikeReplay(ref: Float32Array, imi: Float32Array): boolean {
 export interface Reference {
   features: Features;
   samples: Float32Array; // at SCORE_RATE
+  /** How a clean copy of this exact sound compares (raw 0..1): the "great" mark for this sound. */
+  good: number;
+  /** How an unrelated hum or babble compares: the "not even close" mark for this sound. */
+  bad: number;
+}
+
+/** A clean copy of the sound by someone else: a little faster and higher, with a bit of room noise. */
+function cleanCopy(x: Float32Array): Float32Array {
+  const fast = resample(x, SCORE_RATE * 1.07, SCORE_RATE);
+  let seed = 11;
+  return fast.map(v => {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    return v * 0.8 + ((seed / 0x7fffffff) * 2 - 1) * 0.01;
+  });
+}
+
+/** Sounds that have nothing to do with the clip but are as long: a steady hum, and syllable-like babble. */
+function unrelated(sec: number): Float32Array[] {
+  const n = Math.max(SCORE_RATE * 0.3, Math.round(sec * SCORE_RATE));
+  let seed = 5;
+  const noise = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff) * 2 - 1;
+  const hum = Float32Array.from({ length: n }, (_, i) => 0.4 * Math.sin((2 * Math.PI * 150 * i) / SCORE_RATE + 0.3 * Math.sin((2 * Math.PI * 5 * i) / SCORE_RATE)));
+  let lp = 0;
+  const babble = Float32Array.from({ length: n }, (_, i) => {
+    lp += 0.3 * (noise() - lp);
+    const syll = Math.max(0, Math.sin((2 * Math.PI * 4 * i) / SCORE_RATE));
+    return lp * syll * 1.5 + 0.25 * syll * Math.sin((2 * Math.PI * 220 * i) / SCORE_RATE);
+  });
+  return [hum, babble];
 }
 
 export function makeReference(samples: Float32Array, rate: number): Reference {
   const s = resample(samples, rate, SCORE_RATE);
-  return { samples: s, features: extractFeatures(s, SCORE_RATE) };
+  const ref: Reference = { samples: s, features: extractFeatures(s, SCORE_RATE), good: 1, bad: 0 };
+  // Calibrate against this very sound, so sounds that are hard to measure (screams, songs with music
+  // behind them, tiny pops) don't cost players points: scores land between these two marks.
+  const good = compare(ref, extractFeatures(cleanCopy(s), SCORE_RATE)).raw;
+  const bads = unrelated(ref.features.activeSec).map(u => compare(ref, extractFeatures(u, SCORE_RATE)).raw);
+  const bad = bads.reduce((x, y) => x + y, 0) / bads.length;
+  ref.good = Math.max(good, bad + 0.15);
+  ref.bad = bad;
+  return ref;
 }
 
-export function scoreImitation(ref: Reference, imitation: Float32Array, rate: number): Scored {
-  const imiSamples = resample(imitation, rate, SCORE_RATE);
-  const imi = extractFeatures(imiSamples, SCORE_RATE);
-  const zero: Scored['parts'] = { melody: null, rhythm: 0, length: 0, tone: 0 };
-  if (imi.peakDb < -50 || imi.activeSec < 0.12) return { score: 0, verdict: 'silent', parts: zero };
-  if (looksLikeReplay(ref.samples, imiSamples)) return { score: 0, verdict: 'replay', parts: zero };
+/** Raw similarity 0..1 and its parts, before calibration. */
+function compare(ref: Reference, imi: Features): { raw: number; parts: Scored['parts'] } {
   const r = ref.features;
-
   const envelope = clamp01(1 - dtw(r.env, imi.env, (a, b) => Math.abs(a - b)) / 0.32);
-  const rhythm = r.voicedRatio < 0.35 && r.onsets.length >= 2 ? 0.3 * envelope + 0.7 * onsetMatch(r.onsets, imi.onsets) : envelope;
-  const ratio = Math.min(r.activeSec, imi.activeSec) / Math.max(r.activeSec, imi.activeSec);
+  // Counting beats only makes sense for sounds with real gaps (claps, knocks), not a held scream that wobbles.
+  const beaty = r.voicedRatio < 0.35 && r.onsets.length >= 2 && r.quietRatio >= 0.25;
+  const rhythm = beaty ? 0.3 * envelope + 0.7 * onsetMatch(r.onsets, imi.onsets) : envelope;
+  // A little slack so a short sound isn't judged "way too long" over a fraction of a second.
+  const ratio = (Math.min(r.activeSec, imi.activeSec) + 0.3) / (Math.max(r.activeSec, imi.activeSec) + 0.3);
   const length = clamp01((ratio - 0.35) / 0.5);
-  const tone = clamp01(1 - Math.abs(r.voicedRatio - imi.voicedRatio) * 1.6);
-
-  let raw: number;
+  const tone = clamp01(1 - dtw(r.mfcc, imi.mfcc, cepDistance) / TONE_SCALE);
   let melody: number | null = null;
+  let raw: number;
   if (r.voicedRatio >= 0.35) {
     melody = clamp01(
       1 -
@@ -241,12 +381,23 @@ export function scoreImitation(ref: Reference, imitation: Float32Array, rate: nu
         }) /
           0.42,
     );
-    raw = 0.45 * melody + 0.3 * rhythm + 0.15 * length + 0.1 * tone;
+    raw = 0.35 * tone + 0.25 * rhythm + 0.3 * melody + 0.1 * length;
   } else {
-    raw = 0.8 * rhythm + 0.1 * length + 0.1 * tone;
+    raw = 0.45 * tone + 0.45 * rhythm + 0.1 * length;
   }
-  // Every real attempt earns what it got: no cut-off to 0 for being far off. The curve keeps a close copy
-  // well above a loose one (a good copy lands around 80-95, a different sound around 20-45).
-  const score = Math.max(1, Math.round(100 * Math.pow(clamp01(raw / 0.95), 1.4)));
-  return { score, verdict: 'ok', parts: { melody, rhythm, length, tone } };
+  return { raw, parts: { tone, rhythm, melody, length } };
+}
+
+export function scoreImitation(ref: Reference, imitation: Float32Array, rate: number): Scored {
+  const imiSamples = resample(imitation, rate, SCORE_RATE);
+  const imi = extractFeatures(imiSamples, SCORE_RATE);
+  const zero: Scored['parts'] = { tone: 0, rhythm: 0, melody: null, length: 0 };
+  if (imi.peakDb < -50 || imi.activeSec < 0.12) return { score: 0, verdict: 'silent', parts: zero };
+  if (looksLikeReplay(ref.samples, imiSamples)) return { score: 0, verdict: 'replay', parts: zero };
+  const { raw, parts } = compare(ref, imi);
+  // Place the take between "unrelated sound" (about 10) and "clean copy of this sound" (about 95). Every real
+  // attempt earns what it got; nothing is cut off to 0 for being far off.
+  const norm = (raw - ref.bad) / (ref.good - ref.bad);
+  const score = Math.max(1, Math.min(100, Math.round(100 * Math.pow(clamp01(0.1 + 0.85 * norm), 1.1))));
+  return { score, verdict: 'ok', parts };
 }

@@ -35,7 +35,10 @@ function play(notes: Note[]): void {
 }
 
 export const sounds = {
-  recordGo: () => play([[660, 0, 0.08, 'sine'], [880, 0.09, 0.12, 'sine']]),
+  /** 3, 2, 1 before recording */
+  tick: () => play([[880, 0, 0.09, 'sine', 0.2]]),
+  /** recording starts: higher and brighter, and over just before the mic opens so it isn't recorded */
+  go: () => play([[1320, 0, 0.12, 'sine', 0.22]]),
   submitted: () => play([[880, 0, 0.1, 'sine', 0.15], [1318, 0.08, 0.2, 'sine', 0.12]]),
   reveal: () => play([[330, 0, 0.18], [415, 0.12, 0.18], [494, 0.24, 0.35]]),
   victory: () => play([[523, 0, 0.15], [659, 0.15, 0.15], [784, 0.3, 0.15], [1046, 0.45, 0.5, 'square', 0.08]]),

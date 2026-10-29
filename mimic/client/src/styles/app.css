@@ -476,6 +476,11 @@ b { font-weight: 700; }
 .take--waiting { opacity: 0.5; }
 .take--playing { background: rgba(34, 211, 238, 0.12); outline: 2px solid #22d3ee; }
 .take__bar i.is-progress { background: #22d3ee; animation: none; transition: transform 0.1s linear; }
+.parts { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.parts--compact { justify-content: flex-start; gap: 8px; }
+.part { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px; background: rgba(255, 255, 255, 0.06); font-size: 13px; color: var(--muted); }
+.part b { color: var(--text); font-variant-numeric: tabular-nums; }
+.parts--compact .part { padding: 1px 7px; font-size: 12px; }
 .lead-num { display: inline-block; color: var(--lime); animation: pop 0.35s var(--ease) both; }
 .take.is-best { background: rgba(200, 245, 96, 0.08); }
 .take__rank { width: 18px; font: 800 15px var(--display); color: var(--muted); }

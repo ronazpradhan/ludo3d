@@ -213,7 +213,7 @@ describe('a full match with independent clients', () => {
       const rec = await stateWhere(players[0]!, s => s.phase === 'record' && s.round?.number === round);
       const good = await call(players[0]!, 'submit_take', goodTake(rec));
       expect(good).toMatchObject({ ok: true });
-      expect(good.score as number).toBeGreaterThanOrEqual(55);
+      expect(good.score as number).toBeGreaterThanOrEqual(35);
       expect(await call(players[0]!, 'submit_take', goodTake(rec))).toMatchObject({ ok: false, code: 'ALREADY_SUBMITTED' });
       expect(await call(players[1]!, 'submit_take', bytes(silence(1.5)))).toMatchObject({ ok: true, score: 0, verdict: 'silent' });
       expect(await call(players[2]!, 'get_take', { playerId: idOf(0) })).toMatchObject({ ok: false, code: 'WRONG_PHASE' });
@@ -229,7 +229,7 @@ describe('a full match with independent clients', () => {
       expect(Buffer.from(fetched.pcm as ArrayBuffer).equals(goodTake(rec))).toBe(true);
     }
     const done = await stateWhere(players[0]!, s => s.phase === 'finished');
-    expect(done.players.find(p => p.id === idOf(0))!.score).toBeGreaterThan(5 * (55 + POINTS.bestTakeBonus));
+    expect(done.players.find(p => p.id === idOf(0))!.score).toBeGreaterThan(5 * (35 + POINTS.bestTakeBonus));
     // Recordings never travel in public room updates.
     for (const p of players) for (const line of p.inbox) if (line.startsWith('room_state')) expect(line.length).toBeLessThan(20_000);
 

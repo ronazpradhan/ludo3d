@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { COUNTDOWN_MS, listenLeadMs, RESULTS_OUTRO_MS, RESULTS_SCORE_MS, scoreLabel } from '../../../shared/constants';
-import type { CategoryInfo, PublicPlayer, RoomSnapshot } from '../../../shared/types';
+import type { CategoryInfo, PublicPlayer, RoomSnapshot, ScoreParts } from '../../../shared/types';
 import { AudioGraph } from '../components/AudioGraph';
 import { Avatar, Scoreboard } from '../components/bits';
 import { useMimic, useStore } from '../hooks/useMimic';
 import { clipAudio, type MicState, openMic, playClip, playPcm, type Recording, record, stopPlayback, unlock } from '../lib/audio';
+import { sounds } from '../lib/sound';
 import { roundKey } from '../lib/store';
 import { LiveTrace, type TracePoint } from '../lib/trace';
 
@@ -112,14 +113,26 @@ function Listen({ room, mic }: { room: RoomSnapshot; mic: MicState }) {
   const playing = t >= 0 && t <= dur;
   const countdownLeft = round.phaseEndsAt - now;
   const counting = countdownLeft <= COUNTDOWN_MS;
+  const countNum = counting ? Math.max(1, Math.ceil(countdownLeft / 1000)) : 0;
+
+  // Beep on 3, 2, 1, and a higher beep right before recording starts.
+  useEffect(() => {
+    if (countNum >= 1 && countNum <= 3) sounds.tick();
+  }, [countNum]);
+  useEffect(() => {
+    const delay = round.phaseEndsAt - 180 - store.serverNow();
+    if (delay < 0) return;
+    const t = setTimeout(() => sounds.go(), delay);
+    return () => clearTimeout(t);
+  }, [round.phaseEndsAt, store]);
 
   return (
     <section className="card stage stage--listen" aria-live="polite">
       {counting ? (
         <>
           <span className="eyebrow">Get ready to copy it</span>
-          <span className="count" key={Math.ceil(countdownLeft / 1000)} aria-label={`Recording in ${Math.ceil(countdownLeft / 1000)}`}>
-            {Math.max(1, Math.ceil(countdownLeft / 1000))}
+          <span className="count" key={countNum} aria-label={`Recording in ${countNum}`}>
+            {countNum}
           </span>
           <p className="muted">Recording starts by itself. {hint}.</p>
         </>
@@ -139,7 +152,7 @@ function Listen({ room, mic }: { room: RoomSnapshot; mic: MicState }) {
         </>
       )}
       {/* The playhead waits at the start before the sound, so everyone sees exactly when it begins. */}
-      <AudioGraph clip={round.clip} span={round.maxTakeSec} at={t < 0 ? 0 : playing ? t : null} label="Shape of the sound" />
+      <AudioGraph clip={round.clip} span={round.clip.duration} at={t < 0 ? 0 : playing ? t : null} label="Shape of the sound" />
       {missed && <p className="mic__help">You missed the sound this time. It doesn’t repeat — follow the graph for this one.</p>}
       {blocked && (
         <button type="button" className="btn btn--primary" onClick={() => void unlock().then(ok => ok && setBlocked(false))}>
@@ -242,11 +255,12 @@ function RecordStage({ room, mic, setMic }: { room: RoomSnapshot; mic: MicState;
             <span className="eyebrow">Your copy scored</span>
             <p className="big-score">{mine.score}</p>
             <p className="stage__big">{mine.verdict === 'silent' ? 'We couldn’t hear you' : mine.verdict === 'replay' ? 'That sounded like a replay' : scoreLabel(mine.score)}</p>
+            {mine.parts && <Parts parts={mine.parts} />}
           </>
         ) : (
           <p className="stage__big">Take sent ✓</p>
         )}
-        <AudioGraph clip={round.clip} span={round.maxTakeSec} at={null} trace={trace} label="The sound and your copy" />
+        <AudioGraph clip={round.clip} span={round.clip.duration} at={null} trace={trace} label="The sound and your copy" />
         <p className="muted">{waiting > 0 ? `Waiting for ${waiting} more…` : 'Everyone’s done!'}</p>
       </section>
     );
@@ -267,7 +281,7 @@ function RecordStage({ room, mic, setMic }: { room: RoomSnapshot; mic: MicState;
       ) : (
         <p className="stage__big">{mic === 'ready' ? 'Starting…' : 'Waiting for your microphone…'}</p>
       )}
-      <AudioGraph clip={round.clip} span={round.maxTakeSec} at={state === 'recording' ? elapsed : null} trace={trace} label="The sound and your copy" />
+      <AudioGraph clip={round.clip} span={round.clip.duration} at={state === 'recording' ? elapsed : null} trace={trace} label="The sound and your copy" />
       {state === 'recording' && (
         <button type="button" className="btn btn--ghost btn--sm" onClick={() => void finish()}>
           I’m done
@@ -283,6 +297,28 @@ function RecordStage({ room, mic, setMic }: { room: RoomSnapshot; mic: MicState;
         </>
       )}
     </section>
+  );
+}
+
+/** Why a take got its score: how it sounds, its rhythm, its pitch line and its length. */
+function Parts({ parts, compact = false }: { parts: ScoreParts; compact?: boolean }) {
+  const items: [string, string, number | null][] = [
+    ['🗣️', 'Voice', parts.tone],
+    ['🥁', 'Rhythm', parts.rhythm],
+    ['🎵', 'Pitch', parts.melody],
+    ['⏱️', 'Length', parts.length],
+  ];
+  return (
+    <span className={'parts' + (compact ? ' parts--compact' : '')}>
+      {items
+        .filter(([, , v]) => v !== null)
+        .map(([icon, name, v]) => (
+          <span key={name} className="part" title={`${name}: ${v}/100`}>
+            <span aria-hidden="true">{icon}</span> {compact ? '' : `${name} `}
+            <b>{v}</b>
+          </span>
+        ))}
+    </span>
   );
 }
 
@@ -363,6 +399,7 @@ function Results({ room, byId }: { room: RoomSnapshot; byId: Map<string, PublicP
                   <span className="take__bar" aria-hidden="true">
                     <i style={{ transform: `scaleX(${shown ? t.score / 100 : state === 'playing' ? Math.min(1, (elapsed - step.at) / Math.max(1, step.ms)) : 0})` }} className={state === 'playing' ? 'is-progress' : ''} />
                   </span>
+                  {shown && t.parts && <Parts parts={t.parts} compact />}
                   <span className="take__label">
                     {state === 'playing' ? '🔊 Playing…' : !shown ? 'Up next' : t.verdict === 'none' ? 'No take' : t.verdict === 'silent' ? 'Silent' : t.verdict === 'replay' ? 'Replay — not counted' : scoreLabel(t.score)}
                   </span>

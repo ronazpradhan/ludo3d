@@ -109,7 +109,6 @@ export class MimicStore {
     const patch: Partial<State> = { room: snap, clockOffset: this.state.clockOffset || snap.serverNow - Date.now() };
     if (this.state.myTake && this.state.myTake.key !== roundKey(snap)) patch.myTake = null;
     if (prev && prev.phase !== snap.phase) {
-      if (snap.phase === 'record') sounds.recordGo();
       if (snap.phase === 'results') sounds.reveal();
       if (snap.phase === 'finished') sounds.victory();
     }
@@ -221,7 +220,7 @@ export class MimicStore {
       this.notify(res.message);
       return null;
     }
-    const feedback: TakeFeedback = { score: res.score, verdict: res.verdict };
+    const feedback: TakeFeedback = { score: res.score, verdict: res.verdict, parts: res.parts };
     sounds.submitted();
     this.set({ myTake: { key, feedback } });
     return feedback;

@@ -64,6 +64,14 @@ export interface PublicRound {
 
 export type Verdict = 'ok' | 'silent' | 'replay' | 'none';
 
+/** What a score is made of, each 0-100: how it sounds, its rhythm, its pitch line (null if the sound has none), its length. */
+export interface ScoreParts {
+  tone: number;
+  rhythm: number;
+  melody: number | null;
+  length: number;
+}
+
 export interface TakeResult {
   playerId: string;
   score: number;
@@ -72,6 +80,7 @@ export interface TakeResult {
   best: boolean;
   /** Whether a recording can be played back. */
   hasAudio: boolean;
+  parts: ScoreParts | null;
 }
 
 /** One step of the results show: play this player's take (`ms` long, 0 if none), then reveal their score. */
@@ -108,6 +117,7 @@ export interface RoomSnapshot {
 export interface TakeFeedback {
   score: number;
   verdict: Verdict;
+  parts: ScoreParts | null;
 }
 
 export type ErrorCode =
