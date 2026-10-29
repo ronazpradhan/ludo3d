@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CATEGORIES, CATEGORY_LABELS, DIFFICULTY_SETTINGS, MAX_PLAYERS, MIN_PLAYERS, RECORD_OPTIONS, ROUND_OPTIONS } from '../../../shared/constants';
+import { CATEGORIES, CATEGORY_LABELS, DIFFICULTY_SETTINGS, MAX_PLAYERS, MIN_PLAYERS, ROUND_OPTIONS } from '../../../shared/constants';
 import type { Category, RoomSettings, RoomSnapshot } from '../../../shared/types';
 import { PlayerChip } from '../components/bits';
 import { MicCheck } from '../components/MicCheck';
@@ -88,7 +88,6 @@ export function Lobby({ room }: { room: RoomSnapshot }) {
           {!isHost && <span className="muted">Set by {host?.nickname ?? 'the host'}</span>}
         </div>
         <Segmented label="Sounds" options={ROUND_OPTIONS} value={s.rounds} disabled={!isHost} onChange={v => set({ rounds: v })} format={v => `${v}`} />
-        <Segmented label="Time to record" options={RECORD_OPTIONS} value={s.recordSeconds} disabled={!isHost} onChange={v => set({ recordSeconds: v })} format={v => `${v}s`} />
         <Segmented label="Difficulty" options={DIFFICULTY_SETTINGS} value={s.difficulty} disabled={!isHost} onChange={v => set({ difficulty: v })} format={v => DIFF_LABEL[v]} />
         <div className="setting">
           <span className="setting__label">Categories</span>

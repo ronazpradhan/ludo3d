@@ -1,16 +1,16 @@
 // Short UI sound effects (no audio files to download) and the mute switch, remembered per browser.
 // The mute switch also silences the round's clip and take playback (see audio.ts).
+import { audioContext } from './audio';
 import { loadMuted, saveMuted } from './session';
 
 type Note = [freq: number, at: number, dur: number, type?: OscillatorType, gain?: number];
 
-let ctx: AudioContext | null = null;
 let muted = loadMuted();
 const listeners = new Set<() => void>();
 
 function audio(): AudioContext | null {
   if (typeof window === 'undefined' || !('AudioContext' in window)) return null;
-  ctx ??= new AudioContext();
+  const ctx = audioContext(); // one context for the whole app, so a single tap unlocks everything
   if (ctx.state === 'suspended') void ctx.resume();
   return ctx;
 }

@@ -153,7 +153,7 @@ describe('lobby over sockets', () => {
 
     const { players } = await setupRoom(2, {});
     const host = players[0]!;
-    for (const s of [{ rounds: 3 }, { recordSeconds: 60 }, { categories: ['nope'] }, { difficulty: 'impossible' }, { hostId: 'me' }])
+    for (const s of [{ rounds: 3 }, { rounds: 7 }, { recordSeconds: 25 }, { categories: ['nope'] }, { difficulty: 'impossible' }, { hostId: 'me' }])
       expect(await call(host, 'update_settings', s)).toMatchObject({ ok: false, code: 'BAD_INPUT' });
   });
 

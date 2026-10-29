@@ -1,12 +1,13 @@
 // One Mimic room: players, settings and the match state machine
 //   lobby -> listen -> record -> results -> listen ... -> finished -> (rematch) listen / (back) lobby
-// Each round everyone hears the same clip, records their copy of it, and the server scores every take.
+// Each round everyone hears the same clip exactly once, then after a 3-2-1 countdown everyone records one take at
+// the same moment, for the same length. The server scores every take.
 // The room owns the only copy of the game state and its own timers. Node runs each socket event and each
 // timer callback to completion before the next one, and nothing in here awaits, so every method below is
 // an atomic step for its room. Timers carry a phase token: a timer that fires after its phase has already
 // moved on (everyone submitted early, a player left) finds a different token and does nothing.
 
-import { DEFAULT_SETTINGS, LISTEN_GAP_MS, LISTEN_LEAD_MS, LISTEN_TAIL_MS, MAX_PLAYERS, MIN_PLAYERS, RECORDING_RATE, RESULTS_MS } from '../shared/constants';
+import { COUNTDOWN_MS, DEFAULT_SETTINGS, LISTEN_LEAD_MS, LISTEN_TAIL_MS, MAX_PLAYERS, MIN_PLAYERS, RECORDING_RATE, RESULTS_MS, UPLOAD_GRACE_MS } from '../shared/constants';
 import { int16ToFloat } from '../shared/dsp';
 import { clipDuration } from '../shared/synth';
 import type { Avatar, Clip, ErrorCode, PublicPlayer, RoomPhase, RoomSettings, RoomSnapshot, RoundResult, TakeFeedback } from '../shared/types';
@@ -31,9 +32,9 @@ export const realClock: Clock = {
 
 /** Phase lengths. Production uses the shared constants; tests shorten them. */
 export interface Timing {
-  /** Overrides the listen phase length (normally lead-in + clip twice + gaps). */
+  /** Overrides the listen phase length (normally lead-in + the clip once + pause + 3-2-1 countdown). */
   listenMs?: number;
-  /** Overrides settings.recordSeconds when set. */
+  /** Overrides the record phase length (normally the take length + upload time). */
   recordMs?: number;
   resultsMs: number;
 }
@@ -248,14 +249,14 @@ export class Room {
     const r: Round = { number: m.played, clip, maxTakeSec: maxTakeSec(clip), phase: 'listen', phaseStartedAt: 0, phaseEndsAt: 0, takes: new Map() };
     m.round = r;
     this.lastResult = null;
-    const listenMs = this.timing.listenMs ?? Math.round(LISTEN_LEAD_MS + 2 * clipDuration(clip) * 1000 + LISTEN_GAP_MS + LISTEN_TAIL_MS);
+    const listenMs = this.timing.listenMs ?? Math.round(LISTEN_LEAD_MS + clipDuration(clip) * 1000 + LISTEN_TAIL_MS + COUNTDOWN_MS);
     this.setPhase(r, 'listen', listenMs, () => this.beginRecording());
   }
 
   private beginRecording(): void {
     const r = this.match?.round;
     if (!r || r.phase !== 'listen') return;
-    this.setPhase(r, 'record', this.timing.recordMs ?? this.settings.recordSeconds * 1000, () => this.endRound());
+    this.setPhase(r, 'record', this.timing.recordMs ?? r.maxTakeSec * 1000 + UPLOAD_GRACE_MS, () => this.endRound());
   }
 
   private checkEveryoneSubmitted(): void {

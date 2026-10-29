@@ -1,4 +1,4 @@
-import type { AVATARS, CATEGORIES, DIFFICULTIES, DIFFICULTY_SETTINGS, RECORD_OPTIONS, ROUND_OPTIONS } from './constants';
+import type { AVATARS, CATEGORIES, DIFFICULTIES, DIFFICULTY_SETTINGS, ROUND_OPTIONS } from './constants';
 import type { ClipEvent } from './synth';
 
 export type Avatar = (typeof AVATARS)[number];
@@ -16,7 +16,6 @@ export interface Clip {
 
 export interface RoomSettings {
   rounds: (typeof ROUND_OPTIONS)[number];
-  recordSeconds: (typeof RECORD_OPTIONS)[number];
   categories: Category[];
   difficulty: DifficultySetting;
 }

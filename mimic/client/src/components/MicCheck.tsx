@@ -23,7 +23,15 @@ export function MicCheck({ compact = false, onReady }: { compact?: boolean; onRe
     onReady?.();
     // Meter only: record into nothing for a while, just to show the level.
     let stopped = false;
-    const rec = await record(600, v => !stopped && setLevel(l => Math.max(v, l * 0.85)), () => undefined);
+    const rec = await record(
+      600,
+      data => {
+        let peak = 0;
+        for (let i = 0; i < data.length; i += 4) peak = Math.max(peak, Math.abs(data[i]!));
+        if (!stopped) setLevel(l => Math.max(Math.min(1, peak * 1.6), l * 0.85));
+      },
+      () => undefined,
+    );
     stopRef.current = () => {
       stopped = true;
       rec.cancel();

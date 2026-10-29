@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { MAX_PLAYERS, POINTS } from '../shared/constants';
+import { COUNTDOWN_MS, LISTEN_LEAD_MS, LISTEN_TAIL_MS, MAX_PLAYERS, POINTS, UPLOAD_GRACE_MS } from '../shared/constants';
+import { clipDuration } from '../shared/synth';
+import { DEFAULT_TIMING } from '../server/game-engine';
 import { roundPoints } from '../server/scoring';
 import { makeRoom, pcmOf, silence, TIMING } from './helpers';
 
@@ -140,6 +142,21 @@ describe('a round', () => {
     expect(room.snapshot()).toMatchObject({ phase: 'record', round: { number: 2 } });
     clock.advance(TIMING.recordMs! - 1000); // the old round-1 deadline passes in here
     expect(room.snapshot()).toMatchObject({ phase: 'record', round: { number: 2 } });
+  });
+});
+
+describe('fair timing', () => {
+  it('plays the sound once, counts down 3 seconds, then gives everyone the same fixed take window', () => {
+    const { room, clock, clip } = makeRoom(2, DEFAULT_TIMING);
+    room.start('p1');
+    const listen = room.snapshot().round!;
+    const listenMs = Math.round(LISTEN_LEAD_MS + clipDuration(clip()) * 1000 + LISTEN_TAIL_MS + COUNTDOWN_MS);
+    expect(listen.phaseEndsAt - listen.phaseStartedAt).toBe(listenMs);
+    clock.advance(listenMs);
+    const rec = room.snapshot().round!;
+    expect(room.snapshot().phase).toBe('record');
+    expect(rec.maxTakeSec).toBeLessThanOrEqual(clipDuration(clip()) + 2.1);
+    expect(rec.phaseEndsAt - rec.phaseStartedAt).toBe(rec.maxTakeSec * 1000 + UPLOAD_GRACE_MS);
   });
 });
 

@@ -87,10 +87,10 @@ export interface Recording {
 }
 
 /**
- * Records the mic for up to `maxSec`. `onLevel` gets a 0..1 loudness for a meter.
+ * Records the mic for up to `maxSec`. `onData` sees the raw samples as they arrive (for meters and graphs).
  * The result is mono 16-bit PCM at RECORDING_RATE, ready to send.
  */
-export async function record(maxSec: number, onLevel: (v: number) => void, onAutoStop: () => void): Promise<Recording> {
+export async function record(maxSec: number, onData: (samples: Float32Array, rate: number) => void, onAutoStop: () => void): Promise<Recording> {
   if (!stream) throw new Error('mic not open');
   const c = audioContext();
   await unlock();
@@ -102,14 +102,15 @@ export async function record(maxSec: number, onLevel: (v: number) => void, onAut
   let node: AudioNode;
   const take = (data: Float32Array) => {
     if (done) return;
-    let peak = 0;
-    for (let i = 0; i < data.length; i += 4) peak = Math.max(peak, Math.abs(data[i]!));
-    onLevel(Math.min(1, peak * 1.6));
     const room = max - length;
     const part = data.length > room ? data.subarray(0, room) : data;
+    onData(part, c.sampleRate);
     chunks.push(part);
     length += part.length;
-    if (length >= max) onAutoStop();
+    if (length >= max) {
+      done = true;
+      onAutoStop();
+    }
   };
   if (c.audioWorklet) {
     await c.audioWorklet.addModule(`${import.meta.env.BASE_URL}recorder-worklet.js`);

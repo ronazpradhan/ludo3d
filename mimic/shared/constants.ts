@@ -18,14 +18,16 @@ export const TAKE_EXTRA_SEC = 2;
 export const MAX_TAKE_SEC = 6;
 export const MAX_RECORDING_BYTES = MAX_TAKE_SEC * RECORDING_RATE * 2;
 
-/** Listen phase: a short lead-in, the clip, a gap, the clip again. */
-export const LISTEN_LEAD_MS = 700;
-export const LISTEN_GAP_MS = 900;
-export const LISTEN_TAIL_MS = 500;
+/** Listen phase: a short lead-in, the clip played once, a pause, then a 3-2-1 countdown. */
+export const LISTEN_LEAD_MS = 800;
+export const LISTEN_TAIL_MS = 400;
+export const COUNTDOWN_MS = 3000;
+/** Recording starts for everyone at once and runs for the round's take length. This extra time
+ *  only covers sending the take to the server; nobody can record longer than the take length. */
+export const UPLOAD_GRACE_MS = 5000;
 export const RESULTS_MS = 12_000;
 
 export const ROUND_OPTIONS = [5, 8, 10] as const;
-export const RECORD_OPTIONS = [15, 25] as const;
 
 export const CATEGORIES = ['melody', 'glide', 'rhythm', 'fx'] as const;
 
@@ -79,7 +81,6 @@ export function scoreLabel(score: number): string {
 
 export const DEFAULT_SETTINGS = {
   rounds: 8 as const,
-  recordSeconds: 25 as const,
   categories: [...CATEGORIES],
   difficulty: 'mixed' as const,
 };
