@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { COUNTDOWN_MS, LISTEN_TAIL_MS, listenLeadMs, MAX_PLAYERS, POINTS, UPLOAD_GRACE_MS } from '../shared/constants';
-import { DEFAULT_TIMING } from '../server/game-engine';
+import { COUNTDOWN_MS, LISTEN_TAIL_MS, listenLeadMs, RESULTS_INTRO_MS, RESULTS_OUTRO_MS, RESULTS_SCORE_MS, MAX_PLAYERS, POINTS, UPLOAD_GRACE_MS } from '../shared/constants';
+import { DEFAULT_TIMING, Room } from '../server/game-engine';
 import { roundPoints } from '../server/scoring';
-import { makeRoom, pcmOf, silence, TIMING } from './helpers';
+import { library, makeRoom, pcmOf, silence, TIMING } from './helpers';
 
 const ROUND = TIMING.listenMs! + TIMING.recordMs! + TIMING.resultsMs;
 
@@ -43,7 +43,6 @@ describe('lobby rules', () => {
     const { room, startRecording } = makeRoom(2);
     expect(room.start('p2')).toMatchObject({ ok: false, code: 'NOT_HOST' });
     expect(room.updateSettings('p2', { rounds: 5 })).toMatchObject({ ok: false, code: 'NOT_HOST' });
-    expect(room.updateSettings('p1', { categories: [] })).toMatchObject({ ok: false, code: 'BAD_INPUT' });
     expect(room.updateSettings('p1', { rounds: 5 })).toEqual({ ok: true });
     startRecording();
     expect(room.updateSettings('p1', { rounds: 10 })).toMatchObject({ ok: false, code: 'WRONG_PHASE' });
@@ -145,12 +144,16 @@ describe('a round', () => {
 });
 
 describe('categories and visibility', () => {
-  it('rejects unknown categories and an empty choice, and treats "every category" as all', () => {
+  it('starts with every category off, rejects unknown ones, and needs one on to start', () => {
     const { room } = makeRoom(2);
     expect(room.updateSettings('p1', { categories: ['klingon'] })).toMatchObject({ ok: false, code: 'BAD_INPUT' });
-    expect(room.updateSettings('p1', { categories: [] })).toMatchObject({ ok: false, code: 'BAD_INPUT' });
-    expect(room.updateSettings('p1', { categories: room.snapshot().categories.map(c => c.id) })).toEqual({ ok: true });
-    expect(room.settings.categories).toEqual([]);
+    expect(room.updateSettings('p1', { categories: [] })).toEqual({ ok: true });
+    expect(room.start('p1')).toMatchObject({ ok: false, code: 'BAD_INPUT' });
+    expect(room.updateSettings('p1', { categories: ['fx'] })).toEqual({ ok: true });
+    expect(room.start('p1')).toEqual({ ok: true });
+  });
+  it('a brand-new room has no categories on', () => {
+    expect(new Room('ZZZZZZ', library, { state: () => undefined }).settings.categories).toEqual([]);
   });
   it('lists the library categories with their sound counts', () => {
     const { room } = makeRoom(2);
@@ -164,6 +167,47 @@ describe('categories and visibility', () => {
     expect(room.updateSettings('p2', { visibility: 'public' })).toMatchObject({ ok: false, code: 'NOT_HOST' });
     room.updateSettings('p1', { visibility: 'public' });
     expect(room.listing()).toMatchObject({ code: 'ABCDEF', players: 2, playing: false });
+  });
+});
+
+describe('no repeats and the results show', () => {
+  it('never plays a sound twice in a game: fewer sounds than rounds means a shorter game', () => {
+    const { room, clock } = makeRoom(2);
+    const fx = library.clips.filter(c => c.category === 'fx').length;
+    room.updateSettings('p1', { categories: ['fx'], rounds: 10 });
+    room.start('p1');
+    expect(room.snapshot().round!.total).toBe(Math.min(10, fx));
+    const seen = new Set<string>();
+    while (room.snapshot().phase !== 'finished') {
+      const id = room.snapshot().round!.clip.id;
+      if (room.snapshot().phase === 'listen') {
+        expect(seen.has(id)).toBe(false);
+        seen.add(id);
+      }
+      clock.advance(ROUND);
+    }
+    expect(seen.size).toBe(Math.min(10, fx));
+  });
+
+  it('plays every take, worst first, then shows its score; the results last as long as that takes', () => {
+    const { room, clock, goodTake } = makeRoom(3, DEFAULT_TIMING);
+    room.start('p1');
+    clock.advance(room.snapshot().round!.phaseEndsAt - clock.now());
+    const good = goodTake();
+    room.submitTake('p1', good);
+    room.submitTake('p2', silence(1.5));
+    room.submitTake('p3', pcmOf(new Float32Array(12_000).map((_, i) => Math.sin(i / 3) * 0.4)));
+    const s = room.snapshot();
+    expect(s.phase).toBe('results');
+    const list = s.lastResult!.playlist;
+    const scores = list.map(st => s.lastResult!.takes.find(t => t.playerId === st.playerId)!.score);
+    expect([...scores].sort((a, b) => a - b)).toEqual(scores);
+    expect(list[list.length - 1]!.playerId).toBe('p1');
+    expect(list.find(st => st.playerId === 'p1')!.ms).toBe(Math.round((good.length / 12_000) * 1000));
+    expect(list[0]!.at).toBe(RESULTS_INTRO_MS);
+    for (let i = 1; i < list.length; i++) expect(list[i]!.at).toBe(list[i - 1]!.at + list[i - 1]!.ms + RESULTS_SCORE_MS);
+    const end = list[list.length - 1]!;
+    expect(s.round!.phaseEndsAt - s.round!.phaseStartedAt).toBe(end.at + end.ms + RESULTS_SCORE_MS + RESULTS_OUTRO_MS);
   });
 });
 

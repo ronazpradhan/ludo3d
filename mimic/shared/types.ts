@@ -74,10 +74,20 @@ export interface TakeResult {
   hasAudio: boolean;
 }
 
+/** One step of the results show: play this player's take (`ms` long, 0 if none), then reveal their score. */
+export interface PlaybackStep {
+  playerId: string;
+  /** when the take starts playing, ms after the results began */
+  at: number;
+  ms: number;
+}
+
 export interface RoundResult {
   number: number;
   clip: { id: string; name: string; category: Category };
   takes: TakeResult[];
+  /** Worst take first, best last. */
+  playlist: PlaybackStep[];
 }
 
 export interface RoomSnapshot {

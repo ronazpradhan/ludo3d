@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { COUNTDOWN_MS, listenLeadMs, RESULTS_MS, scoreLabel } from '../../../shared/constants';
-import type { CategoryInfo, PublicPlayer, RoomSnapshot, TakeResult } from '../../../shared/types';
+import { COUNTDOWN_MS, listenLeadMs, RESULTS_OUTRO_MS, RESULTS_SCORE_MS, scoreLabel } from '../../../shared/constants';
+import type { CategoryInfo, PublicPlayer, RoomSnapshot } from '../../../shared/types';
 import { AudioGraph } from '../components/AudioGraph';
 import { Avatar, Scoreboard } from '../components/bits';
-import { useCountdown, useMimic, useStore } from '../hooks/useMimic';
+import { useMimic, useStore } from '../hooks/useMimic';
 import { clipAudio, type MicState, openMic, playClip, playPcm, type Recording, record, stopPlayback, unlock } from '../lib/audio';
 import { roundKey } from '../lib/store';
 import { LiveTrace, type TracePoint } from '../lib/trace';
@@ -22,7 +22,12 @@ function useServerTime(on: boolean): number {
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    // Animation frames pause while the page isn't being drawn; this keeps the clock moving anyway.
+    const backup = setInterval(() => setNow(store.serverNow()), 200);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearInterval(backup);
+    };
   }, [on, store]);
   return now;
 }
@@ -121,10 +126,20 @@ function Listen({ room, mic }: { room: RoomSnapshot; mic: MicState }) {
       ) : (
         <>
           <span className="eyebrow">{t < 0 ? 'Listen — it plays once' : playing ? 'Listen…' : 'That’s it!'}</span>
-          <p className="stage__big">{t < 0 ? 'Here it comes…' : playing ? '🔊 Playing' : 'Remember the shape'}</p>
+          {t < 0 ? (
+            <p className="stage__big">
+              Sound in{' '}
+              <span className="lead-num" key={Math.min(2, Math.ceil(-t))}>
+                {Math.max(1, Math.min(Math.round(listenLeadMs(round.clip) / 1000), Math.ceil(-t)))}
+              </span>
+            </p>
+          ) : (
+            <p className="stage__big">{playing ? '🔊 Playing' : 'Remember the shape'}</p>
+          )}
         </>
       )}
-      <AudioGraph clip={round.clip} span={round.maxTakeSec} at={playing ? t : null} label="Shape of the sound" />
+      {/* The playhead waits at the start before the sound, so everyone sees exactly when it begins. */}
+      <AudioGraph clip={round.clip} span={round.maxTakeSec} at={t < 0 ? 0 : playing ? t : null} label="Shape of the sound" />
       {missed && <p className="mic__help">You missed the sound this time. It doesn’t repeat — follow the graph for this one.</p>}
       {blocked && (
         <button type="button" className="btn btn--primary" onClick={() => void unlock().then(ok => ok && setBlocked(false))}>
@@ -271,46 +286,88 @@ function RecordStage({ room, mic, setMic }: { room: RoomSnapshot; mic: MicState;
   );
 }
 
+/**
+ * Plays everyone's take to everyone, worst first and best last, revealing each score right after its take.
+ * The server sets the timing (the playlist), so every phone plays the same take at the same moment.
+ */
 function Results({ room, byId }: { room: RoomSnapshot; byId: Map<string, PublicPlayer> }) {
   const store = useStore();
   const { me } = useMimic();
   const res = room.lastResult;
   const round = room.round!;
-  const left = useCountdown(round.phaseEndsAt);
-  const [playing, setPlaying] = useState<string | null>(null);
+  const now = useServerTime(true);
+  const takes = useRef(new Map<string, Int16Array>());
+  const key = `${room.matchNumber}:${res?.number ?? 0}`;
+
+  // Download every take straight away, then play each in its slot.
+  useEffect(() => {
+    if (!res) return;
+    let live = true;
+    takes.current = new Map();
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    for (const step of res.playlist) {
+      if (!step.ms) continue;
+      const loaded = store.fetchTake(step.playerId).then(pcm => {
+        if (pcm) takes.current.set(step.playerId, pcm);
+      });
+      const delay = round.phaseStartedAt + step.at - store.serverNow();
+      if (delay < -300) continue; // already past (joined late)
+      timers.push(
+        setTimeout(() => {
+          void loaded.then(() => {
+            const pcm = takes.current.get(step.playerId);
+            if (live && pcm) void playPcm(pcm);
+          });
+        }, Math.max(0, delay)),
+      );
+    }
+    return () => {
+      live = false;
+      timers.forEach(clearTimeout);
+      stopPlayback();
+    };
+  }, [key, round.phaseStartedAt, store]);
+
   if (!res) return null;
   const last = round.number >= round.total;
-
-  const play = async (t: TakeResult) => {
-    setPlaying(t.playerId);
-    const pcm = await store.fetchTake(t.playerId);
-    if (pcm) await playPcm(pcm);
-    setPlaying(p => (p === t.playerId ? null : p));
-  };
+  const elapsed = now - round.phaseStartedAt;
+  const takeOf = new Map(res.takes.map(t => [t.playerId, t]));
+  const current = res.playlist.find(s => elapsed < s.at + s.ms + RESULTS_SCORE_MS);
+  const allShown = !current;
+  const left = round.phaseEndsAt - now;
+  const playingNow = current && elapsed >= current.at && elapsed < current.at + current.ms ? current : null;
 
   return (
     <div className="results">
-      <section className="card reveal" aria-live="assertive">
+      <section className="card reveal" aria-live="polite">
         <span className="eyebrow">That was</span>
         <p className="reveal__answer">{res.clip.name}</p>
+        <p className="muted small">
+          {allShown ? 'Everyone’s been heard!' : playingNow ? `🔊 Playing ${byId.get(playingNow.playerId)?.nickname ?? 'a'}’s take` : 'Listening to everyone’s takes…'}
+        </p>
         <ol className="takes">
-          {res.takes.map((t, i) => {
-            const p = byId.get(t.playerId);
+          {res.playlist.map((step, i) => {
+            const t = takeOf.get(step.playerId)!;
+            const p = byId.get(step.playerId);
+            const state = elapsed < step.at ? 'waiting' : elapsed < step.at + step.ms ? 'playing' : 'shown';
+            const shown = state === 'shown';
             return (
-              <li key={t.playerId} className={'take' + (t.playerId === me?.playerId ? ' is-me' : '') + (t.best ? ' is-best' : '')}>
-                <span className="take__rank">{i + 1}</span>
+              <li
+                key={step.playerId}
+                className={`take take--${state}` + (step.playerId === me?.playerId ? ' is-me' : '') + (shown && t.best ? ' is-best' : '')}
+              >
+                <span className="take__rank">{res.playlist.length - i}</span>
                 {p && <Avatar id={p.avatar} size={34} />}
                 <span className="take__who">
-                  {p?.nickname ?? 'Someone'} {t.best && <span className="tag tag--host">best +30</span>}
-                  <span className="take__bar" aria-hidden="true"><i style={{ transform: `scaleX(${t.score / 100})` }} /></span>
-                  <span className="take__label">{t.verdict === 'none' ? 'No take' : t.verdict === 'silent' ? 'Silent' : t.verdict === 'replay' ? 'Replay — not counted' : scoreLabel(t.score)}</span>
+                  {p?.nickname ?? 'Someone'} {shown && t.best && <span className="tag tag--host">best +30</span>}
+                  <span className="take__bar" aria-hidden="true">
+                    <i style={{ transform: `scaleX(${shown ? t.score / 100 : state === 'playing' ? Math.min(1, (elapsed - step.at) / Math.max(1, step.ms)) : 0})` }} className={state === 'playing' ? 'is-progress' : ''} />
+                  </span>
+                  <span className="take__label">
+                    {state === 'playing' ? '🔊 Playing…' : !shown ? 'Up next' : t.verdict === 'none' ? 'No take' : t.verdict === 'silent' ? 'Silent' : t.verdict === 'replay' ? 'Replay — not counted' : scoreLabel(t.score)}
+                  </span>
                 </span>
-                <span className="take__score">{t.score}</span>
-                {t.hasAudio && (
-                  <button type="button" className="icon-btn" aria-label={`Play ${p?.nickname ?? 'this'} take`} disabled={playing !== null} onClick={() => void play(t)}>
-                    {playing === t.playerId ? '…' : '▶'}
-                  </button>
-                )}
+                <span className="take__score">{shown ? t.score : '?'}</span>
               </li>
             );
           })}
@@ -318,11 +375,17 @@ function Results({ room, byId }: { room: RoomSnapshot; byId: Map<string, PublicP
       </section>
       <section className="card">
         <h2 className="side-h">Leaderboard</h2>
-        <Scoreboard players={room.players} hostId={room.hostId} meId={me?.playerId} highlight={new Map(res.takes.map(t => [t.playerId, t.points]))} />
-        <div className="next-bar" role="timer" aria-label="Next round">
-          <span>{last ? 'Final results in' : 'Next sound in'} {Math.ceil(left / 1000)}</span>
-          <i style={{ transform: `scaleX(${left / RESULTS_MS})` }} />
-        </div>
+        {allShown ? (
+          <>
+            <Scoreboard players={room.players} hostId={room.hostId} meId={me?.playerId} highlight={new Map(res.takes.map(t => [t.playerId, t.points]))} />
+            <div className="next-bar" role="timer" aria-label="Next round">
+              <span>{last ? 'Final results in' : 'Next sound in'} {Math.max(0, Math.ceil(left / 1000))}</span>
+              <i style={{ transform: `scaleX(${Math.max(0, left / RESULTS_OUTRO_MS)})` }} />
+            </div>
+          </>
+        ) : (
+          <p className="muted">Scores update after everyone’s take has played.</p>
+        )}
       </section>
     </div>
   );

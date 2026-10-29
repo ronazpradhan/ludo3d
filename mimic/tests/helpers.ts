@@ -56,7 +56,7 @@ export const library = validateLibrary(
   new Map(fixture.map(c => [c.id, renderClip(c, RECORDING_RATE)])),
 );
 export const clips = library.clips;
-export const TIMING: Timing = { listenMs: 5000, recordMs: 20_000, resultsMs: 8000 };
+export const TIMING = { listenMs: 5000, recordMs: 20_000, resultsMs: 8000 } satisfies Timing;
 
 /** A human-ish copy of a clip: other timbre, transposed, slower, sloppy timing, background noise. */
 export function imitate(spec: ClipSpec, shift = 0.5, stretch = 1.15, wave: Wave = 'sine', jitter = 0.03): Float32Array {
@@ -103,6 +103,8 @@ export function makeRoom(n: number, timing: Timing = TIMING) {
     room.setConnected(id, `sock-${i}`);
     ids.push(id);
   }
+  // Rooms start with every category off; tests play with all of them on.
+  room.updateSettings('p1', { categories: library.categories.map(c => c.id) });
   const clip = () => clips.find(c => c.id === room.snapshot().round!.clip.id)!;
   const goodTake = () => pcmOf(imitate(specOf(clip().id)));
   const score = (id: string): number => room.players.get(id)!.score;

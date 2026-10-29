@@ -7,9 +7,21 @@
 // an atomic step for its room. Timers carry a phase token: a timer that fires after its phase has already
 // moved on (everyone submitted early, a player left) finds a different token and does nothing.
 
-import { COUNTDOWN_MS, DEFAULT_SETTINGS, LISTEN_TAIL_MS, listenLeadMs, MAX_PLAYERS, MIN_PLAYERS, RECORDING_RATE, RESULTS_MS, UPLOAD_GRACE_MS } from '../shared/constants';
+import {
+  COUNTDOWN_MS,
+  DEFAULT_SETTINGS,
+  LISTEN_TAIL_MS,
+  listenLeadMs,
+  MAX_PLAYERS,
+  MIN_PLAYERS,
+  RECORDING_RATE,
+  RESULTS_INTRO_MS,
+  RESULTS_OUTRO_MS,
+  RESULTS_SCORE_MS,
+  UPLOAD_GRACE_MS,
+} from '../shared/constants';
 import { int16ToFloat } from '../shared/dsp';
-import type { Avatar, Clip, ErrorCode, OpenRoom, PublicPlayer, RoomPhase, RoomSettings, RoomSnapshot, RoundResult, TakeFeedback } from '../shared/types';
+import type { Avatar, Clip, ErrorCode, OpenRoom, PlaybackStep, PublicPlayer, RoomPhase, RoomSettings, RoomSnapshot, RoundResult, TakeFeedback } from '../shared/types';
 import { scoreImitation } from './audio-score';
 import { roundPoints, type Take } from './scoring';
 import { eligibleClips, type Library, maxTakeSec, pickClip, referenceFor } from './sounds';
@@ -35,9 +47,10 @@ export interface Timing {
   listenMs?: number;
   /** Overrides the record phase length (normally the take length + upload time). */
   recordMs?: number;
-  resultsMs: number;
+  /** Overrides the results length (normally long enough to play every take and show its score). */
+  resultsMs?: number;
 }
-export const DEFAULT_TIMING: Timing = { resultsMs: RESULTS_MS };
+export const DEFAULT_TIMING: Timing = {};
 
 export interface RoomListener {
   /** Public state changed; broadcast a fresh snapshot to everyone in the room. */
@@ -73,6 +86,8 @@ interface Match {
   total: number;
   played: number;
   round: Round | null;
+  /** Clips already played this match: a sound never repeats within a game. */
+  used: Set<string>;
 }
 
 /** Everything about a clip except its name, which is the answer. */
@@ -193,11 +208,7 @@ export class Room {
     if (this.phase !== 'lobby' && this.phase !== 'finished') return fail('WRONG_PHASE', 'Settings are locked during a match.');
     const next: RoomSettings = { ...this.settings, ...patch };
     next.categories = [...new Set(next.categories)];
-    if (patch.categories && next.categories.length === 0) return fail('BAD_INPUT', 'Pick at least one category.');
     if (next.categories.some(c => !this.lib.categories.some(k => k.id === c))) return fail('BAD_INPUT', 'That category does not exist.');
-    // Picking every category is stored as "all", which also picks up categories added later.
-    if (next.categories.length === this.lib.categories.length) next.categories = [];
-    if (eligibleClips(this.lib.clips, next).length === 0) return fail('BAD_INPUT', 'No sounds match those settings.');
     this.settings = next;
     this.touch();
     this.listener.state(this);
@@ -208,8 +219,11 @@ export class Room {
     if (by !== this.hostId) return fail('NOT_HOST', 'Only the host can start the match.');
     if (this.phase !== 'lobby' && this.phase !== 'finished') return fail('WRONG_PHASE', 'A match is already running.');
     if (this.connectedCount < MIN_PLAYERS) return fail('NOT_ENOUGH_PLAYERS', `You need at least ${MIN_PLAYERS} connected players.`);
+    const pool = eligibleClips(this.lib.clips, this.settings);
+    if (pool.length === 0) return fail('BAD_INPUT', 'Turn on at least one category.');
     for (const p of this.players.values()) p.score = 0;
-    this.match = { total: this.settings.rounds, played: 0, round: null };
+    // Never more rounds than there are different sounds, so nothing repeats.
+    this.match = { total: Math.min(this.settings.rounds, pool.length), played: 0, round: null, used: new Set() };
     this.matchNumber++;
     this.lastResult = null;
     this.touch();
@@ -251,7 +265,11 @@ export class Room {
     if (!m) return;
     this.clearTimer();
     if (m.played >= m.total || this.players.size < MIN_PLAYERS) return this.finish();
-    const clip = pickClip(eligibleClips(this.lib.clips, this.settings), this.usedClips);
+    // Prefer sounds this room hasn't heard in earlier games too; never one already played in this game.
+    const pool = eligibleClips(this.lib.clips, this.settings).filter(c => !m.used.has(c.id));
+    if (pool.length === 0) return this.finish();
+    const clip = pickClip(pool, this.usedClips);
+    m.used.add(clip.id);
     m.played++;
     const r: Round = { number: m.played, clip, maxTakeSec: maxTakeSec(clip), phase: 'listen', phaseStartedAt: 0, phaseEndsAt: 0, takes: new Map() };
     m.round = r;
@@ -301,8 +319,17 @@ export class Room {
       const p = this.players.get(t.playerId);
       if (p) p.score += t.points;
     }
-    this.lastResult = { number: r.number, clip: { id: r.clip.id, name: r.clip.name, category: r.clip.category }, takes: results };
-    this.setPhase(r, 'results', this.timing.resultsMs, () => this.nextRound());
+    // Play every take to everyone, worst first so the best copy comes last, each followed by its score.
+    const playlist: PlaybackStep[] = [];
+    let at = RESULTS_INTRO_MS;
+    for (const t of [...results].reverse()) {
+      const pcm = r.takes.get(t.playerId)?.pcm;
+      const ms = pcm ? Math.round((pcm.length / RECORDING_RATE) * 1000) : 0;
+      playlist.push({ playerId: t.playerId, at, ms });
+      at += ms + RESULTS_SCORE_MS;
+    }
+    this.lastResult = { number: r.number, clip: { id: r.clip.id, name: r.clip.name, category: r.clip.category }, takes: results, playlist };
+    this.setPhase(r, 'results', this.timing.resultsMs ?? at + RESULTS_OUTRO_MS, () => this.nextRound());
   }
 
   /** Someone's recording from the round being shown, for playback during the results. */

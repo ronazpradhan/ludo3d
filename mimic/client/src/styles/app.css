@@ -327,6 +327,7 @@ b { font-weight: 700; }
 .room__meta { font-size: 13px; color: var(--muted); }
 .setting__note { margin: -6px 0 14px; font-size: 13px; color: var(--muted); }
 .setting__row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.setting__quick { display: inline-flex; gap: 14px; }
 .link-btn { border: 0; background: none; padding: 4px 0; color: var(--purple-hi); font-weight: 700; font-size: 13px; }
 .link-btn:disabled { color: #6f6c93; }
 .toggles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(210px, 100%), 1fr)); gap: 8px; max-height: 360px; overflow-y: auto; }
@@ -351,7 +352,15 @@ b { font-weight: 700; }
 .wave__mid { fill: #63b4ff; }
 .wave__inner { fill: #f2f8ff; }
 .wave__bar.is-ahead { opacity: 0.55; }
-.wave__voice { fill: rgba(200, 245, 96, 0.85); }
+.wave { position: relative; }
+.wave--duo svg { height: 190px; }
+.wave__split { stroke: rgba(34, 211, 238, 0.35); stroke-width: 1; stroke-dasharray: 4 4; vector-effect: non-scaling-stroke; }
+.wave__bar--voice .wave__outer { fill: #e0337f; }
+.wave__bar--voice .wave__mid { fill: #ff8cc0; }
+.wave__bar--voice .wave__inner { fill: #fff0f7; }
+.wave__tag { position: absolute; left: 12px; z-index: 1; font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; padding: 2px 6px; border-radius: 6px; background: rgba(5, 6, 15, 0.7); pointer-events: none; }
+.wave__tag--sound { top: 10px; color: #8fc8ff; }
+.wave__tag--you { top: calc(61% + 4px); color: #ff8cc0; }
 .wave__head { fill: #ff2d3d; filter: drop-shadow(0 0 4px rgba(255, 45, 61, 0.9)); }
 .count { font: 800 120px/1 var(--display); color: var(--lime); animation: pop 0.35s var(--ease) both; }
 .stage--record.is-live { border-color: rgba(255, 122, 89, 0.6); box-shadow: 0 0 0 3px rgba(255, 122, 89, 0.15), var(--shadow); }
@@ -359,6 +368,7 @@ b { font-weight: 700; }
 @media (max-width: 819px) {
   .wave { border-width: 2px; border-radius: 18px; }
   .wave svg { height: 120px; }
+  .wave--duo svg { height: 160px; }
   .count { font-size: 96px; }
 }
 
@@ -463,6 +473,10 @@ b { font-weight: 700; }
 .takes { list-style: none; margin: 10px 0 0; padding: 0; width: 100%; max-width: 560px; display: grid; gap: 8px; text-align: left; }
 .take { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: rgba(255, 255, 255, 0.04); animation: slide 0.3s var(--ease) both; }
 .take.is-me { outline: 1.5px solid var(--purple-hi); }
+.take--waiting { opacity: 0.5; }
+.take--playing { background: rgba(34, 211, 238, 0.12); outline: 2px solid #22d3ee; }
+.take__bar i.is-progress { background: #22d3ee; animation: none; transition: transform 0.1s linear; }
+.lead-num { display: inline-block; color: var(--lime); animation: pop 0.35s var(--ease) both; }
 .take.is-best { background: rgba(200, 245, 96, 0.08); }
 .take__rank { width: 18px; font: 800 15px var(--display); color: var(--muted); }
 .take__who { flex: 1; min-width: 0; display: grid; gap: 4px; font-weight: 700; }

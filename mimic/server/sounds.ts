@@ -96,9 +96,9 @@ export function loadLibrary(dir = path.join(__dirname, '..', 'library')): Librar
   return cached;
 }
 
-/** Clips in the chosen categories; an empty choice means every category. */
+/** Clips in the chosen categories. */
 export function eligibleClips(all: Clip[], settings: Pick<RoomSettings, 'categories'>): Clip[] {
-  return settings.categories.length ? all.filter(c => settings.categories.includes(c.category)) : all;
+  return all.filter(c => settings.categories.includes(c.category));
 }
 
 /** Random unused clip; once the whole pool has been used it starts over, so repeats only come after that. */

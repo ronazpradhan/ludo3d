@@ -80,7 +80,7 @@ function stateWhere(c: Client, pred: (s: RoomSnapshot) => boolean, ms = 5000): P
   });
 }
 
-async function setupRoom(n: number, settings: Record<string, unknown> = { rounds: 5 }) {
+async function setupRoom(n: number, settings: Record<string, unknown> = { rounds: 5, categories: library.categories.map(c => c.id) }) {
   const players = await Promise.all(Array.from({ length: n }, () => client()));
   const host = players[0]!;
   const created = (await call(host, 'create_room', { nickname: 'Player1', avatar: 'fox' })) as AnyRes & JoinedRoom;

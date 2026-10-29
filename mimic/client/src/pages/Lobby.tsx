@@ -37,14 +37,10 @@ export function Lobby({ room }: { room: RoomSnapshot }) {
   const connected = room.players.filter(p => p.connected).length;
   const s = room.settings;
   const set = (patch: Partial<RoomSettings>) => void store.updateSettings(patch);
-  // An empty list on the server means every category.
+  // Categories start off; the host turns on the ones they want.
   const all = room.categories.map(c => c.id);
-  const chosen = s.categories.length ? s.categories : all;
-  const toggleCat = (c: Category) => {
-    const has = chosen.includes(c);
-    if (has && chosen.length === 1) return store.notify('Keep at least one category on.', 'info');
-    set({ categories: has ? chosen.filter(x => x !== c) : [...chosen, c] });
-  };
+  const chosen = s.categories;
+  const toggleCat = (c: Category) => set({ categories: chosen.includes(c) ? chosen.filter(x => x !== c) : [...chosen, c] });
   const soundCount = room.categories.filter(c => chosen.includes(c.id)).reduce((n, c) => n + c.count, 0);
   const invite = `${location.origin}/mimic/?room=${room.code}`;
   const copy = async () => {
@@ -93,7 +89,8 @@ export function Lobby({ room }: { room: RoomSnapshot }) {
             <span className="setting__label" id="cats-h">Categories · {soundCount} sounds</span>
             {isHost && (
               <span className="setting__quick">
-                <button type="button" className="link-btn" disabled={chosen.length === all.length} onClick={() => set({ categories: all })}>Turn all on</button>
+                <button type="button" className="link-btn" disabled={chosen.length === all.length} onClick={() => set({ categories: all })}>All on</button>
+                <button type="button" className="link-btn" disabled={chosen.length === 0} onClick={() => set({ categories: [] })}>All off</button>
               </span>
             )}
           </div>
@@ -123,13 +120,13 @@ export function Lobby({ room }: { room: RoomSnapshot }) {
 
       <div className="lobby__actions">
         {isHost ? (
-          <button type="button" className="btn btn--primary btn--block btn--big" disabled={busy || connected < MIN_PLAYERS} onClick={() => void store.start()}>
-            {connected < MIN_PLAYERS ? `Need ${MIN_PLAYERS} players (${connected}/${MIN_PLAYERS})` : 'Start the match'}
+          <button type="button" className="btn btn--primary btn--block btn--big" disabled={busy || connected < MIN_PLAYERS || soundCount === 0} onClick={() => void store.start()}>
+            {connected < MIN_PLAYERS ? `Need ${MIN_PLAYERS} players (${connected}/${MIN_PLAYERS})` : soundCount === 0 ? 'Turn on a category to start' : 'Start the match'}
           </button>
         ) : (
           <p className="waiting" role="status">
             <span className="dots" aria-hidden="true"><i /><i /><i /></span>
-            {connected < MIN_PLAYERS ? `Waiting for more players (${connected}/${MIN_PLAYERS})` : `Waiting for ${host?.nickname ?? 'the host'} to start`}
+            {connected < MIN_PLAYERS ? `Waiting for more players (${connected}/${MIN_PLAYERS})` : soundCount === 0 ? `Waiting for ${host?.nickname ?? 'the host'} to pick categories` : `Waiting for ${host?.nickname ?? 'the host'} to start`}
           </p>
         )}
       </div>
