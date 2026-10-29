@@ -25,7 +25,7 @@ export interface ManagerOptions {
 }
 
 export interface ManagerListener extends RoomListener {
-  closed(room: Room, reason: 'expired' | 'empty'): void;
+  closed(room: Room, reason: 'expired' | 'empty' | 'ended'): void;
   removed(room: Room, player: Player): void;
 }
 
@@ -126,7 +126,14 @@ export class RoomManager {
     if (room.players.size === 0) this.drop(room, 'empty');
   }
 
-  private drop(room: Room, reason: 'expired' | 'empty'): void {
+  /** The host ends the room: everyone is sent back to the start. */
+  end(room: Room, by: string): boolean {
+    if (room.hostId !== by) return false;
+    this.drop(room, 'ended');
+    return true;
+  }
+
+  private drop(room: Room, reason: 'expired' | 'empty' | 'ended'): void {
     room.close();
     if (this.rooms.get(room.code) === room) this.rooms.delete(room.code);
     this.listener.closed(room, reason);

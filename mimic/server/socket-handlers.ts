@@ -202,8 +202,14 @@ export function registerMimicHandlers(io: MimicServer, lib: Library, options: Ha
 
     socket.on(
       'leave_room',
-      guarded('leave_room', reply => {
+      guarded('leave_room', (reply, payload: unknown) => {
         const s = seat(socket);
+        const end = typeof payload === 'object' && payload !== null && (payload as { end?: unknown }).end === true;
+        if (s && end) {
+          if (!manager.end(s.room, s.player.id)) return refuse(reply, 'NOT_HOST', 'Only the host can end the room.');
+          log('room_ended', { room: s.room.code });
+          return reply({ ok: true });
+        }
         unbind(socket);
         if (s) {
           manager.leave(s.room, s.player.id);

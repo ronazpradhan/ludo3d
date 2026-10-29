@@ -171,11 +171,21 @@ describe('lobby over sockets', () => {
 
   it('hands the host role on when the host leaves, and deletes the room when everyone has left', async () => {
     const { players, code, idOf } = await setupRoom(3, {});
-    await call(players[0]!, 'leave_room');
+    await call(players[0]!, 'leave_room', {});
     const s = await stateWhere(players[1]!, x => x.players.length === 2);
     expect(s.hostId).toBe(idOf(1));
     await call(players[1]!, 'leave_room');
     await call(players[2]!, 'leave_room');
+    expect(mimic.manager.rooms.has(code)).toBe(false);
+  });
+
+  it('lets the host end the room for everyone, and only the host', async () => {
+    const { players, code } = await setupRoom(3, {});
+    const closed = new Promise<string>(resolve => players[2]!.once('room_closed', resolve));
+    expect(await call(players[1]!, 'leave_room', { end: true })).toMatchObject({ ok: false, code: 'NOT_HOST' });
+    expect(mimic.manager.rooms.has(code)).toBe(true);
+    expect(await call(players[0]!, 'leave_room', { end: true })).toEqual({ ok: true });
+    expect(await closed).toBe('ended');
     expect(mimic.manager.rooms.has(code)).toBe(false);
   });
 

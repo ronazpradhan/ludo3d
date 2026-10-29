@@ -173,8 +173,8 @@ function stretch<T>(xs: T[], n: number): T[] {
  * silence into loud hiss, and a voice from across the room only just clears the noise; a real attempt at
  * the mic is 25+ dB over it. */
 const LOUD_OVER_NOISE_DB = 16;
-/** A take needs at least this much clear sound to be scored at all. */
-const MIN_LOUD_SEC = 0.2;
+/** A take needs at least this much clear sound to be scored at all: a couple of claps is enough, a hiss never is. */
+const MIN_LOUD_SEC = 0.08;
 
 /** A sound that fills the whole take at an even level (a held note, a siren) has no quiet moment to measure the
  * room against. It counts when it has a clear pitch: the hiss of an auto-gain mic in a silent room has none. */
@@ -233,7 +233,8 @@ export function extractFeatures(samples: Float32Array, rate: number): Features {
   );
   const semisRaw = pitch.map(f => (f ? 12 * Math.log2(f / 440) : null));
   const voiced = semisRaw.filter((s): s is number => s !== null);
-  const mid = median(voiced);
+  // Centre on the average pitch: a median flips between the notes of a two-tone sound and shifts the whole line.
+  const mid = voiced.length ? voiced.reduce((a, b) => a + b, 0) / voiced.length : 0;
   const semis = semisRaw.map(s => (s === null ? null : s - mid));
   // Light smoothing of the envelope so tiny wobbles don't count.
   const smooth = env.map((_, i) => (env[i - 1] ?? env[i]!) * 0.25 + env[i]! * 0.5 + (env[i + 1] ?? env[i]!) * 0.25);

@@ -83,6 +83,8 @@ b { font-weight: 700; }
 .btn--primary:disabled { opacity: 1; background: #34305e; color: #9d98c7; box-shadow: 0 6px 0 #26224a; }
 .btn--primary:active:not(:disabled) { box-shadow: 0 2px 0 var(--purple-lo); transform: translateY(4px); }
 .btn--lime { background: var(--lime); color: var(--ink); }
+.btn--coral { background: var(--coral); color: var(--ink); box-shadow: 0 5px 0 #c9502f; }
+.btn--coral:active:not(:disabled) { box-shadow: 0 2px 0 #c9502f; transform: translateY(3px); }
 .btn--ghost { background: transparent; border: 1.5px solid var(--line-2); }
 .btn--ghost:hover:not(:disabled) { border-color: var(--purple-hi); }
 .btn--text { background: transparent; color: var(--muted); padding: 0 10px; min-height: 40px; }
@@ -502,3 +504,12 @@ b { font-weight: 700; }
 @keyframes grow { from { transform: scaleX(0); } }
 .take__label { font-size: 12px; font-weight: 500; color: var(--muted); }
 .take__score { font: 800 24px var(--display); color: var(--lime); min-width: 42px; text-align: right; }
+
+/* ---------- dialog ---------- */
+.dialog-backdrop { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px; background: rgba(5, 6, 20, 0.7); backdrop-filter: blur(4px); animation: fade-in 0.15s ease-out; }
+.dialog { width: min(420px, 100%); padding: 24px; display: grid; gap: 12px; text-align: center; animation: pop-in 0.2s var(--ease); }
+.dialog__title { margin: 0; font-family: var(--display); font-size: 22px; }
+.dialog .muted { margin: 0 0 4px; line-height: 1.45; }
+.dialog__actions { display: grid; gap: 10px; }
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes pop-in { from { opacity: 0; transform: scale(0.94); } }

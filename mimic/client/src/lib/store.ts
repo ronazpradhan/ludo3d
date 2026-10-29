@@ -99,7 +99,7 @@ export class MimicStore {
     s.on('room_closed', reason => {
       clearSeat();
       this.set({ me: null, room: null, ended: 'closed' });
-      this.notify(reason === 'expired' ? 'The room closed after a long time without play.' : 'The room was closed.', 'info');
+      this.notify(reason === 'expired' ? 'The room closed after a long time without play.' : reason === 'ended' ? 'The host ended the room.' : 'The room was closed.', 'info');
     });
     s.on('error_message', e => this.notify(e.message));
   }
@@ -183,8 +183,9 @@ export class MimicStore {
     }
   }
 
-  async leave(): Promise<void> {
-    if (this.socket.connected) await this.call(done => this.socket.emit('leave_room', done));
+  /** Leaves the room; the host can `end` it for everyone instead. */
+  async leave(end = false): Promise<void> {
+    if (this.socket.connected) await this.call(done => this.socket.emit('leave_room', { end }, done));
     clearSeat();
     this.set({ me: null, room: null, myTake: null, ended: null });
   }

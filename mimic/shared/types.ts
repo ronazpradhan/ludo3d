@@ -155,7 +155,8 @@ export interface ClientToServerEvents {
   create_room: (p: ProfileInput, ack: Ack<JoinedRoom>) => void;
   join_room: (p: ProfileInput & { code: string }, ack: Ack<JoinedRoom>) => void;
   resume_session: (p: { code: string; token: string }, ack: Ack<JoinedRoom>) => void;
-  leave_room: (ack?: Ack) => void;
+  /** `end`: the host closes the room for everyone instead of handing it on. */
+  leave_room: (p?: { end?: boolean }, ack?: Ack) => void;
   update_settings: (p: Partial<RoomSettings>, ack?: Ack) => void;
   start_game: (ack?: Ack) => void;
   /** 16-bit little-endian mono PCM at RECORDING_RATE. */
@@ -174,7 +175,7 @@ export interface ServerToClientEvents {
   room_state: (s: RoomSnapshot) => void;
   /** Another tab or device took over this player's seat. */
   session_replaced: () => void;
-  room_closed: (reason: 'removed' | 'expired' | 'empty') => void;
+  room_closed: (reason: 'removed' | 'expired' | 'empty' | 'ended') => void;
   error_message: (e: { code: ErrorCode; message: string }) => void;
 }
 

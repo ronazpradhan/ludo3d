@@ -1,16 +1,18 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ConnectionBanner, Logo, MuteButton, Toast } from './components/bits';
 import { useMimic, useStore } from './hooks/useMimic';
 import { Final } from './pages/Final';
 import { Game } from './pages/Game';
 import { Home } from './pages/Home';
 import { Lobby } from './pages/Lobby';
+import type { RoomSnapshot } from '../../shared/types';
 
 const inviteCode = new URLSearchParams(location.search).get('room') ?? '';
 
 export function App() {
   const store = useStore();
   const { me, room, ended, restoring } = useMimic();
+  const [leaving, setLeaving] = useState(false);
   const view = ended ? 'ended' : !me || !room ? 'home' : `${room.phase}:${room.round?.number ?? 0}`;
 
   // A new screen starts at the top; otherwise a phone stays scrolled down where the last one ended.
@@ -51,22 +53,10 @@ export function App() {
           <span className="topbar__code mono" aria-label="Room code">{room.code}</span>
           <div className="topbar__right">
             <MuteButton />
-            {room.phase === 'lobby' && (
-              <button type="button" className="btn btn--text btn--sm" onClick={() => void store.leave()}>Leave</button>
-            )}
-            {(room.phase === 'listen' || room.phase === 'record' || room.phase === 'results') && (
-              <button
-                type="button"
-                className="btn btn--text btn--sm"
-                onClick={() => {
-                  if (confirm('Leave this match? Your score will be lost.')) void store.leave();
-                }}
-              >
-                Leave
-              </button>
-            )}
+            <button type="button" className="btn btn--text btn--sm" onClick={() => setLeaving(true)}>Leave</button>
           </div>
         </header>
+        {leaving && <LeaveDialog room={room} meId={me.playerId} onClose={() => setLeaving(false)} />}
         {room.phase === 'lobby' ? <Lobby room={room} /> : room.phase === 'finished' ? <Final room={room} /> : <Game room={room} />}
       </>
     );
@@ -77,6 +67,49 @@ export function App() {
       <ConnectionBanner />
       <main className="app__main">{screen}</main>
       <Toast />
+    </div>
+  );
+}
+
+/** Leaving: everyone can just leave; the host chooses between handing the room on and ending it for all. */
+function LeaveDialog({ room, meId, onClose }: { room: RoomSnapshot; meId: string; onClose: () => void }) {
+  const store = useStore();
+  const isHost = room.hostId === meId;
+  const others = room.players.filter(p => p.id !== meId);
+  const next = others.find(p => p.connected) ?? others[0];
+  const inMatch = room.phase !== 'lobby' && room.phase !== 'finished';
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    addEventListener('keydown', onKey);
+    return () => removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  return (
+    <div className="dialog-backdrop" onClick={onClose}>
+      <div className="dialog card" role="dialog" aria-modal="true" aria-labelledby="leave-title" onClick={e => e.stopPropagation()}>
+        <h2 id="leave-title" className="dialog__title">{isHost ? 'Leave or end the room?' : 'Leave the room?'}</h2>
+        <p className="muted">
+          {isHost && next
+            ? `Leave and ${next.nickname} becomes the host, so the others keep playing. Or end the room and send everyone back to the start.`
+            : inMatch
+              ? 'Your score in this match will be lost.'
+              : 'You can join again with the room code.'}
+        </p>
+        <div className="dialog__actions">
+          {isHost && next && (
+            <button type="button" className="btn btn--coral btn--block" onClick={() => void store.leave(true)}>
+              End room for everyone
+            </button>
+          )}
+          <button type="button" className="btn btn--ghost btn--block" onClick={() => void store.leave()}>
+            {isHost && next ? `Just leave (${next.nickname} hosts)` : 'Leave'}
+          </button>
+          <button type="button" className="btn btn--text btn--block" onClick={onClose} autoFocus>
+            Stay
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
