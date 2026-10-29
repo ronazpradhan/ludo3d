@@ -1,0 +1,16 @@
+# One Render Web Service runs every game, including Mimic. No database, no other services.
+# Used when the repo is deployed as a Render Blueprint. For an existing service set up in the dashboard,
+# use the same commands there (see README, "Deploying to Render").
+services:
+  - type: web
+    name: games
+    runtime: node
+    plan: free
+    buildCommand: npm ci   # postinstall runs `npm run build` (Mimic)
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production

@@ -3,7 +3,38 @@
   "version": "1.0.0",
   "private": true,
   "main": "server.js",
-  "scripts": { "start": "node server.js", "test": "node --test" },
-  "engines": { "node": ">=18" },
-  "dependencies": { "ws": "^8.18.0" }
+  "scripts": {
+    "start": "node server.js",
+    "build": "tsc -p mimic/tsconfig.server.json && vite build --config mimic/vite.config.mts",
+    "postinstall": "npm run build",
+    "dev:mimic": "vite --config mimic/vite.config.mts",
+    "typecheck": "tsc -p mimic/tsconfig.json && tsc -p mimic/tsconfig.server.json --noEmit",
+    "test": "npm run test:games && npm run test:mimic",
+    "test:games": "node --test \"test/*.test.js\"",
+    "test:mimic": "vitest run --config mimic/vitest.config.mts",
+    "check": "npm run typecheck && npm test && npm run build"
+  },
+  "engines": {
+    "node": ">=20.19"
+  },
+  "dependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "express": "^5.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "socket.io": "^4.8.4",
+    "socket.io-client": "^4.8.4",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.7",
+    "ws": "^8.18.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "vitest": "^5.0.5"
+  },
+  "description": "Ludo, Jutpatti, Flash, Dhumbal and Mimic: multiplayer browser games on one Node server"
 }

@@ -6,11 +6,16 @@ const { createJutpattiServer } = require('./games/jutpatti/rooms');
 const { createFlashServer } = require('./games/flash/rooms');
 const { createDhumbalServer } = require('./games/dhumbal/rooms');
 const { createLudoDice } = require('./games/ludo/dice');
+// Mimic (charades) is TypeScript + React, compiled by `npm run build` into dist/mimic.
+let attachMimic = null;
+try { ({ attachMimic } = require('./dist/mimic/server/index.js')); }
+catch (e) { if (e.code !== 'MODULE_NOT_FOUND') throw e; console.warn('Mimic is not built (run npm run build); the other games still work.'); }
 
 const PUB = path.join(__dirname, 'public');
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml',
   '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.ogg': 'audio/ogg', '.m4a': 'audio/mp4', '.aac': 'audio/aac', '.webm': 'audio/webm' };
 const server = http.createServer((req, res) => {
+  if (mimic && mimic.handle(req, res)) return;
   let url = '/'; try { url = decodeURIComponent((req.url || '/').split('?')[0]); } catch (e) {}
   if (url === '/healthz') { res.writeHead(200); return res.end('ok'); }
   let file = path.join(PUB, url === '/' ? 'index.html' : url);
@@ -29,7 +34,13 @@ const server = http.createServer((req, res) => {
   fs.createReadStream(file).pipe(res);
 });
 
-const wss = new WebSocketServer({ server, maxPayload: 32 * 1024 });
+const mimic = attachMimic ? attachMimic(server) : null;   // serves /mimic/ and its Socket.IO at /mimic/socket.io
+// The games' WebSocket takes every upgrade except Mimic's Socket.IO, which listens on the same server.
+const wss = new WebSocketServer({ noServer: true, maxPayload: 32 * 1024 });
+server.on('upgrade', (req, socket, head) => {
+  if ((req.url || '').startsWith('/mimic/')) return;
+  wss.handleUpgrade(req, socket, head, ws => wss.emit('connection', ws, req));
+});
 const rooms = new Map(); // room name -> Map(clientId -> { ws, presence })
 const NAME = /^[\w*-]{1,40}$/, MAX_ROOM = 12, MAX_ROOMS_PER_CLIENT = 4;
 
@@ -104,4 +115,15 @@ setInterval(() => wss.clients.forEach(ws => {
   ws.alive = false; ws.ping();
 }), 25000);
 
+// No host argument: Node listens on every interface (IPv4 and IPv6), which is what Render needs.
 server.listen(process.env.PORT || 3000, () => console.log('Ludo running on port ' + (process.env.PORT || 3000)));
+
+// Render sends SIGTERM before replacing the instance: close sockets cleanly, then exit.
+let stopping = false;
+for (const sig of ['SIGTERM', 'SIGINT']) process.on(sig, async () => {
+  if (stopping) return; stopping = true;
+  setTimeout(() => process.exit(0), 5000).unref();
+  for (const ws of wss.clients) ws.close(1001, 'server restarting');
+  if (mimic) await mimic.close();
+  server.close(() => process.exit(0));
+});

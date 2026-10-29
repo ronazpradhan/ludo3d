@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "types": ["node"],
+    "noEmit": true,
+    "allowImportingTsExtensions": false,
+    "isolatedModules": true
+  },
+  "include": ["client/src/**/*.ts", "client/src/**/*.tsx", "shared/**/*.ts", "server/**/*.ts", "tests/**/*.ts", "*.mts"]
+}
