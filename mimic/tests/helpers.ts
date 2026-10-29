@@ -4,7 +4,7 @@ import { type ClipSpec, renderClip, type Wave } from '../shared/synth';
 import type { RoomSnapshot } from '../shared/types';
 import type { Clock, RoomListener, Timing } from '../server/game-engine';
 import { Room } from '../server/game-engine';
-import { loadClips } from '../server/sounds';
+import { loadLibrary } from '../server/sounds';
 
 /** Manual clock: timers only fire when the test advances time. */
 export class FakeClock implements Clock {
@@ -39,7 +39,9 @@ export class Recorder implements RoomListener {
   state = (room: Room): void => void this.states.push(room.snapshot());
 }
 
-export const clips = loadClips();
+/** The built-in synthesized library (tests never need a build). */
+export const library = loadLibrary();
+export const clips = library.clips;
 export const TIMING: Timing = { listenMs: 5000, recordMs: 20_000, resultsMs: 8000 };
 
 /** A human-ish copy of a clip: other timbre, transposed, slower, sloppy timing, background noise. */
@@ -78,7 +80,7 @@ export const silence = (sec: number): Int16Array => new Int16Array(Math.floor(se
 export function makeRoom(n: number, timing: Timing = TIMING) {
   const clock = new FakeClock();
   const rec = new Recorder();
-  const room = new Room('ABCDEF', clips, rec, clock, timing);
+  const room = new Room('ABCDEF', library, rec, clock, timing);
   const ids: string[] = [];
   for (let i = 1; i <= n; i++) {
     const id = `p${i}`;
@@ -88,7 +90,7 @@ export function makeRoom(n: number, timing: Timing = TIMING) {
     ids.push(id);
   }
   const clip = () => clips.find(c => c.id === room.snapshot().round!.clip.id)!;
-  const goodTake = () => pcmOf(imitate(clip()));
+  const goodTake = () => pcmOf(imitate({ events: clip().events! }));
   const score = (id: string): number => room.players.get(id)!.score;
   /** Start the match and move into the record phase of round 1. */
   const startRecording = () => {

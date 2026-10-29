@@ -1,11 +1,15 @@
 // The similarity scorer and the clip library.
 import { describe, expect, it } from 'vitest';
-import { CATEGORIES, DIFFICULTIES, RECORDING_RATE } from '../shared/constants';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import { MAX_TAKE_SEC, RECORDING_RATE } from '../shared/constants';
 import { floatToInt16, int16ToFloat, resample } from '../shared/dsp';
-import { type ClipSpec, clipDuration, renderClip, type Wave } from '../shared/synth';
+import { type ClipSpec, renderClip, type Wave } from '../shared/synth';
+import { buildLibrary } from '../scripts/build-library.mjs';
 import { makeReference, scoreImitation } from '../server/audio-score';
-import { eligibleClips, maxTakeSec, MIN_CLIPS, pickClip, referenceFor, validateClips } from '../server/sounds';
-import { clips, imitate } from './helpers';
+import { eligibleClips, maxTakeSec, MIN_CLIPS, pickClip, readLibrary, referenceFor, validateLibrary } from '../server/sounds';
+import { clips, imitate, library } from './helpers';
 
 const R = RECORDING_RATE;
 const notes = (fs: number[], gap = 0.28): ClipSpec => ({ events: fs.map((f, i) => ({ t: i * gap, d: gap - 0.03, wave: 'triangle' as Wave, f })) });
@@ -63,35 +67,100 @@ describe('similarity scoring', () => {
 });
 
 describe('clip library', () => {
-  it(`has at least ${MIN_CLIPS} valid clips covering every category and difficulty`, () => {
+  it(`has at least ${MIN_CLIPS} valid clips, and every listed category has sounds`, () => {
     expect(clips.length).toBeGreaterThanOrEqual(MIN_CLIPS);
-    for (const c of CATEGORIES) for (const d of DIFFICULTIES) expect(clips.some(x => x.category === c && x.difficulty === d)).toBe(true);
+    for (const c of library.categories) expect(clips.filter(x => x.category === c.id).length).toBe(c.count);
   });
 
   it('only has clips a person can copy: short, and each one scores well against a good copy of itself', () => {
     let low = 0;
     for (const c of clips) {
-      expect(clipDuration(c)).toBeLessThanOrEqual(4);
-      expect(maxTakeSec(c)).toBeLessThanOrEqual(6);
-      if (scoreImitation(referenceFor(c), imitate(c, 0.75, 1.1), R).score < 60) low++;
+      expect(c.duration).toBeLessThanOrEqual(4);
+      expect(maxTakeSec(c)).toBeLessThanOrEqual(MAX_TAKE_SEC);
+      if (scoreImitation(referenceFor(c), imitate({ events: c.events! }, 0.75, 1.1), R).score < 60) low++;
     }
     expect(low / clips.length).toBeLessThan(0.1);
   });
 
   it('fails loudly on a broken library', () => {
-    const base = clips.map(c => ({ ...c }));
-    expect(() => validateClips(base.slice(0, 10))).toThrow(/at least/);
-    expect(() => validateClips([...base, { ...base[0]! }])).toThrow(/duplicate id/);
-    expect(() => validateClips([...base.slice(1), { ...base[0]!, category: 'nope' }])).toThrow(/invalid/);
-    expect(() => validateClips([...base.slice(1), { ...base[0]!, events: [{ t: 0, d: 9, wave: 'sine', f: 440 }] }])).toThrow();
+    const categories = library.categories;
+    const base = clips.map(c => ({ id: c.id, name: c.name, category: c.category, events: c.events }));
+    expect(() => validateLibrary({ categories, clips: base.slice(0, 10) })).toThrow(/at least/);
+    expect(() => validateLibrary({ categories, clips: [...base, { ...base[0]! }] })).toThrow(/duplicate id/);
+    expect(() => validateLibrary({ categories, clips: [...base.slice(1), { ...base[0]!, category: 'nope' }] })).toThrow(/unknown category/);
+    expect(() => validateLibrary({ categories, clips: [...base.slice(1), { ...base[0]!, events: [{ t: 0, d: 9, wave: 'sine', f: 440 }] }] })).toThrow();
+    expect(() => validateLibrary({ categories, clips: [...base.slice(1), { id: 'x-1', name: 'X', category: 'fx', audio: 'sounds/x-1.wav', duration: 1 }] })).toThrow(/no reference audio/);
   });
 
   it('only repeats a clip after the whole pool has been used', () => {
-    const pool = eligibleClips(clips, { categories: ['fx'], difficulty: 'hard' });
+    const pool = eligibleClips(clips, { categories: ['fx'] });
     const used = new Set<string>();
     const first = new Set(pool.map(() => pickClip(pool, used).id));
     expect(first.size).toBe(pool.length);
     const again = pickClip(pool, used);
     expect(pool.some(c => c.id === again.id)).toBe(true);
+  });
+});
+
+/** A 16-bit stereo WAV, as a sound editor would save it. */
+function wavFile(samples: Float32Array, rate: number): Buffer {
+  const data = Buffer.alloc(samples.length * 4);
+  samples.forEach((v, i) => {
+    const s = Math.round(Math.max(-1, Math.min(1, v)) * 32767);
+    data.writeInt16LE(s, i * 4);
+    data.writeInt16LE(s, i * 4 + 2);
+  });
+  const h = Buffer.alloc(44);
+  h.write('RIFF', 0);
+  h.writeUInt32LE(36 + data.length, 4);
+  h.write('WAVEfmt ', 8);
+  h.writeUInt32LE(16, 16);
+  h.writeUInt16LE(1, 20);
+  h.writeUInt16LE(2, 22);
+  h.writeUInt32LE(rate, 24);
+  h.writeUInt32LE(rate * 4, 28);
+  h.writeUInt16LE(4, 32);
+  h.writeUInt16LE(16, 34);
+  h.write('data', 36);
+  h.writeUInt32LE(data.length, 40);
+  return Buffer.concat([h, data]);
+}
+
+describe('adding your own recordings', () => {
+  it('turns files in a category folder into playable, scoreable sounds', async () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mimic-lib-'));
+    const src = path.join(tmp, 'sounds');
+    fs.mkdirSync(path.join(src, 'trendy'), { recursive: true });
+    fs.mkdirSync(path.join(src, 'hindi'), { recursive: true }); // empty: must not show up
+    fs.mkdirSync(path.join(src, 'bollywood songs'), { recursive: true }); // not in categories.json: gets a default entry
+    const real = path.join(__dirname, '..', 'sounds');
+    fs.copyFileSync(path.join(real, 'categories.json'), path.join(src, 'categories.json'));
+    fs.copyFileSync(path.join(real, 'synth.json'), path.join(src, 'synth.json'));
+    // Half a second of silence around a tune, like a real clip.
+    const tune = renderClip(samples.melody!, 44100);
+    const padded = new Float32Array(tune.length + 44100);
+    padded.set(tune, 22050);
+    fs.writeFileSync(path.join(src, 'trendy', 'Kya Baat Hai.wav'), wavFile(padded, 44100));
+    fs.writeFileSync(path.join(src, 'bollywood songs', 'Hum tum.wav'), wavFile(padded, 44100));
+    fs.writeFileSync(path.join(src, 'trendy', 'broken.mp3'), Buffer.from('not really an mp3'));
+    const logs: string[] = [];
+
+    const out = path.join(tmp, 'library');
+    const pub = path.join(tmp, 'client');
+    await buildLibrary({ soundsDir: src, outDir: out, publicDir: pub, log: m => logs.push(m) });
+    const lib = readLibrary(out);
+
+    expect(lib.categories.map(c => c.id)).toEqual(['melody', 'glide', 'rhythm', 'fx', 'trendy', 'bollywood-songs']);
+    expect(lib.categories.find(c => c.id === 'bollywood-songs')).toMatchObject({ label: 'Bollywood songs', count: 1 });
+    const clip = lib.clips.find(c => c.category === 'trendy')!;
+    expect(clip).toMatchObject({ id: 'trendy-kya-baat-hai', name: 'Kya Baat Hai', audio: 'sounds/trendy-kya-baat-hai.wav' });
+    // Silence trimmed: about the tune's own length.
+    expect(clip.duration).toBeGreaterThan(1.3);
+    expect(clip.duration).toBeLessThan(1.6);
+    expect(fs.existsSync(path.join(pub, clip.audio!))).toBe(true);
+    expect(logs.some(l => l.includes('broken.mp3'))).toBe(true);
+    // Scored against the recording: a good copy scores well, silence doesn't.
+    expect(scoreImitation(referenceFor(clip, lib), imitate(samples.melody!), R).score).toBeGreaterThanOrEqual(70);
+    fs.rmSync(tmp, { recursive: true, force: true });
   });
 });

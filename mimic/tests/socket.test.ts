@@ -98,7 +98,7 @@ async function setupRoom(n: number, settings: Record<string, unknown> = { rounds
 /** A good copy of the round's clip, as the bytes a browser would send. */
 function goodTake(s: RoomSnapshot): Buffer {
   const clip = clips.find(c => c.id === s.round!.clip.id)!;
-  const pcm = pcmOf(imitate(clip));
+  const pcm = pcmOf(imitate({ events: clip.events! }));
   return Buffer.from(pcm.buffer, pcm.byteOffset, pcm.byteLength);
 }
 const bytes = (pcm: Int16Array): Buffer => Buffer.from(pcm.buffer, pcm.byteOffset, pcm.byteLength);
@@ -181,6 +181,19 @@ describe('lobby over sockets', () => {
   it('refuses sockets from foreign origins', async () => {
     await expect(client({ origin: 'https://evil.example' })).rejects.toBeTruthy();
     clients.pop();
+  });
+});
+
+describe('public rooms', () => {
+  it('shows public rooms to anyone, and anyone can join one by its listing', async () => {
+    const { players, code } = await setupRoom(1, {});
+    const visitor = await client();
+    const before = (await call(visitor, 'list_rooms')) as AnyRes & { rooms: { code: string }[] };
+    expect(before.rooms.some(r => r.code === code)).toBe(false);
+    expect(await call(players[0]!, 'update_settings', { visibility: 'public' })).toEqual({ ok: true });
+    const after = (await call(visitor, 'list_rooms')) as AnyRes & { rooms: { code: string; host: { nickname: string } }[] };
+    expect(after.rooms.find(r => r.code === code)).toMatchObject({ host: { nickname: 'Player1' } });
+    expect(await call(visitor, 'join_room', { nickname: 'Visitor', avatar: 'bee', code })).toMatchObject({ ok: true });
   });
 });
 

@@ -7,13 +7,12 @@
 // an atomic step for its room. Timers carry a phase token: a timer that fires after its phase has already
 // moved on (everyone submitted early, a player left) finds a different token and does nothing.
 
-import { COUNTDOWN_MS, DEFAULT_SETTINGS, LISTEN_LEAD_MS, LISTEN_TAIL_MS, MAX_PLAYERS, MIN_PLAYERS, RECORDING_RATE, RESULTS_MS, UPLOAD_GRACE_MS } from '../shared/constants';
+import { COUNTDOWN_MS, DEFAULT_SETTINGS, LISTEN_TAIL_MS, listenLeadMs, MAX_PLAYERS, MIN_PLAYERS, RECORDING_RATE, RESULTS_MS, UPLOAD_GRACE_MS } from '../shared/constants';
 import { int16ToFloat } from '../shared/dsp';
-import { clipDuration } from '../shared/synth';
-import type { Avatar, Clip, ErrorCode, PublicPlayer, RoomPhase, RoomSettings, RoomSnapshot, RoundResult, TakeFeedback } from '../shared/types';
+import type { Avatar, Clip, ErrorCode, OpenRoom, PublicPlayer, RoomPhase, RoomSettings, RoomSnapshot, RoundResult, TakeFeedback } from '../shared/types';
 import { scoreImitation } from './audio-score';
 import { roundPoints, type Take } from './scoring';
-import { eligibleClips, maxTakeSec, pickClip, referenceFor } from './sounds';
+import { eligibleClips, type Library, maxTakeSec, pickClip, referenceFor } from './sounds';
 
 export type Result<T = object> = ({ ok: true } & T) | { ok: false; code: ErrorCode; message: string };
 export const fail = (code: ErrorCode, message: string): { ok: false; code: ErrorCode; message: string } => ({ ok: false, code, message });
@@ -76,12 +75,17 @@ interface Match {
   round: Round | null;
 }
 
+/** Everything about a clip except its name, which is the answer. */
+function publicClip(c: Clip): Omit<Clip, 'name'> {
+  return { id: c.id, category: c.category, duration: c.duration, ...(c.events ? { events: c.events } : {}), ...(c.audio ? { audio: c.audio } : {}) };
+}
+
 export class Room {
   readonly code: string;
   readonly createdAt: number;
   hostId = '';
   readonly players = new Map<string, Player>(); // insertion order = join order
-  settings: RoomSettings = { ...DEFAULT_SETTINGS, categories: [...DEFAULT_SETTINGS.categories] };
+  settings: RoomSettings = { ...DEFAULT_SETTINGS, categories: [] };
   phase: RoomPhase = 'lobby';
   matchNumber = 0;
   lastActivity: number;
@@ -94,7 +98,7 @@ export class Room {
 
   constructor(
     code: string,
-    private readonly clips: Clip[],
+    private readonly lib: Library,
     private readonly listener: RoomListener,
     private readonly clock: Clock = realClock,
     private readonly timing: Timing = DEFAULT_TIMING,
@@ -189,8 +193,11 @@ export class Room {
     if (this.phase !== 'lobby' && this.phase !== 'finished') return fail('WRONG_PHASE', 'Settings are locked during a match.');
     const next: RoomSettings = { ...this.settings, ...patch };
     next.categories = [...new Set(next.categories)];
-    if (next.categories.length === 0) return fail('BAD_INPUT', 'Pick at least one category.');
-    if (eligibleClips(this.clips, next).length === 0) return fail('BAD_INPUT', 'No sounds match those settings.');
+    if (patch.categories && next.categories.length === 0) return fail('BAD_INPUT', 'Pick at least one category.');
+    if (next.categories.some(c => !this.lib.categories.some(k => k.id === c))) return fail('BAD_INPUT', 'That category does not exist.');
+    // Picking every category is stored as "all", which also picks up categories added later.
+    if (next.categories.length === this.lib.categories.length) next.categories = [];
+    if (eligibleClips(this.lib.clips, next).length === 0) return fail('BAD_INPUT', 'No sounds match those settings.');
     this.settings = next;
     this.touch();
     this.listener.state(this);
@@ -244,12 +251,12 @@ export class Room {
     if (!m) return;
     this.clearTimer();
     if (m.played >= m.total || this.players.size < MIN_PLAYERS) return this.finish();
-    const clip = pickClip(eligibleClips(this.clips, this.settings), this.usedClips);
+    const clip = pickClip(eligibleClips(this.lib.clips, this.settings), this.usedClips);
     m.played++;
     const r: Round = { number: m.played, clip, maxTakeSec: maxTakeSec(clip), phase: 'listen', phaseStartedAt: 0, phaseEndsAt: 0, takes: new Map() };
     m.round = r;
     this.lastResult = null;
-    const listenMs = this.timing.listenMs ?? Math.round(LISTEN_LEAD_MS + clipDuration(clip) * 1000 + LISTEN_TAIL_MS + COUNTDOWN_MS);
+    const listenMs = this.timing.listenMs ?? Math.round(listenLeadMs(clip) + clip.duration * 1000 + LISTEN_TAIL_MS + COUNTDOWN_MS);
     this.setPhase(r, 'listen', listenMs, () => this.beginRecording());
   }
 
@@ -276,7 +283,7 @@ export class Room {
     if (seconds < 0.2) return fail('BAD_INPUT', 'That recording is too short.');
     if (seconds > r.maxTakeSec + 0.25) return fail('BAD_INPUT', `Takes can be up to ${r.maxTakeSec} seconds this round.`);
     this.touch();
-    const scored = scoreImitation(referenceFor(r.clip), int16ToFloat(pcm), RECORDING_RATE);
+    const scored = scoreImitation(referenceFor(r.clip, this.lib), int16ToFloat(pcm), RECORDING_RATE);
     r.takes.set(by, { playerId: by, score: scored.score, verdict: scored.verdict, hasAudio: true, pcm });
     this.checkEveryoneSubmitted();
     if (r.phase === 'record') this.listener.state(this);
@@ -294,7 +301,7 @@ export class Room {
       const p = this.players.get(t.playerId);
       if (p) p.score += t.points;
     }
-    this.lastResult = { number: r.number, clip: { id: r.clip.id, name: r.clip.name, category: r.clip.category, difficulty: r.clip.difficulty }, takes: results };
+    this.lastResult = { number: r.number, clip: { id: r.clip.id, name: r.clip.name, category: r.clip.category }, takes: results };
     this.setPhase(r, 'results', this.timing.resultsMs, () => this.nextRound());
   }
 
@@ -346,6 +353,20 @@ export class Room {
 
   // ---------- views ----------
 
+  /** How this room appears in the public list, or null if it isn't listed. */
+  listing(): OpenRoom | null {
+    if (this.closed || this.settings.visibility !== 'public' || this.connectedCount === 0) return null;
+    const host = this.players.get(this.hostId);
+    if (!host) return null;
+    return {
+      code: this.code,
+      host: { nickname: host.nickname, avatar: host.avatar },
+      players: this.players.size,
+      maxPlayers: MAX_PLAYERS,
+      playing: this.phase !== 'lobby' && this.phase !== 'finished',
+    };
+  }
+
   /** The same for every viewer: the clip to play, but never its name before the results, and no recordings. */
   snapshot(): RoomSnapshot {
     const players: PublicPlayer[] = [...this.players.values()].map(p => ({
@@ -363,12 +384,13 @@ export class Room {
       hostId: this.hostId,
       players,
       settings: { ...this.settings, categories: [...this.settings.categories] },
+      categories: this.lib.categories,
       round:
         m && r
           ? {
               number: r.number,
               total: m.total,
-              clip: { id: r.clip.id, category: r.clip.category, difficulty: r.clip.difficulty, events: r.clip.events },
+              clip: publicClip(r.clip),
               phaseStartedAt: r.phaseStartedAt,
               phaseEndsAt: r.phaseEndsAt,
               maxTakeSec: r.maxTakeSec,

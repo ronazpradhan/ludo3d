@@ -1,23 +1,42 @@
-import type { AVATARS, CATEGORIES, DIFFICULTIES, DIFFICULTY_SETTINGS, ROUND_OPTIONS } from './constants';
+import type { AVATARS, ROUND_OPTIONS, VISIBILITY } from './constants';
 import type { ClipEvent } from './synth';
 
 export type Avatar = (typeof AVATARS)[number];
-export type Category = (typeof CATEGORIES)[number];
-export type Difficulty = (typeof DIFFICULTIES)[number];
-export type DifficultySetting = (typeof DIFFICULTY_SETTINGS)[number];
+export type Category = string;
+export type Visibility = (typeof VISIBILITY)[number];
 
+export interface CategoryInfo {
+  id: Category;
+  label: string;
+  emoji: string;
+  hint: string;
+  /** how many sounds it has */
+  count: number;
+}
+
+/** A sound to copy: either synthesized from `events`, or a recording at `audio` (a path under /mimic/). */
 export interface Clip {
   id: string;
   name: string;
   category: Category;
-  difficulty: Difficulty;
-  events: ClipEvent[];
+  duration: number;
+  events?: ClipEvent[];
+  audio?: string;
 }
 
 export interface RoomSettings {
   rounds: (typeof ROUND_OPTIONS)[number];
   categories: Category[];
-  difficulty: DifficultySetting;
+  visibility: Visibility;
+}
+
+/** A public room as listed on the home screen. */
+export interface OpenRoom {
+  code: string;
+  host: { nickname: string; avatar: Avatar };
+  players: number;
+  maxPlayers: number;
+  playing: boolean;
 }
 
 export type RoomPhase = 'lobby' | 'listen' | 'record' | 'results' | 'finished';
@@ -34,7 +53,7 @@ export interface PublicRound {
   number: number;
   total: number;
   /** What to play. The clip's name stays hidden until the results. */
-  clip: { id: string; category: Category; difficulty: Difficulty; events: ClipEvent[] };
+  clip: Omit<Clip, 'name'>;
   /** Server epoch ms when the current phase began / ends. */
   phaseStartedAt: number;
   phaseEndsAt: number;
@@ -57,7 +76,7 @@ export interface TakeResult {
 
 export interface RoundResult {
   number: number;
-  clip: { id: string; name: string; category: Category; difficulty: Difficulty };
+  clip: { id: string; name: string; category: Category };
   takes: TakeResult[];
 }
 
@@ -67,6 +86,8 @@ export interface RoomSnapshot {
   hostId: string;
   players: PublicPlayer[];
   settings: RoomSettings;
+  /** Every category in the sound library, for the settings. */
+  categories: CategoryInfo[];
   round: PublicRound | null;
   lastResult: RoundResult | null;
   matchNumber: number;
@@ -122,6 +143,7 @@ export interface ClientToServerEvents {
   request_rematch: (ack?: Ack) => void;
   back_to_lobby: (ack?: Ack) => void;
   sync_clock: (ack: (serverNow: number) => void) => void;
+  list_rooms: (ack: Ack<{ rooms: OpenRoom[] }>) => void;
 }
 
 export interface ServerToClientEvents {

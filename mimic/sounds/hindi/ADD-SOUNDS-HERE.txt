@@ -1,0 +1,3 @@
+Put .mp3 or .wav files for this category here (use sounds you have the right to share).
+The file name becomes the sound's name, e.g. "Kya baat hai.mp3". Clips longer than 6 seconds are cut to 6.
+Then run: npm run build

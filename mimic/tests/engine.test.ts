@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { COUNTDOWN_MS, LISTEN_LEAD_MS, LISTEN_TAIL_MS, MAX_PLAYERS, POINTS, UPLOAD_GRACE_MS } from '../shared/constants';
-import { clipDuration } from '../shared/synth';
 import { DEFAULT_TIMING } from '../server/game-engine';
 import { roundPoints } from '../server/scoring';
 import { makeRoom, pcmOf, silence, TIMING } from './helpers';
@@ -58,7 +57,7 @@ describe('a round', () => {
     room.start('p1');
     const s = room.snapshot();
     expect(s.phase).toBe('listen');
-    expect(s.round!.clip.events.length).toBeGreaterThan(0);
+    expect(s.round!.clip.events!.length).toBeGreaterThan(0);
     expect(JSON.stringify(s)).not.toContain(`"name":"${clip().name}"`);
     clock.advance(TIMING.listenMs!);
     expect(room.snapshot().phase).toBe('record');
@@ -145,17 +144,40 @@ describe('a round', () => {
   });
 });
 
+describe('categories and visibility', () => {
+  it('rejects unknown categories and an empty choice, and treats "every category" as all', () => {
+    const { room } = makeRoom(2);
+    expect(room.updateSettings('p1', { categories: ['klingon'] })).toMatchObject({ ok: false, code: 'BAD_INPUT' });
+    expect(room.updateSettings('p1', { categories: [] })).toMatchObject({ ok: false, code: 'BAD_INPUT' });
+    expect(room.updateSettings('p1', { categories: room.snapshot().categories.map(c => c.id) })).toEqual({ ok: true });
+    expect(room.settings.categories).toEqual([]);
+  });
+  it('lists the library categories with their sound counts', () => {
+    const { room } = makeRoom(2);
+    const cats = room.snapshot().categories;
+    expect(cats.map(c => c.id)).toEqual(['melody', 'glide', 'rhythm', 'fx']);
+    expect(cats.every(c => c.count > 0 && c.label && c.emoji)).toBe(true);
+  });
+  it('is private until the host makes it public', () => {
+    const { room } = makeRoom(2);
+    expect(room.listing()).toBeNull();
+    expect(room.updateSettings('p2', { visibility: 'public' })).toMatchObject({ ok: false, code: 'NOT_HOST' });
+    room.updateSettings('p1', { visibility: 'public' });
+    expect(room.listing()).toMatchObject({ code: 'ABCDEF', players: 2, playing: false });
+  });
+});
+
 describe('fair timing', () => {
   it('plays the sound once, counts down 3 seconds, then gives everyone the same fixed take window', () => {
     const { room, clock, clip } = makeRoom(2, DEFAULT_TIMING);
     room.start('p1');
     const listen = room.snapshot().round!;
-    const listenMs = Math.round(LISTEN_LEAD_MS + clipDuration(clip()) * 1000 + LISTEN_TAIL_MS + COUNTDOWN_MS);
+    const listenMs = Math.round(LISTEN_LEAD_MS + clip().duration * 1000 + LISTEN_TAIL_MS + COUNTDOWN_MS);
     expect(listen.phaseEndsAt - listen.phaseStartedAt).toBe(listenMs);
     clock.advance(listenMs);
     const rec = room.snapshot().round!;
     expect(room.snapshot().phase).toBe('record');
-    expect(rec.maxTakeSec).toBeLessThanOrEqual(clipDuration(clip()) + 2.1);
+    expect(rec.maxTakeSec).toBeLessThanOrEqual(clip().duration + 2.1);
     expect(rec.phaseEndsAt - rec.phaseStartedAt).toBe(rec.maxTakeSec * 1000 + UPLOAD_GRACE_MS);
   });
 });
@@ -176,12 +198,12 @@ describe('a match', () => {
     expect(room.snapshot().phase).toBe('finished');
   });
 
-  it('only uses clips from the chosen categories and difficulty', () => {
+  it('only uses clips from the chosen categories', () => {
     const { room, clock } = makeRoom(2);
-    room.updateSettings('p1', { categories: ['rhythm'], difficulty: 'easy', rounds: 5 });
+    expect(room.updateSettings('p1', { categories: ['rhythm', 'fx'], rounds: 5 })).toEqual({ ok: true });
     room.start('p1');
     for (let i = 0; i < 5; i++) {
-      expect(room.snapshot().round!.clip).toMatchObject({ category: 'rhythm', difficulty: 'easy' });
+      expect(['rhythm', 'fx']).toContain(room.snapshot().round!.clip.category);
       clock.advance(ROUND);
     }
   });

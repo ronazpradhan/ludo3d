@@ -1,6 +1,6 @@
 // Shapes of every payload a browser may send. Anything that doesn't match is rejected before it reaches a room.
 import { z } from 'zod';
-import { AVATARS, CATEGORIES, DIFFICULTY_SETTINGS, NICKNAME_MAX, ROOM_CODE_PATTERN, ROUND_OPTIONS } from '../shared/constants';
+import { AVATARS, CATEGORY_ID, NICKNAME_MAX, ROOM_CODE_PATTERN, ROUND_OPTIONS, VISIBILITY } from '../shared/constants';
 
 const nickname = z
   .string()
@@ -19,8 +19,8 @@ export const GetTakeSchema = z.object({ playerId: z.string().min(1).max(32) }).s
 export const SettingsSchema = z
   .object({
     rounds: z.union(ROUND_OPTIONS.map(n => z.literal(n)) as [z.ZodLiteral<5>, z.ZodLiteral<8>, z.ZodLiteral<10>]),
-    categories: z.array(z.enum(CATEGORIES)).min(1).max(CATEGORIES.length),
-    difficulty: z.enum(DIFFICULTY_SETTINGS),
+    categories: z.array(z.string().regex(CATEGORY_ID)).max(64),
+    visibility: z.enum(VISIBILITY),
   })
   .partial()
   .strict();

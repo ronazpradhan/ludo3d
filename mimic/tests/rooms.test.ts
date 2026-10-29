@@ -2,14 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { ROOM_CODE_PATTERN } from '../shared/constants';
 import { RateLimiter } from '../server/rate-limit';
 import { type ManagerListener, randomRoomCode, RoomManager } from '../server/rooms';
-import { clips, FakeClock, Recorder } from './helpers';
+import { FakeClock, library, Recorder } from './helpers';
 
 function manager(opts: ConstructorParameters<typeof RoomManager>[2] = {}) {
   const clock = new FakeClock();
   const rec = new Recorder();
   const closed: string[] = [];
   const listener: ManagerListener = { state: rec.state, closed: r => void closed.push(r.code), removed: () => undefined };
-  const m = new RoomManager(clips, listener, { clock, graceMs: 60_000, hostHandoffMs: 20_000, ...opts });
+  const m = new RoomManager(library, listener, { clock, graceMs: 60_000, hostHandoffMs: 20_000, ...opts });
   return { m, clock, rec, closed };
 }
 const fox = { nickname: 'Fox', avatar: 'fox' as const };
@@ -120,6 +120,23 @@ describe('cleanup', () => {
     clock.advance(11_000);
     m.sweep();
     expect(a.room.hostId).toBe(b.joined.playerId);
+  });
+});
+
+describe('public rooms', () => {
+  it('lists only public rooms, joinable ones first, and never private ones', () => {
+    const { m } = manager();
+    const pub = m.createRoom(fox);
+    const priv = m.createRoom({ nickname: 'Owl', avatar: 'owl' });
+    if (!pub.ok || !priv.ok) throw new Error();
+    pub.room.setConnected(pub.joined.playerId, 's1');
+    priv.room.setConnected(priv.joined.playerId, 's2');
+    expect(m.openRooms()).toEqual([]);
+    expect(pub.room.updateSettings(pub.joined.playerId, { visibility: 'public' })).toEqual({ ok: true });
+    expect(m.openRooms()).toEqual([{ code: pub.room.code, host: { nickname: 'Fox', avatar: 'fox' }, players: 1, maxPlayers: 10, playing: false }]);
+    // A public room whose players have all dropped isn't advertised.
+    pub.room.setConnected(pub.joined.playerId, null);
+    expect(m.openRooms()).toEqual([]);
   });
 });
 

@@ -1,16 +1,16 @@
 // Waveform of the sound (mirrored blue/white bars) in a glowing box, with a red playhead.
 // While recording, the player's own loudness is drawn in green over it so they can match the shape.
-import { useMemo } from 'react';
-import { type ClipEvent, renderClip } from '../../../shared/synth';
+import { useEffect, useMemo, useState } from 'react';
+import type { Clip } from '../../../shared/types';
+import { type ClipAudio, clipAudio } from '../lib/audio';
 import type { TracePoint } from '../lib/trace';
 
 const W = 600;
 const H = 160;
 const BARS = 220;
-const RATE = 8000; // plenty for drawing a loudness shape
 
 interface Props {
-  events: ClipEvent[];
+  clip: Omit<Clip, 'name'>;
   /** seconds shown across the box */
   span: number;
   /** playhead position in seconds, or null for none */
@@ -19,20 +19,32 @@ interface Props {
   label: string;
 }
 
-export function AudioGraph({ events, span, at, trace, label }: Props) {
+export function AudioGraph({ clip, span, at, trace, label }: Props) {
+  const [audio, setAudio] = useState<ClipAudio | null>(null);
+  useEffect(() => {
+    let live = true;
+    setAudio(null);
+    clipAudio(clip).then(a => live && setAudio(a), () => undefined);
+    return () => {
+      live = false;
+    };
+    // Only a different clip needs new audio; snapshots hand us a fresh object for the same one.
+  }, [clip.id]);
+
   // Peak loudness of the sound in each bar, 0..1.
   const wave = useMemo(() => {
-    const s = renderClip({ events }, RATE);
-    const per = (span * RATE) / BARS;
+    if (!audio) return new Array<number>(BARS).fill(0);
+    const { samples: s, rate } = audio;
+    const per = (span * rate) / BARS;
     const peaks = Array.from({ length: BARS }, (_, b) => {
       let peak = 0;
       const end = Math.min(s.length, Math.floor((b + 1) * per));
-      for (let i = Math.floor(b * per); i < end; i++) peak = Math.max(peak, Math.abs(s[i]!));
+      for (let i = Math.floor(b * per); i < end; i += 4) peak = Math.max(peak, Math.abs(s[i]!));
       return peak;
     });
     const top = Math.max(...peaks, 1e-6);
     return peaks.map(p => Math.pow(p / top, 0.7)); // lift quiet parts a little so they're visible
-  }, [events, span]);
+  }, [audio, span]);
 
   // A little fixed raggedness per bar so it reads like a real recording, not flat blocks.
   const jag = useMemo(() => {

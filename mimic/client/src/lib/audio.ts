@@ -48,14 +48,39 @@ function playBuffer(samples: Float32Array, rate: number, when = 0): Promise<void
   return new Promise(res => (src.onended = () => res()));
 }
 
-const rendered = new Map<string, Float32Array>();
-/** Plays the round's clip, rendered from its description (the exact sound the server scores against). */
-export function playClip(id: string, spec: ClipSpec, delaySec = 0): Promise<void> {
-  const rate = audioContext().sampleRate;
-  const key = `${id}@${rate}`;
-  let s = rendered.get(key);
-  if (!s) rendered.set(key, (s = renderClip(spec, rate)));
-  return playBuffer(s, rate, delaySec);
+export interface ClipAudio {
+  samples: Float32Array;
+  rate: number;
+}
+type PlayableClip = { id: string; events?: ClipSpec['events']; audio?: string };
+
+const loaded = new Map<string, Promise<ClipAudio>>();
+/**
+ * The round's clip as samples: synthesized clips are rendered from their description, recorded ones are
+ * downloaded and decoded. Either way it's the exact sound the server scores against. Cached per clip.
+ */
+export function clipAudio(clip: PlayableClip): Promise<ClipAudio> {
+  let p = loaded.get(clip.id);
+  if (!p) {
+    p = clip.audio
+      ? fetch(`${import.meta.env.BASE_URL}${clip.audio}`)
+          .then(r => {
+            if (!r.ok) throw new Error(`couldn't load the sound (${r.status})`);
+            return r.arrayBuffer();
+          })
+          .then(buf => audioContext().decodeAudioData(buf))
+          .then(b => ({ samples: b.getChannelData(0), rate: b.sampleRate }))
+      : Promise.resolve({ samples: renderClip({ events: clip.events ?? [] }, audioContext().sampleRate), rate: audioContext().sampleRate });
+    p.catch(() => loaded.delete(clip.id)); // let a later call retry
+    loaded.set(clip.id, p);
+  }
+  return p;
+}
+
+/** Plays the round's clip once. */
+export async function playClip(clip: PlayableClip, delaySec = 0): Promise<void> {
+  const a = await clipAudio(clip);
+  return playBuffer(a.samples, a.rate, delaySec);
 }
 
 export function playPcm(pcm: Int16Array): Promise<void> {

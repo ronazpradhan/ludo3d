@@ -4,7 +4,8 @@
 
 import { createHash, randomBytes, randomInt, timingSafeEqual } from 'crypto';
 import { ROOM_CODE_ALPHABET, ROOM_CODE_LENGTH } from '../shared/constants';
-import type { Clip, JoinedRoom, ProfileInput } from '../shared/types';
+import type { JoinedRoom, OpenRoom, ProfileInput } from '../shared/types';
+import type { Library } from './sounds';
 import { type Clock, DEFAULT_TIMING, fail, type Player, realClock, type Result, Room, type RoomListener, type Timing } from './game-engine';
 
 export interface ManagerOptions {
@@ -44,7 +45,7 @@ export class RoomManager {
   private readonly timing: Timing;
 
   constructor(
-    private readonly clips: Clip[],
+    private readonly lib: Library,
     private readonly listener: ManagerListener,
     options: ManagerOptions = {},
   ) {
@@ -77,7 +78,7 @@ export class RoomManager {
     if (this.rooms.size >= this.opts.maxRooms) return fail('SERVER_BUSY', 'Too many rooms right now. Try again in a bit.');
     const code = this.newCode();
     if (!code) return fail('SERVER_BUSY', 'Could not make a room code. Try again.');
-    const room = new Room(code, this.clips, this.listener, this.clock, this.timing);
+    const room = new Room(code, this.lib, this.listener, this.clock, this.timing);
     this.rooms.set(code, room);
     const { player, token } = this.newPlayer(profile);
     const added = room.addPlayer(player);
@@ -107,6 +108,17 @@ export class RoomManager {
       if (have.length === want.length && timingSafeEqual(have, want)) return { ok: true, room, player: p };
     }
     return fail('SESSION_INVALID', 'Your seat in that room has expired. Join again with the room code.');
+  }
+
+  /** Public rooms for the home screen: joinable ones first, then fullest first. At most `limit`. */
+  openRooms(limit = 30): OpenRoom[] {
+    const list: OpenRoom[] = [];
+    for (const room of this.rooms.values()) {
+      const l = room.listing();
+      if (l) list.push(l);
+    }
+    const joinable = (r: OpenRoom) => !r.playing && r.players < r.maxPlayers;
+    return list.sort((a, b) => Number(joinable(b)) - Number(joinable(a)) || b.players - a.players).slice(0, limit);
   }
 
   leave(room: Room, playerId: string): void {

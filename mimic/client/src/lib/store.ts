@@ -2,7 +2,7 @@
 // connection status. It holds no game rules; it shows what the server says.
 import { io, type Socket } from 'socket.io-client';
 import { SOCKET_PATH } from '../../../shared/constants';
-import type { ClientToServerEvents, ErrorCode, JoinedRoom, ProfileInput, RoomSettings, RoomSnapshot, ServerToClientEvents, TakeFeedback } from '../../../shared/types';
+import type { ClientToServerEvents, ErrorCode, JoinedRoom, OpenRoom, ProfileInput, RoomSettings, RoomSnapshot, ServerToClientEvents, TakeFeedback } from '../../../shared/types';
 import { clearSeat, forgetLastSeat, lastSeat, saveProfile, saveSeat, type Seat, tabSeat } from './session';
 import { sounds } from './sound';
 
@@ -225,6 +225,12 @@ export class MimicStore {
     sounds.submitted();
     this.set({ myTake: { key, feedback } });
     return feedback;
+  }
+
+  /** Public rooms for the home screen; null if the server couldn't be asked. */
+  async listRooms(): Promise<OpenRoom[] | null> {
+    const res = await this.call<{ rooms: OpenRoom[] }>(done => this.socket.emit('list_rooms', done));
+    return res.ok ? res.rooms : null;
   }
 
   async fetchTake(playerId: string): Promise<Int16Array | null> {

@@ -319,6 +319,35 @@ b { font-weight: 700; }
   .final__actions { grid-column: 1 / -1; }
 }
 
+/* ---------- public rooms, visibility, category toggles ---------- */
+.home__rooms { grid-area: rooms; }
+.live { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--ok); text-transform: uppercase; letter-spacing: 0.1em; }
+.live i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); animation: pulse 1.6s ease-in-out infinite; }
+.empty { margin: 0; color: var(--muted); font-size: 14px; }
+.empty b { color: var(--text); }
+.rooms { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; max-height: 340px; overflow-y: auto; }
+.room { display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 10px; border-radius: 16px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--line); animation: slide 0.25s var(--ease) both; }
+.room__info { flex: 1; min-width: 0; display: grid; }
+.room__name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.room__meta { font-size: 13px; color: var(--muted); }
+.setting__note { margin: -6px 0 14px; font-size: 13px; color: var(--muted); }
+.setting__row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.link-btn { border: 0; background: none; padding: 4px 0; color: var(--purple-hi); font-weight: 700; font-size: 13px; }
+.link-btn:disabled { color: #6f6c93; }
+.toggles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(210px, 100%), 1fr)); gap: 8px; max-height: 360px; overflow-y: auto; }
+.toggle { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: rgba(255, 255, 255, 0.03); border: 1.5px solid var(--line); cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+.toggle.is-on { border-color: rgba(200, 245, 96, 0.45); background: rgba(200, 245, 96, 0.06); }
+.toggle.is-locked { cursor: default; }
+.toggle__emoji { font-size: 22px; }
+.toggle__text { flex: 1; min-width: 0; display: grid; }
+.toggle__name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toggle__count { font-size: 12px; color: var(--muted); }
+.switch { appearance: none; -webkit-appearance: none; flex: none; position: relative; width: 44px; height: 26px; margin: 0; border-radius: 999px; background: #3a3762; cursor: pointer; transition: background 0.2s; }
+.switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4); transition: transform 0.2s var(--ease); }
+.switch:checked { background: var(--lime); }
+.switch:checked::after { transform: translateX(18px); }
+.switch:disabled { cursor: default; opacity: 0.8; }
+
 /* ---------- audiograph ---------- */
 .wave { margin: 6px 0; width: 100%; max-width: 680px; padding: 6px; border-radius: 22px; background: #05060f; border: 3px solid #22d3ee; box-shadow: 0 0 18px rgba(34, 211, 238, 0.45), inset 0 0 24px rgba(34, 211, 238, 0.12); overflow: hidden; }
 .wave svg { display: block; width: 100%; height: 150px; }
@@ -339,7 +368,7 @@ b { font-weight: 700; }
 }
 
 /* ---------- responsive: phones (320px+), tablets, desktops ---------- */
-.home { grid-template-areas: 'top' 'hero' 'card' 'how'; }
+.home { grid-template-areas: 'top' 'hero' 'card' 'rooms' 'how'; }
 .home .topbar { grid-area: top; }
 .home__hero { grid-area: hero; padding: 0 2px; }
 .home__card { grid-area: card; }
@@ -399,7 +428,7 @@ b { font-weight: 700; }
   .game__side .scoreboard { grid-template-columns: 1fr; }
 }
 @media (min-width: 820px) {
-  .home { grid-template-areas: 'top top' 'hero card' 'how card'; row-gap: 18px; align-items: start; align-content: center; }
+  .home { grid-template-areas: 'top top' 'hero card' 'how card' 'rooms card' 'rooms .'; row-gap: 18px; align-items: start; align-content: center; }
   .home__hero { align-self: end; }
   .home__card { align-self: center; }
   .lobby { align-items: start; }

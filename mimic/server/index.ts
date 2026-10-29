@@ -9,7 +9,7 @@ import { Server } from 'socket.io';
 import { MAX_RECORDING_BYTES, SOCKET_PATH } from '../shared/constants';
 import type { ClientToServerEvents, ServerToClientEvents, SocketData } from '../shared/types';
 import { log } from './log';
-import { loadClips } from './sounds';
+import { loadLibrary } from './sounds';
 import { type HandlerOptions, type MimicServer, registerMimicHandlers } from './socket-handlers';
 
 export interface MimicOptions extends HandlerOptions {
@@ -17,6 +17,8 @@ export interface MimicOptions extends HandlerOptions {
   clientDir?: string;
   /** Extra origins allowed to open the socket, e.g. "https://mygames.onrender.com". Same-origin always works. */
   allowedOrigins?: string[];
+  /** Built sound library (library.json + refs/). Defaults to dist/mimic/library. */
+  libraryDir?: string;
   /** Trust X-Forwarded-For for the client IP (on Render this is the real visitor). */
   trustProxy?: boolean;
 }
@@ -45,7 +47,7 @@ function originAllowed(origin: string | undefined, host: string | undefined, all
 }
 
 export function attachMimic(httpServer: HttpServer, options: MimicOptions = {}): MimicHandle {
-  const clips = loadClips(); // throws with a clear message if sounds.json is broken
+  const lib = loadLibrary(options.libraryDir); // throws with a clear message if the library is broken
   const clientDir = options.clientDir ?? path.join(__dirname, '..', 'client');
   const allowed = options.allowedOrigins ?? (process.env.MIMIC_ALLOWED_ORIGINS ?? '').split(',').map(s => s.trim()).filter(Boolean);
   const trustProxy = options.trustProxy ?? (process.env.TRUST_PROXY === '1' || !!process.env.RENDER);
@@ -66,7 +68,7 @@ export function attachMimic(httpServer: HttpServer, options: MimicOptions = {}):
     socket.data.ip = (trustProxy && first) || socket.handshake.address;
     next();
   });
-  const handlers = registerMimicHandlers(io, clips, options);
+  const handlers = registerMimicHandlers(io, lib, options);
 
   const app = express();
   app.disable('x-powered-by');
@@ -123,7 +125,7 @@ export function attachMimic(httpServer: HttpServer, options: MimicOptions = {}):
   });
 
   if (!fs.existsSync(indexFile)) log('client_missing', { dir: clientDir });
-  log('ready', { clips: clips.length });
+  log('ready', { clips: lib.clips.length, categories: lib.categories.length });
 
   return {
     io,

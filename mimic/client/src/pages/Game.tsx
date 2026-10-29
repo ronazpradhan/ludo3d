@@ -1,23 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { CATEGORY_HINTS, CATEGORY_LABELS, COUNTDOWN_MS, LISTEN_LEAD_MS, RESULTS_MS, scoreLabel } from '../../../shared/constants';
-import { clipDuration } from '../../../shared/synth';
-import type { PublicPlayer, RoomSnapshot, TakeResult } from '../../../shared/types';
+import { COUNTDOWN_MS, listenLeadMs, RESULTS_MS, scoreLabel } from '../../../shared/constants';
+import type { CategoryInfo, PublicPlayer, RoomSnapshot, TakeResult } from '../../../shared/types';
 import { AudioGraph } from '../components/AudioGraph';
 import { Avatar, Scoreboard } from '../components/bits';
 import { useCountdown, useMimic, useStore } from '../hooks/useMimic';
-import { type MicState, openMic, playClip, playPcm, type Recording, record, stopPlayback, unlock } from '../lib/audio';
+import { clipAudio, type MicState, openMic, playClip, playPcm, type Recording, record, stopPlayback, unlock } from '../lib/audio';
 import { roundKey } from '../lib/store';
 import { LiveTrace, type TracePoint } from '../lib/trace';
 
-function Difficulty({ d }: { d: 'easy' | 'medium' | 'hard' }) {
-  const n = { easy: 1, medium: 2, hard: 3 }[d];
-  return (
-    <span className={`diff diff--${d}`} aria-label={`${d} difficulty`}>
-      {[1, 2, 3].map(i => <i key={i} className={i <= n ? 'on' : ''} />)}
-      <span>{d}</span>
-    </span>
-  );
-}
+const categoryOf = (room: RoomSnapshot, id: string): CategoryInfo | undefined => room.categories.find(c => c.id === id);
 
 /** Re-renders every animation frame while `on`, returning the server clock. */
 function useServerTime(on: boolean): number {
@@ -58,8 +49,7 @@ export function Game({ room }: { room: RoomSnapshot }) {
     <div className="game">
       <header className="game__head">
         <span className="eyebrow">Round {round.number} of {round.total}</span>
-        <span className="pill">{CATEGORY_LABELS[round.clip.category]}</span>
-        <Difficulty d={round.clip.difficulty} />
+        <span className="pill">{categoryOf(room, round.clip.category)?.emoji} {categoryOf(room, round.clip.category)?.label ?? round.clip.category}</span>
       </header>
       {room.phase === 'results' ? (
         // The results bring their own leaderboard, so they get the full width.
@@ -84,8 +74,9 @@ export function Game({ room }: { room: RoomSnapshot }) {
 function Listen({ room, mic }: { room: RoomSnapshot; mic: MicState }) {
   const store = useStore();
   const round = room.round!;
-  const dur = clipDuration(round.clip);
-  const playAt = round.phaseStartedAt + LISTEN_LEAD_MS;
+  const dur = round.clip.duration;
+  const playAt = round.phaseStartedAt + listenLeadMs(round.clip);
+  const hint = categoryOf(room, round.clip.category)?.hint ?? 'Copy the sound';
   const now = useServerTime(true);
   const [missed, setMissed] = useState(false);
   const [blocked, setBlocked] = useState(false);
@@ -93,20 +84,24 @@ function Listen({ room, mic }: { room: RoomSnapshot; mic: MicState }) {
   useEffect(() => {
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
-    void unlock().then(ok => {
-      if (cancelled) return;
-      if (!ok) return setBlocked(true);
-      const delay = playAt - store.serverNow();
-      // Joined or reloaded after the sound started: it's not replayed, that would be unfair.
-      if (delay < -250) return setMissed(true);
-      timer = setTimeout(() => void playClip(round.clip.id, round.clip), Math.max(0, delay));
-    });
+    void unlock()
+      .then(async ok => {
+        if (cancelled) return;
+        if (!ok) return setBlocked(true);
+        await clipAudio(round.clip); // download/prepare it before its slot
+        if (cancelled) return;
+        const delay = playAt - store.serverNow();
+        // Joined, reloaded or downloaded too late: the sound isn't replayed, that would be unfair.
+        if (delay < -250) return setMissed(true);
+        timer = setTimeout(() => void playClip(round.clip), Math.max(0, delay));
+      })
+      .catch(() => !cancelled && setMissed(true));
     return () => {
       cancelled = true;
       clearTimeout(timer);
       stopPlayback();
     };
-  }, [round.clip, playAt, store]);
+  }, [round.clip.id, playAt, store]);
 
   const t = (now - playAt) / 1000;
   const playing = t >= 0 && t <= dur;
@@ -121,7 +116,7 @@ function Listen({ room, mic }: { room: RoomSnapshot; mic: MicState }) {
           <span className="count" key={Math.ceil(countdownLeft / 1000)} aria-label={`Recording in ${Math.ceil(countdownLeft / 1000)}`}>
             {Math.max(1, Math.ceil(countdownLeft / 1000))}
           </span>
-          <p className="muted">Recording starts by itself. {CATEGORY_HINTS[round.clip.category]}.</p>
+          <p className="muted">Recording starts by itself. {hint}.</p>
         </>
       ) : (
         <>
@@ -129,8 +124,8 @@ function Listen({ room, mic }: { room: RoomSnapshot; mic: MicState }) {
           <p className="stage__big">{t < 0 ? 'Here it comes…' : playing ? '🔊 Playing' : 'Remember the shape'}</p>
         </>
       )}
-      <AudioGraph events={round.clip.events} span={round.maxTakeSec} at={playing ? t : null} label="Shape of the sound" />
-      {missed && <p className="mic__help">You joined after the sound played. It doesn’t repeat — follow the graph for this one.</p>}
+      <AudioGraph clip={round.clip} span={round.maxTakeSec} at={playing ? t : null} label="Shape of the sound" />
+      {missed && <p className="mic__help">You missed the sound this time. It doesn’t repeat — follow the graph for this one.</p>}
       {blocked && (
         <button type="button" className="btn btn--primary" onClick={() => void unlock().then(ok => ok && setBlocked(false))}>
           🔈 Tap to turn on sound
@@ -207,7 +202,7 @@ function RecordStage({ room, mic, setMic }: { room: RoomSnapshot; mic: MicState;
         ) : (
           <p className="stage__big">Take sent ✓</p>
         )}
-        <AudioGraph events={round.clip.events} span={round.maxTakeSec} at={null} trace={trace} label="The sound and your copy" />
+        <AudioGraph clip={round.clip} span={round.maxTakeSec} at={null} trace={trace} label="The sound and your copy" />
         <p className="muted">{waiting > 0 ? `Waiting for ${waiting} more…` : 'Everyone’s done!'}</p>
       </section>
     );
@@ -228,7 +223,7 @@ function RecordStage({ room, mic, setMic }: { room: RoomSnapshot; mic: MicState;
       ) : (
         <p className="stage__big">{mic === 'ready' ? 'Starting…' : 'Waiting for your microphone…'}</p>
       )}
-      <AudioGraph events={round.clip.events} span={round.maxTakeSec} at={state === 'recording' ? elapsed : null} trace={trace} label="The sound and your copy" />
+      <AudioGraph clip={round.clip} span={round.maxTakeSec} at={state === 'recording' ? elapsed : null} trace={trace} label="The sound and your copy" />
       {state === 'recording' && (
         <button type="button" className="btn btn--ghost btn--sm" onClick={() => void finish()}>
           I’m done

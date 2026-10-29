@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { CATEGORIES, CATEGORY_LABELS, DIFFICULTY_SETTINGS, MAX_PLAYERS, MIN_PLAYERS, ROUND_OPTIONS } from '../../../shared/constants';
+import { MAX_PLAYERS, MIN_PLAYERS, ROUND_OPTIONS, VISIBILITY } from '../../../shared/constants';
 import type { Category, RoomSettings, RoomSnapshot } from '../../../shared/types';
 import { PlayerChip } from '../components/bits';
 import { MicCheck } from '../components/MicCheck';
 import { useMimic, useStore } from '../hooks/useMimic';
 
-const DIFF_LABEL: Record<RoomSettings['difficulty'], string> = { mixed: 'Mixed', easy: 'Easy', medium: 'Medium', hard: 'Hard' };
+const VIS_LABEL: Record<RoomSettings['visibility'], string> = { private: '🔒 Private', public: '🌐 Public' };
 
 function Segmented<T extends string | number>({ label, options, value, onChange, disabled, format }: {
   label: string;
@@ -37,11 +37,15 @@ export function Lobby({ room }: { room: RoomSnapshot }) {
   const connected = room.players.filter(p => p.connected).length;
   const s = room.settings;
   const set = (patch: Partial<RoomSettings>) => void store.updateSettings(patch);
+  // An empty list on the server means every category.
+  const all = room.categories.map(c => c.id);
+  const chosen = s.categories.length ? s.categories : all;
   const toggleCat = (c: Category) => {
-    const has = s.categories.includes(c);
-    if (has && s.categories.length === 1) return store.notify('Keep at least one category.', 'info');
-    set({ categories: has ? s.categories.filter(x => x !== c) : [...s.categories, c] });
+    const has = chosen.includes(c);
+    if (has && chosen.length === 1) return store.notify('Keep at least one category on.', 'info');
+    set({ categories: has ? chosen.filter(x => x !== c) : [...chosen, c] });
   };
+  const soundCount = room.categories.filter(c => chosen.includes(c.id)).reduce((n, c) => n + c.count, 0);
   const invite = `${location.origin}/mimic/?room=${room.code}`;
   const copy = async () => {
     try {
@@ -88,16 +92,36 @@ export function Lobby({ room }: { room: RoomSnapshot }) {
           {!isHost && <span className="muted">Set by {host?.nickname ?? 'the host'}</span>}
         </div>
         <Segmented label="Sounds" options={ROUND_OPTIONS} value={s.rounds} disabled={!isHost} onChange={v => set({ rounds: v })} format={v => `${v}`} />
-        <Segmented label="Difficulty" options={DIFFICULTY_SETTINGS} value={s.difficulty} disabled={!isHost} onChange={v => set({ difficulty: v })} format={v => DIFF_LABEL[v]} />
+        <Segmented label="Who can join" options={VISIBILITY} value={s.visibility} disabled={!isHost} onChange={v => set({ visibility: v })} format={v => VIS_LABEL[v]} />
+        <p className="setting__note">
+          {s.visibility === 'public' ? 'Listed on the home screen: anyone can join without the code.' : 'Only people with the code or invite link can join.'}
+        </p>
         <div className="setting">
-          <span className="setting__label">Categories</span>
-          <div className="cats">
-            {CATEGORIES.map(c => (
-              <button key={c} type="button" aria-pressed={s.categories.includes(c)} disabled={!isHost} className={'cat' + (s.categories.includes(c) ? ' is-on' : '')} onClick={() => toggleCat(c)}>
-                {CATEGORY_LABELS[c]}
-              </button>
-            ))}
+          <div className="setting__row">
+            <span className="setting__label" id="cats-h">Categories · {soundCount} sounds</span>
+            {isHost && (
+              <span className="setting__quick">
+                <button type="button" className="link-btn" disabled={chosen.length === all.length} onClick={() => set({ categories: all })}>Turn all on</button>
+              </span>
+            )}
           </div>
+          <ul className="toggles" aria-labelledby="cats-h">
+            {room.categories.map(c => {
+              const on = chosen.includes(c.id);
+              return (
+                <li key={c.id}>
+                  <label className={'toggle' + (on ? ' is-on' : '') + (!isHost ? ' is-locked' : '')}>
+                    <span className="toggle__emoji" aria-hidden="true">{c.emoji}</span>
+                    <span className="toggle__text">
+                      <span className="toggle__name">{c.label}</span>
+                      <span className="toggle__count">{c.count} sounds</span>
+                    </span>
+                    <input type="checkbox" role="switch" className="switch" checked={on} disabled={!isHost} onChange={() => toggleCat(c.id)} aria-label={c.label} />
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </section>
 

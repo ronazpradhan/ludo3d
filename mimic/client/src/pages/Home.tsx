@@ -1,7 +1,7 @@
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, useEffect, useState } from 'react';
 import { MAX_PLAYERS, MIN_PLAYERS, NICKNAME_MAX, ROOM_CODE_ALPHABET, ROOM_CODE_LENGTH } from '../../../shared/constants';
-import type { ProfileInput } from '../../../shared/types';
-import { AvatarPicker, Logo, MuteButton } from '../components/bits';
+import type { OpenRoom, ProfileInput } from '../../../shared/types';
+import { Avatar, AvatarPicker, Logo, MuteButton } from '../components/bits';
 import { useMimic, useStore } from '../hooks/useMimic';
 import { loadProfile } from '../lib/session';
 import { unlockAudio } from '../lib/sound';
@@ -21,6 +21,20 @@ export function Home({ inviteCode }: { inviteCode: string }) {
   const [code, setCode] = useState(cleanCode(inviteCode));
   const [nameError, setNameError] = useState('');
   const offline = connection !== 'online';
+  const [open, setOpen] = useState<OpenRoom[] | null>(null);
+
+  // Public rooms, refreshed every few seconds while this screen is open.
+  useEffect(() => {
+    if (offline) return;
+    let live = true;
+    const load = () => void store.listRooms().then(r => live && r && setOpen(r));
+    load();
+    const t = setInterval(load, 5000);
+    return () => {
+      live = false;
+      clearInterval(t);
+    };
+  }, [offline, store]);
 
   const validProfile = (): ProfileInput | null => {
     const nickname = profile.nickname.replace(/\s+/g, ' ').trim();
@@ -45,6 +59,11 @@ export function Home({ inviteCode }: { inviteCode: string }) {
     if (!p) return;
     if (code.length !== ROOM_CODE_LENGTH) return store.notify(`Room codes have ${ROOM_CODE_LENGTH} characters.`);
     void store.joinRoom(p, code);
+  };
+  const joinOpen = (r: OpenRoom) => {
+    unlockAudio();
+    const p = validProfile();
+    if (p) void store.joinRoom(p, r.code);
   };
 
   return (
@@ -117,6 +136,38 @@ export function Home({ inviteCode }: { inviteCode: string }) {
           <button type="submit" className="btn btn--ghost" disabled={busy || offline}>Join</button>
         </form>
         {offline && <p className="home__status" role="status"><span className="spinner" aria-hidden="true" /> Connecting to the server…</p>}
+      </section>
+
+      <section className="card home__rooms" aria-labelledby="open-h">
+        <div className="card__head">
+          <h2 id="open-h">Public rooms</h2>
+          <span className="live" aria-hidden="true"><i /> live</span>
+        </div>
+        {open === null ? (
+          <p className="muted small"><span className="spinner" aria-hidden="true" /> Looking for rooms…</p>
+        ) : open.length === 0 ? (
+          <p className="empty">No public rooms right now. Create one and set it to <b>Public</b> so anyone can drop in.</p>
+        ) : (
+          <ul className="rooms">
+            {open.map(r => {
+              const full = r.players >= r.maxPlayers;
+              return (
+                <li key={r.code} className="room">
+                  <Avatar id={r.host.avatar} size={40} />
+                  <span className="room__info">
+                    <span className="room__name">{r.host.nickname}’s room</span>
+                    <span className="room__meta">
+                      {r.players}/{r.maxPlayers} players · {r.playing ? 'playing now' : 'in the lobby'}
+                    </span>
+                  </span>
+                  <button type="button" className="btn btn--primary btn--sm" disabled={busy || offline || r.playing || full} onClick={() => joinOpen(r)}>
+                    {r.playing ? 'Playing' : full ? 'Full' : 'Join'}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </section>
     </div>
   );

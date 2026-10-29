@@ -1,11 +1,12 @@
-// Generates mimic/server/sounds.json: the original, synthesized clips players imitate.
+// Generates mimic/sounds/synth.json: the original, synthesized clips players imitate.
 // Run: node mimic/scripts/build-sounds.mjs   (output is committed; re-run after editing this file)
+// Real recordings go in mimic/sounds/<category>/ instead; see build-library.mjs.
 // Every clip is made from tones, glides and claps a person can copy by humming, whistling or clapping.
 // Pitches stay in a comfortable range (about 200-700 Hz); scoring ignores key and octave anyway.
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-const out = fileURLToPath(new URL('../server/sounds.json', import.meta.url));
+const out = fileURLToPath(new URL('../sounds/synth.json', import.meta.url));
 const hz = midi => +(440 * 2 ** ((midi - 69) / 12)).toFixed(2);
 const r3 = x => +x.toFixed(3);
 
@@ -18,7 +19,8 @@ const clips = [];
 const counters = {};
 function add(category, difficulty, name, events) {
   const n = (counters[category] = (counters[category] ?? 0) + 1);
-  clips.push({ id: `${category}-${String(n).padStart(3, '0')}`, name, category, difficulty, events: events.map(e => ({ ...e, t: r3(e.t), d: r3(e.d) })) });
+  // The difficulty only shapes how busy a clip is; it isn't stored or shown.
+  clips.push({ id: `${category}-${String(n).padStart(3, '0')}`, name, category, events: events.map(e => ({ ...e, t: r3(e.t), d: r3(e.d) })) });
 }
 
 // ---------- melodies: hum or whistle it ----------

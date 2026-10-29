@@ -4,11 +4,12 @@
 import type { Server, Socket } from 'socket.io';
 import type { z } from 'zod';
 import { MAX_RECORDING_BYTES } from '../shared/constants';
-import type { Clip, ClientToServerEvents, ErrorCode, ServerToClientEvents, SocketData } from '../shared/types';
+import type { ClientToServerEvents, ErrorCode, ServerToClientEvents, SocketData } from '../shared/types';
 import type { Player, Result, Room } from './game-engine';
 import { log } from './log';
 import { RateLimiter } from './rate-limit';
 import { type ManagerOptions, RoomManager } from './rooms';
+import type { Library } from './sounds';
 import { firstIssue, GetTakeSchema, JoinSchema, ProfileSchema, ResumeSchema, SettingsSchema } from './validation';
 
 export type MimicServer = Server<ClientToServerEvents, ServerToClientEvents, Record<string, never>, SocketData>;
@@ -40,7 +41,7 @@ function toPcm(payload: unknown): Int16Array | null {
   return new Int16Array(copy.buffer, 0, copy.byteLength / 2);
 }
 
-export function registerMimicHandlers(io: MimicServer, clips: Clip[], options: HandlerOptions = {}): { manager: RoomManager; stop(): void } {
+export function registerMimicHandlers(io: MimicServer, lib: Library, options: HandlerOptions = {}): { manager: RoomManager; stop(): void } {
   type Limit = [limit: number, windowMs: number];
   const defaults: Record<LimitName, Limit> = {
     take: [4, 10_000],
@@ -73,7 +74,7 @@ export function registerMimicHandlers(io: MimicServer, clips: Clip[], options: H
   };
 
   const manager: RoomManager = new RoomManager(
-    clips,
+    lib,
     {
       state: room => io.to(channel(room.code)).emit('room_state', room.snapshot()),
       closed: (room, reason) => {
@@ -279,6 +280,11 @@ export function registerMimicHandlers(io: MimicServer, clips: Clip[], options: H
         if (!s) return refuse(reply, 'NOT_IN_ROOM', 'You are not in a room.');
         send(reply, s.room.backToLobby(s.player.id));
       }),
+    );
+
+    socket.on(
+      'list_rooms',
+      guarded('list_rooms', reply => reply({ ok: true, rooms: manager.openRooms() })),
     );
 
     // Not rate-limited through `guarded`: clients call it on connect and every so often to line up clocks.
