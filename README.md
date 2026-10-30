@@ -131,7 +131,9 @@ disallows tools from fetching its sound files); a themed category only keeps cli
 Only the links are in the repo (`mimic/sounds/sources.json`); `npm run build` downloads the audio (into
 `mimic/sounds/.cache`, not committed), trims silence and cuts clips to 6 seconds; clips under 0.6 s are skipped.
 Refresh or change the lists with `node mimic/scripts/fetch-sounds.mjs` (categories are at the top of that file).
-Extra clips of your own: put `.mp3`/`.wav` files in `mimic/sounds/<category>/` and rebuild.
+Extra clips of your own: put `.mp3`/`.wav` files in `mimic/sounds/<category>/` and rebuild (the file name is
+the sound's name; an optional `category.json` there sets `{ "label", "emoji", "hint" }`; a folder named like an
+existing category, e.g. `memes`, adds to it). Commit them so Render gets them; in a public repo anyone can download them.
 Recording stops by itself about a second after you go quiet (capped at the clip's length + 2 s).
 
 **Word judge:** for sounds with words in them, each phone also checks that a take says the same words. It runs

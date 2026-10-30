@@ -3,7 +3,10 @@
 //   mimic/sounds/sources.json         categories (name, emoji, hint) and their sounds on myinstants.com;
 //                                     refresh with scripts/fetch-myinstants.mjs. The audio is downloaded here,
 //                                     at build time, into mimic/sounds/.cache (never committed).
-//   mimic/sounds/<category>/*.mp3     extra sounds of your own (.mp3 or .wav), one folder per category
+//   mimic/sounds/<category>/*.mp3     extra sounds of your own (.mp3 or .wav), one folder per category; the file
+//                                     name is the sound's name. An optional category.json in the folder sets
+//                                     { "label", "emoji", "hint" }. A folder named like an existing category
+//                                     (e.g. memes) adds to it.
 //
 // Each recording is decoded, mixed to mono, trimmed of silence at both ends, capped at MAX_SEC and
 // normalised. The server scores against a 12 kHz copy (library/refs/<id>.pcm); browsers play a 22 kHz WAV
@@ -218,7 +221,21 @@ export async function buildLibrary({ soundsDir, outDir, publicDir, cacheDir = pa
     const category = slug(dir);
     if (!known.has(category)) {
       known.add(category);
-      metas.push({ id: category, label: dir.replace(/[_-]+/g, ' ').replace(/^./, c => c.toUpperCase()), emoji: '🔊', hint: 'Copy the sound' });
+      // Optional category.json in the folder: { "label": "...", "emoji": "...", "hint": "..." }.
+      const metaFile = path.join(full, 'category.json');
+      let own = {};
+      try {
+        if (existsSync(metaFile)) own = JSON.parse(readFileSync(metaFile, 'utf8'));
+      } catch (e) {
+        log(`  ${dir}/category.json ignored: ${e.message}`);
+      }
+      const text = (v, max) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : null);
+      metas.push({
+        id: category,
+        label: text(own.label, 30) ?? dir.replace(/[_-]+/g, ' ').replace(/^./, c => c.toUpperCase()),
+        emoji: text(own.emoji, 8) ?? '🔊',
+        hint: text(own.hint, 60) ?? 'Copy the sound',
+      });
     }
     for (const file of readdirSync(full).sort())
       if (AUDIO.test(file)) await add(category, nameOf(file), `${dir}/${file}`, readFileSync(path.join(full, file)), /\.wav$/i.test(file));
