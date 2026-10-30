@@ -3,10 +3,10 @@ import { floatToInt16 } from '../shared/dsp';
 import fs from 'fs';
 import path from 'path';
 import { type ClipEvent, type ClipSpec, clipDuration, renderClip, type Wave } from '../shared/synth';
-import type { RoomSnapshot } from '../shared/types';
+import type { Clip, RoomSnapshot } from '../shared/types';
 import type { Clock, RoomListener, Timing } from '../server/game-engine';
 import { Room } from '../server/game-engine';
-import { validateLibrary } from '../server/sounds';
+import { maxTakeSec, validateLibrary } from '../server/sounds';
 
 /** Manual clock: timers only fire when the test advances time. */
 export class FakeClock implements Clock {
@@ -59,7 +59,12 @@ export const clips = library.clips;
 export const TIMING = { loadMs: 0, listenMs: 5000, recordMs: 20_000, resultsMs: 8000 } satisfies Timing;
 
 /** A human-ish copy of a clip: other timbre, transposed, slower, sloppy timing, background noise. */
-export function imitate(spec: ClipSpec, shift = 0.5, stretch = 1.15, wave: Wave = 'sine', jitter = 0.03): Float32Array {
+/** A good copy as a phone records it: started a moment late, and cut at exactly the clip's length like every take. */
+export function copyOf(clip: Clip): Float32Array {
+  return imitate(specOf(clip.id), 0.5, 1, 'sine', 0.03, 0.12).subarray(0, Math.round(maxTakeSec(clip) * RECORDING_RATE));
+}
+
+export function imitate(spec: ClipSpec, shift = 0.5, stretch = 1.15, wave: Wave = 'sine', jitter = 0.03, lead = 0.3): Float32Array {
   let k = 1;
   const events = spec.events.map(e => {
     k = (k * 7 + 3) % 11;
@@ -75,7 +80,7 @@ export function imitate(spec: ClipSpec, shift = 0.5, stretch = 1.15, wave: Wave 
     };
   });
   const R = RECORDING_RATE;
-  const pad = Math.floor(0.3 * R);
+  const pad = Math.floor(lead * R);
   const s = renderClip({ events }, R);
   const out = new Float32Array(s.length + 2 * pad);
   out.set(s, pad);
@@ -106,7 +111,7 @@ export function makeRoom(n: number, timing: Timing = TIMING) {
   // Rooms start with every category off; tests play with all of them on.
   room.updateSettings('p1', { categories: library.categories.map(c => c.id) });
   const clip = () => clips.find(c => c.id === room.snapshot().round!.clip.id)!;
-  const goodTake = () => pcmOf(imitate(specOf(clip().id)));
+  const goodTake = () => pcmOf(copyOf(clip()));
   const score = (id: string): number => room.players.get(id)!.score;
   /** Start the match and move into the record phase of round 1. */
   const startRecording = () => {

@@ -5,7 +5,7 @@ import { randomInt } from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import { z } from 'zod';
-import { CATEGORY_ID, MAX_TAKE_SEC, RECORDING_RATE, TAKE_EXTRA_SEC } from '../shared/constants';
+import { CATEGORY_ID, MAX_TAKE_SEC, RECORDING_RATE } from '../shared/constants';
 import { int16ToFloat } from '../shared/dsp';
 import { clipDuration, renderClip } from '../shared/synth';
 import type { CategoryInfo, Clip, RoomSettings } from '../shared/types';
@@ -127,5 +127,5 @@ export function referenceFor(clip: Clip, lib: Library = loadLibrary()): Referenc
 }
 
 export function maxTakeSec(clip: Clip): number {
-  return Math.min(MAX_TAKE_SEC, Math.ceil((clip.duration + TAKE_EXTRA_SEC) * 10) / 10);
+  return Math.min(MAX_TAKE_SEC, Math.ceil(clip.duration * 10) / 10);
 }

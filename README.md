@@ -134,7 +134,8 @@ Refresh or change the lists with `node mimic/scripts/fetch-sounds.mjs` (categori
 Extra clips of your own: put `.mp3`/`.wav` files in `mimic/sounds/<category>/` and rebuild (the file name is
 the sound's name; an optional `category.json` there sets `{ "label", "emoji", "hint" }`; a folder named like an
 existing category, e.g. `memes`, adds to it). Commit them so Render gets them; in a public repo anyone can download them.
-Recording stops by itself about a second after you go quiet (capped at the clip's length + 2 s).
+Every take records for exactly the clip's length, the same for everyone; it never stops early. Sounds uploaded
+more than once (same audio, other names or categories) are kept only once.
 
 **Word judge:** for sounds with words in them, each phone also checks that a take says the same words. It runs
 the ZIPA phone recogniser ([Zhu et al., ACL 2025](https://github.com/lingjzhu/zipa), small CTC model, int8 ONNX,

@@ -163,6 +163,85 @@ async function cached(url, cacheDir) {
   return buf;
 }
 
+// The same sound is often uploaded many times under different names (and into different categories), so
+// each clip gets a fingerprint: its spectrum, 12 log-spaced bands every 40 ms.
+const FP_N = 512;
+const FP_HOP = 480;
+const FP_BANDS = 12;
+const FP_EDGES = Array.from({ length: FP_BANDS + 1 }, (_, i) => Math.round(2 * Math.pow(FP_N / 4, i / FP_BANDS)));
+/** Clips this alike (and about as long) are the same sound. Different takes of one catchphrase stay below it. */
+const SAME_SOUND = 0.95;
+
+function fft(re, im) {
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) {
+    let bit = n >> 1;
+    for (; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if (i < j) {
+      [re[i], re[j]] = [re[j], re[i]];
+      [im[i], im[j]] = [im[j], im[i]];
+    }
+  }
+  for (let len = 2; len <= n; len <<= 1) {
+    const a = (-2 * Math.PI) / len;
+    for (let i = 0; i < n; i += len)
+      for (let k = 0; k < len / 2; k++) {
+        const c = Math.cos(a * k);
+        const s = Math.sin(a * k);
+        const p = i + k;
+        const q = p + len / 2;
+        const tr = re[q] * c - im[q] * s;
+        const ti = re[q] * s + im[q] * c;
+        re[q] = re[p] - tr;
+        im[q] = im[p] - ti;
+        re[p] += tr;
+        im[p] += ti;
+      }
+  }
+}
+
+function fingerprint(x) {
+  const out = [];
+  const re = new Float64Array(FP_N);
+  const im = new Float64Array(FP_N);
+  for (let s = 0; s + FP_N <= x.length; s += FP_HOP) {
+    for (let t = 0; t < FP_N; t++) {
+      re[t] = x[s + t];
+      im[t] = 0;
+    }
+    fft(re, im);
+    for (let b = 0; b < FP_BANDS; b++) {
+      let e = 0;
+      for (let k = FP_EDGES[b]; k < Math.max(FP_EDGES[b] + 1, FP_EDGES[b + 1]); k++) e += re[k] * re[k] + im[k] * im[k];
+      out.push(Math.log10(e + 1e-6));
+    }
+  }
+  return out;
+}
+
+/** How alike two fingerprints are, -1..1, allowing them to be up to 3 frames out of step. */
+function alike(a, b) {
+  let best = -1;
+  for (let lag = -3; lag <= 3; lag++) {
+    const sh = lag * FP_BANDS;
+    let sa = 0, sb = 0, sab = 0, saa = 0, sbb = 0, k = 0;
+    for (let i = 0; i < a.length; i++) {
+      const j = i + sh;
+      if (j < 0 || j >= b.length) continue;
+      sa += a[i];
+      sb += b[j];
+      sab += a[i] * b[j];
+      saa += a[i] * a[i];
+      sbb += b[j] * b[j];
+      k++;
+    }
+    if (k < FP_BANDS * 5) continue;
+    best = Math.max(best, (sab - (sa * sb) / k) / Math.sqrt((saa - (sa * sa) / k) * (sbb - (sb * sb) / k) || 1));
+  }
+  return best;
+}
+
 /** Runs `fn` over `items` with at most `n` at a time, keeping the order of results. */
 async function pool(items, n, fn) {
   const out = new Array(items.length);
@@ -186,6 +265,7 @@ export async function buildLibrary({ soundsDir, outDir, publicDir, cacheDir = pa
 
   const clips = [];
   const ids = new Set();
+  const prints = [];
   const metas = sources.map(({ sounds: _s, ...meta }) => meta);
   const known = new Set(metas.map(m => m.id));
 
@@ -195,11 +275,16 @@ export async function buildLibrary({ soundsDir, outDir, publicDir, cacheDir = pa
       const decoded = isWav ? decodeWav(buf) : await decodeMp3(buf);
       const { samples, rate, trimmed } = prepare(decoded);
       if (samples.length / rate < MIN_SEC) throw new Error(`shorter than ${MIN_SEC}s, too quick to copy`);
+      const ref = resample(samples, rate, SCORE_RATE);
+      const fp = fingerprint(ref);
+      const duration = samples.length / rate;
+      const twin = prints.find(p => Math.abs(p.duration - duration) <= 0.4 && alike(p.fp, fp) >= SAME_SOUND);
+      if (twin) throw new Error(`the same sound as ${twin.id}`);
       const base = `${category}-${slug(name)}`;
       let id = base;
       for (let k = 2; ids.has(id); k++) id = `${base}-${k}`;
       ids.add(id);
-      const ref = resample(samples, rate, SCORE_RATE);
+      prints.push({ id, duration, fp });
       const pcm = Buffer.alloc(ref.length * 2);
       for (let i = 0; i < ref.length; i++) pcm.writeInt16LE(Math.round(Math.max(-1, Math.min(1, ref[i])) * 32767), i * 2);
       writeFileSync(path.join(outDir, 'refs', `${id}.pcm`), pcm);
@@ -208,13 +293,8 @@ export async function buildLibrary({ soundsDir, outDir, publicDir, cacheDir = pa
       if (trimmed) log(`  ${label}: longer than ${MAX_SEC}s, only the first ${MAX_SEC}s is used`);
     })().catch(e => log(`  skipped ${label}: ${e.message}`));
 
-  // Sounds listed in sources.json (from myinstants), downloaded at build time.
-  for (const cat of sources) {
-    const files = await pool(cat.sounds, 6, s => cached(s.url, cacheDir).catch(e => (log(`  skipped ${cat.id}/${s.name}: ${e.message}`), null)));
-    for (const [i, s] of cat.sounds.entries()) if (files[i]) await add(cat.id, s.name, `${cat.id}/${s.name}`, files[i], /\.wav$/i.test(s.url));
-  }
-
-  // Your own files dropped into mimic/sounds/<category>/.
+  // Your own files dropped into mimic/sounds/<category>/. They go first, so a sound that is also on
+  // myinstants stays in your folder and the downloaded copy is the one left out.
   for (const dir of readdirSync(soundsDir).sort()) {
     const full = path.join(soundsDir, dir);
     if (dir.startsWith('.') || !statSync(full).isDirectory()) continue;
@@ -239,6 +319,12 @@ export async function buildLibrary({ soundsDir, outDir, publicDir, cacheDir = pa
     }
     for (const file of readdirSync(full).sort())
       if (AUDIO.test(file)) await add(category, nameOf(file), `${dir}/${file}`, readFileSync(path.join(full, file)), /\.wav$/i.test(file));
+  }
+
+  // Sounds listed in sources.json (from myinstants), downloaded at build time.
+  for (const cat of sources) {
+    const files = await pool(cat.sounds, 6, s => cached(s.url, cacheDir).catch(e => (log(`  skipped ${cat.id}/${s.name}: ${e.message}`), null)));
+    for (const [i, s] of cat.sounds.entries()) if (files[i]) await add(cat.id, s.name, `${cat.id}/${s.name}`, files[i], /\.wav$/i.test(s.url));
   }
 
   const counts = new Map();

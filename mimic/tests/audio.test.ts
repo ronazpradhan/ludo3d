@@ -161,7 +161,10 @@ describe('adding your own recordings', () => {
     const padded = new Float32Array(tune.length + 44100);
     padded.set(tune, 22050);
     fs.writeFileSync(path.join(src, 'trendy', 'Kya Baat Hai.wav'), wavFile(padded, 44100));
-    fs.writeFileSync(path.join(src, 'bollywood songs', 'Hum tum.wav'), wavFile(padded, 44100));
+    const beat = renderClip(samples.rhythm!, 44100);
+    fs.writeFileSync(path.join(src, 'bollywood songs', 'Hum tum.wav'), wavFile(beat, 44100));
+    // The same tune again under another name: a duplicate, left out.
+    fs.writeFileSync(path.join(src, 'trendy', 'Kya baat hai (copy).wav'), wavFile(padded, 44100));
     fs.writeFileSync(path.join(src, 'trendy', 'broken.mp3'), Buffer.from('not really an mp3'));
     const logs: string[] = [];
 
@@ -175,6 +178,7 @@ describe('adding your own recordings', () => {
     expect(lib.categories.map(c => c.id)).toEqual(['trendy', 'bollywood-songs']);
     expect(lib.categories[0]).toMatchObject({ label: 'Trending', emoji: '🔥', count: 1 });
     expect(logs.some(l => l.includes('Offline'))).toBe(true);
+    expect(logs.some(l => l.includes('(copy)') && l.includes('the same sound as'))).toBe(true);
     expect(lib.categories.find(c => c.id === 'bollywood-songs')).toMatchObject({ label: 'Bollywood songs', count: 1 });
     const clip = lib.clips.find(c => c.category === 'trendy')!;
     expect(clip).toMatchObject({ id: 'trendy-kya-baat-hai', name: 'Kya Baat Hai', audio: 'sounds/trendy-kya-baat-hai.wav' });

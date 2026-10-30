@@ -13,8 +13,7 @@ export const NICKNAME_MAX = 16;
 
 /** Recordings travel as 16-bit mono PCM at this rate. */
 export const RECORDING_RATE = 12_000;
-/** A take may run this much longer than the clip, and never longer than MAX_TAKE_SEC. */
-export const TAKE_EXTRA_SEC = 2;
+/** A take always lasts exactly as long as the clip (clips are cut to 6 s), never longer than this. */
 export const MAX_TAKE_SEC = 8;
 export const MAX_RECORDING_BYTES = MAX_TAKE_SEC * RECORDING_RATE * 2;
 

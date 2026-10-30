@@ -88,7 +88,7 @@ describe('a round', () => {
     const { room, startRecording, goodTake } = makeRoom(2);
     startRecording();
     const good = room.submitTake('p1', goodTake());
-    const quiet = room.submitTake('p2', silence(2));
+    const quiet = room.submitTake('p2', silence(0.6));
     expect(good.ok && good.feedback.score).toBeGreaterThanOrEqual(35);
     expect(quiet).toMatchObject({ ok: true, feedback: { score: 0, verdict: 'silent' } });
   });
@@ -98,7 +98,7 @@ describe('a round', () => {
     startRecording();
     room.submitTake('p1', goodTake());
     expect(room.snapshot().phase).toBe('record');
-    room.submitTake('p2', silence(1));
+    room.submitTake('p2', silence(0.6));
     const s = room.snapshot();
     expect(s.phase).toBe('results');
     const best = s.lastResult!.takes.find(t => t.best)!;
@@ -195,7 +195,7 @@ describe('no repeats and the results show', () => {
     clock.advance(room.snapshot().round!.phaseEndsAt - clock.now());
     const good = goodTake();
     room.submitTake('p1', good);
-    room.submitTake('p2', silence(1.5));
+    room.submitTake('p2', silence(0.6));
     room.submitTake('p3', pcmOf(new Float32Array(12_000).map((_, i) => Math.sin(i / 3) * 0.4)));
     const s = room.snapshot();
     expect(s.phase).toBe('results');
@@ -217,8 +217,8 @@ describe('no repeats and the results show', () => {
       const { room, startRecording, goodTake } = makeRoom(3);
       startRecording();
       room.submitTake('p1', goodTake());
-      room.submitTake('p2', silence(1.5));
-      room.submitTake('p3', silence(1.5));
+      room.submitTake('p2', silence(0.6));
+      room.submitTake('p3', silence(0.6));
       const list = room.snapshot().lastResult!.playlist;
       lastIsBest.add(list[list.length - 1]!.playerId === 'p1');
     }
@@ -229,7 +229,7 @@ describe('no repeats and the results show', () => {
     const { room, startRecording, goodTake, score } = makeRoom(2);
     startRecording();
     room.submitTake('p1', goodTake());
-    room.submitTake('p2', silence(1.5));
+    room.submitTake('p2', silence(0.6));
     expect(score('p1')).toBeGreaterThan(0);
     expect(room.snapshot().players.find(p => p.id === 'p1')!.score).toBe(score('p1'));
   });

@@ -9,7 +9,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { MAX_RECORDING_BYTES, POINTS, SOCKET_PATH } from '../shared/constants';
 import type { ClientToServerEvents, JoinedRoom, RoomSnapshot, ServerToClientEvents } from '../shared/types';
 import { attachMimic, type MimicHandle } from '../server/index';
-import { clips, imitate, library, pcmOf, silence, specOf } from './helpers';
+import { clips, copyOf, library, pcmOf, silence } from './helpers';
 
 type Client = Socket<ServerToClientEvents, ClientToServerEvents> & { latest?: RoomSnapshot; inbox: string[] };
 type AnyRes = { ok: boolean; code?: string; message?: string; [k: string]: unknown };
@@ -99,7 +99,7 @@ async function setupRoom(n: number, settings: Record<string, unknown> = { rounds
 /** A good copy of the round's clip, as the bytes a browser would send. */
 function goodTake(s: RoomSnapshot): Buffer {
   const clip = clips.find(c => c.id === s.round!.clip.id)!;
-  const pcm = pcmOf(imitate(specOf(clip.id)));
+  const pcm = pcmOf(copyOf(clip));
   return Buffer.from(pcm.buffer, pcm.byteOffset, pcm.byteLength);
 }
 const bytes = (pcm: Int16Array): Buffer => Buffer.from(pcm.buffer, pcm.byteOffset, pcm.byteLength);
@@ -225,9 +225,9 @@ describe('a full match with independent clients', () => {
       expect(good).toMatchObject({ ok: true });
       expect(good.score as number).toBeGreaterThanOrEqual(35);
       expect(await call(players[0]!, 'submit_take', goodTake(rec))).toMatchObject({ ok: false, code: 'ALREADY_SUBMITTED' });
-      expect(await call(players[1]!, 'submit_take', bytes(silence(1.5)))).toMatchObject({ ok: true, score: 0, verdict: 'silent' });
+      expect(await call(players[1]!, 'submit_take', bytes(silence(0.6)))).toMatchObject({ ok: true, score: 0, verdict: 'silent' });
       expect(await call(players[2]!, 'get_take', { playerId: idOf(0) })).toMatchObject({ ok: false, code: 'WRONG_PHASE' });
-      await call(players[2]!, 'submit_take', bytes(silence(1)));
+      await call(players[2]!, 'submit_take', bytes(silence(0.6)));
 
       // Everyone sent a take: the round ends early with the best take getting the bonus.
       const res = await stateWhere(players[2]!, s => s.phase === 'results' && s.lastResult?.number === round);
