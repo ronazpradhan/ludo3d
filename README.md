@@ -124,9 +124,9 @@ octave don't matter) and the best take of the round gets +30. Rooms are private 
 public (listed on the Mimic home screen). React + TypeScript under `mimic/`, served at `/mimic/` by the same
 server; `npm install` builds it (or run `npm run build`).
 
-**Sounds:** 21 categories modelled on soundbuttonslab.com's soundboards (Memes, Goofy ahh, Rizz, Reactions,
-Viral, IShowSpeed & Ronaldo, Discord, Roblox, Among Us, FNAF, Peter Griffin, SpongeBob, Anime, Games, Movies, Farts) plus Nepal trending,
-Nepali, Indian memes, CID and Bollywood. The audio comes from myinstants.com (soundbuttonslab's robots.txt
+**Sounds:** 15 categories modelled on soundbuttonslab.com's soundboards (Memes, Goofy ahh, Reactions, Viral,
+IShowSpeed & Ronaldo, Roblox, Among Us, Peter Griffin, SpongeBob, Anime, Games, Movies) plus Nepal trending,
+Indian memes, CID and Bollywood, and your own folders (e.g. Voicy). The audio comes from myinstants.com (soundbuttonslab's robots.txt
 disallows tools from fetching its sound files); a themed category only keeps clips whose title matches the theme.
 Only the links are in the repo (`mimic/sounds/sources.json`); `npm run build` downloads the audio (into
 `mimic/sounds/.cache`, not committed), trims silence and cuts clips to 6 seconds; clips under 0.6 s are skipped.

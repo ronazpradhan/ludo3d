@@ -1,7 +1,7 @@
 // Builds mimic/sounds/sources.json: Mimic's categories and, for each, a list of sounds (name + mp3 link).
 //
-// The categories follow soundbuttonslab.com's soundboards (memes, goofy ahh, rizz, Discord, Roblox, Among Us,
-// FNAF, Peter Griffin, ...) plus Nepal / India ones. The audio comes from myinstants.com, which allows
+// The categories follow soundbuttonslab.com's soundboards (memes, goofy ahh, Roblox, Among Us,
+// Peter Griffin, ...) plus Nepal / India ones. The audio comes from myinstants.com, which allows
 // downloading it (soundbuttonslab's robots.txt disallows its sound files for tools). A themed category only
 // keeps sounds whose title actually mentions the theme, so "Among Us" is really Among Us.
 // Only links are stored; `npm run build` downloads the audio.
@@ -17,22 +17,17 @@ const PER_CATEGORY = 30;
 const CATEGORIES = [
   { id: 'memes', label: 'Memes', emoji: '😂', hint: 'Copy the meme sound', pages: ['/en/categories/memes/'] },
   { id: 'goofy', label: 'Goofy ahh', emoji: '🤪', hint: 'Go full goofy', pages: ['/en/search/?name=goofy'], must: /goofy|ahh/i },
-  { id: 'rizz', label: 'Rizz', emoji: '😏', hint: 'Bring the rizz', pages: ['/en/search/?name=rizz'], must: /rizz/i },
   { id: 'reactions', label: 'Reactions', emoji: '😱', hint: 'React exactly like that', pages: ['/en/categories/reactions/'] },
   { id: 'viral', label: 'Viral', emoji: '🔥', hint: 'Copy the viral sound', pages: ['/en/categories/viral/', '/en/categories/tiktok%20trends/'] },
   { id: 'speed-ronaldo', label: 'IShowSpeed & Ronaldo', emoji: '⚽', hint: 'SIUUU like you mean it', pages: ['/en/search/?name=ishowspeed', '/en/search/?name=siuu', '/en/search/?name=ronaldo', '/en/search/?name=wallahi'], perPage: 10, must: /speed|siu|sui|ronaldo|cr7|cristiano|wallahi|la peace|bark|serious right|still live|anger buddy/i },
-  { id: 'discord', label: 'Discord', emoji: '🎧', hint: 'Copy the Discord sound', pages: ['/en/search/?name=discord'], must: /discord/i },
   { id: 'roblox', label: 'Roblox', emoji: '🧱', hint: 'Copy the Roblox sound', pages: ['/en/search/?name=roblox'], must: /roblox|oof/i },
   { id: 'among-us', label: 'Among Us', emoji: '🔪', hint: 'Sus. Copy it.', pages: ['/en/search/?name=among%20us', '/en/search/?name=amogus', '/en/search/?name=sus'], must: /among|amogus|sus\b|impostor|imposter/i },
-  { id: 'fnaf', label: 'FNAF', emoji: '🐻', hint: 'Copy the jumpscare', pages: ['/en/search/?name=fnaf', '/en/search/?name=freddy'], must: /fnaf|freddy|five nights|foxy|bonnie|chica|springtrap/i },
   { id: 'peter-griffin', label: 'Peter Griffin', emoji: '🍺', hint: 'Do the Peter voice', pages: ['/en/search/?name=peter%20griffin', '/en/search/?name=family%20guy'], must: /peter|griffin|family guy|stewie/i },
   { id: 'spongebob', label: 'SpongeBob', emoji: '🧽', hint: 'Copy the Bikini Bottom sound', pages: ['/en/search/?name=spongebob'], must: /sponge|squidward|patrick|krabs/i },
   { id: 'anime', label: 'Anime', emoji: '🍥', hint: 'Copy the anime line', pages: ['/en/categories/anime%20&%20manga/'] },
   { id: 'games', label: 'Games', emoji: '🎮', hint: 'Copy the game sound', pages: ['/en/categories/games/'] },
   { id: 'movies', label: 'Movies', emoji: '🍿', hint: 'Copy the movie line', pages: ['/en/categories/movies/'] },
-  { id: 'farts', label: 'Farts', emoji: '💨', hint: 'You know what to do', pages: ['/en/search/?name=fart'], must: /fart/i },
   { id: 'nepal-trending', label: 'Nepal trending', emoji: '📈', hint: 'Copy what’s trending in Nepal', pages: ['/en/index/np/'] },
-  { id: 'nepali', label: 'Nepali', emoji: '🏔️', hint: 'Say it exactly like the clip', pages: ['/en/search/?name=nepal', '/en/search/?name=nepal%20police'] },
   { id: 'indian-memes', label: 'Indian memes', emoji: '🛺', hint: 'Copy the desi meme', pages: ['/en/index/in/', '/en/search/?name=indian'] },
   { id: 'cid', label: 'CID', emoji: '🕵️', hint: 'Daya, darwaza tod do', pages: ['/en/search/?name=cid'] },
   { id: 'bollywood', label: 'Bollywood', emoji: '🎬', hint: 'Deliver the dialogue', pages: ['/en/search/?name=bollywood', '/en/search/?name=hindi'] },
