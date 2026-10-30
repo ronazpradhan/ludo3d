@@ -25,8 +25,8 @@ describe('comparing phones', () => {
   });
   it('turns similarity into a 0..1 words score against everyday talk', () => {
     const ref = p('ɑɹjusɪɹiəsɹaɪtnaʊbɹoʊ');
-    expect(wordsScore(ref, p('ɑɹjusɪɹiəsɹaɪnaʊəbɛʊ'))).toBeGreaterThan(0.8);
-    expect(wordsScore(ref, p('aɪlaɪkbənænəz'))).toBeLessThan(0.2);
+    expect(wordsScore(ref, p('ɑɹjusɪɹiəsɹaɪnaʊəbɛʊ'))).toBeGreaterThan(0.95);
+    expect(wordsScore(ref, p('aɪlaɪkbənænəz'))).toBeLessThan(0.3);
     expect(wordsScore(ref, p(''))).toBe(0);
   });
   it('decodes CTC output: blanks dropped, repeats merged, marks removed', () => {

@@ -415,9 +415,16 @@ export function scoreImitation(ref: Reference, imitation: Float32Array, rate: nu
   if (imi.peakDb < -50 || imi.activeSec < 0.12 || imi.loudSec < MIN_LOUD_SEC) return { score: 0, verdict: 'silent', parts: zero };
   if (looksLikeReplay(ref.samples, imiSamples)) return { score: 0, verdict: 'replay', parts: zero };
   const { raw, parts } = compare(ref, imi);
-  // Place the take between "unrelated sound" (about 10) and "clean copy of this sound" (about 95). Every real
-  // attempt earns what it got; nothing is cut off to 0 for being far off.
-  const norm = (raw - ref.bad) / (ref.good - ref.bad);
-  const score = Math.max(1, Math.min(100, Math.round(100 * Math.pow(clamp01(0.1 + 0.85 * norm), 1.1))));
-  return { score, verdict: 'ok', parts };
+  return { score: humanScore((raw - ref.bad) / (ref.good - ref.bad)), verdict: 'ok', parts };
+}
+
+/**
+ * Turns where a take sits between "an unrelated sound" (0) and "a perfect machine copy" (1) into points.
+ * No human voice gets close to a machine copy, so the scale is generous at the top: a good human copy
+ * (about 0.6-0.8) scores 85-100 and the best ones hit 100, a rough one 55-80, another sound stays under
+ * about 30. Every real attempt still earns what it got; nothing is cut to 0 for being far off.
+ */
+export function humanScore(norm: number): number {
+  const s = clamp01((norm - 0.1) / 0.7);
+  return Math.max(1, Math.round(100 * (1 - Math.pow(1 - s, 1.6))));
 }

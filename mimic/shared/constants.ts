@@ -66,10 +66,10 @@ export const POINTS = {
 
 /** Labels for a 0-100 similarity score. */
 export function scoreLabel(score: number): string {
-  if (score >= 90) return 'Perfect copy!';
-  if (score >= 75) return 'Great';
-  if (score >= 55) return 'Pretty close';
-  if (score >= 35) return 'Kind of';
+  if (score >= 95) return 'Perfect copy!';
+  if (score >= 85) return 'Great';
+  if (score >= 70) return 'Pretty close';
+  if (score >= 45) return 'Kind of';
   return 'Way off';
 }
 

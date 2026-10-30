@@ -88,8 +88,9 @@ const UNRELATED = [
   'hɛloʊhaʊɑɹjuduɪŋ', 'aɪlaɪkbənænəz', 'wʌtɑɹjuduɪŋ', 'oʊmaɪgɑd', 'noʊweɪ', 'lɛtsgoʊ', 'oʊkeɪ', 'bɹoʊ',
   'jɛssəɹ', 'kjahua', 'tikhɛ', 'nəmʌste', 'ɡʊdmɔɹnɪŋ', 'aɪmhʌŋgɹi', 'gɪvmiðəbɔl', 'ðætsnɑtfɛɹ',
 ].map(s => [...s]);
-/** A take scoring this far above the baseline counts as saying the words fully. */
-const GOOD = 0.8;
+/** A take this close to the sound's phones counts as saying the words fully: people's accents and the
+ * recogniser's slips keep even a perfect line well short of an exact phone match. */
+const GOOD = 0.65;
 
 /**
  * The words part of a take's score, 0..1: how much closer the take's phones are to the sound's than everyday
@@ -98,6 +99,7 @@ const GOOD = 0.8;
 export function wordsScore(ref: Phones, take: Phones): number | null {
   if (!hasSpeech(ref)) return null;
   const base = UNRELATED.map(u => phoneSimilarity(ref.phones, u)).sort((a, b) => a - b)[UNRELATED.length >> 1]!;
-  const v = (phoneSimilarity(ref.phones, take.phones) - base) / Math.max(0.2, GOOD - base);
-  return Math.max(0, Math.min(1, v));
+  const v = Math.max(0, Math.min(1, (phoneSimilarity(ref.phones, take.phones) - base) / Math.max(0.2, GOOD - base)));
+  // Generous near the top, like the rest of the score: most of the words right is nearly full marks.
+  return 1 - Math.pow(1 - v, 1.5);
 }

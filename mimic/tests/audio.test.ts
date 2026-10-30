@@ -221,3 +221,17 @@ describe('silent takes', () => {
     }
   });
 });
+
+describe('a human-friendly score', () => {
+  it('gives good human copies 85-100, rough ones a fair middle, and other sounds little', async () => {
+    const { humanScore } = await import('../server/audio-score');
+    expect(humanScore(1)).toBe(100);
+    expect(humanScore(0.8)).toBe(100);
+    expect(humanScore(0.6)).toBeGreaterThanOrEqual(85);
+    expect(humanScore(0.4)).toBeGreaterThan(55);
+    expect(humanScore(0.4)).toBeLessThan(80);
+    expect(humanScore(0.2)).toBeLessThan(35);
+    expect(humanScore(-0.5)).toBe(1);
+    for (let n = 0; n < 1; n += 0.05) expect(humanScore(n + 0.05)).toBeGreaterThanOrEqual(humanScore(n));
+  });
+});
