@@ -520,7 +520,6 @@ b { font-weight: 700; }
 .judge__bar { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--purple-hi); transition: width 0.3s; }
 
 /* ---------- suspense ---------- */
-.secret-note { margin: 10px 0 0; text-align: center; }
 .drumroll { margin: 4px 0 0; font-size: 18px; color: var(--lime); animation: pop 0.35s var(--ease) both; }
 .drumroll b { font-family: var(--display); font-size: 28px; }
 .takes.is-revealed .take { animation: pop 0.4s var(--ease) both; }

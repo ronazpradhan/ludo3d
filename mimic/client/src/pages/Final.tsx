@@ -17,7 +17,7 @@ export function Final({ room }: { room: RoomSnapshot }) {
   const best = ranked[0]?.score ?? 0;
   const winners = ranked.filter(p => p.score === best);
 
-  // A drumroll first: the standings were secret all game.
+  // A drumroll first, before the podium.
   const [drum, setDrum] = useState(Math.ceil(FINAL_REVEAL_MS / 1000));
   useEffect(() => {
     if (drum <= 0) {

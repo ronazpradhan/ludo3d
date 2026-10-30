@@ -86,8 +86,7 @@ export function Game({ room }: { room: RoomSnapshot }) {
           </div>
           <aside className="card game__side" aria-label="Scoreboard">
             <h2 className="side-h">Players</h2>
-            <Scoreboard players={room.players} hostId={room.hostId} meId={me?.playerId} done={round.submittedIds} secret />
-            <p className="muted small secret-note">🤫 Standings are revealed at the end</p>
+            <Scoreboard players={room.players} hostId={room.hostId} meId={me?.playerId} done={round.submittedIds} />
           </aside>
         </div>
       )}
@@ -393,6 +392,9 @@ function Results({ room, byId }: { room: RoomSnapshot; byId: Map<string, PublicP
   const elapsed = now - round.phaseStartedAt;
   const revealAt = res?.revealAt ?? 0;
   const revealed = elapsed >= revealAt;
+  // The table keeps the totals from before this round until its scores are revealed.
+  const gained = new Map((res?.takes ?? []).filter(t => t.points > 0).map(t => [t.playerId, t.points]));
+  const standings = revealed ? room.players : room.players.map(p => ({ ...p, score: p.score - (gained.get(p.id) ?? 0) }));
   const drum = !revealed && elapsed >= revealAt - RESULTS_REVEAL_MS ? Math.max(1, Math.ceil((revealAt - elapsed) / 1000)) : 0;
 
   // Drumroll beeps on 3, 2, 1, and a higher one as the scores appear.
@@ -464,8 +466,7 @@ function Results({ room, byId }: { room: RoomSnapshot; byId: Map<string, PublicP
       </section>
       <section className="card">
         <h2 className="side-h">Players</h2>
-        <Scoreboard players={room.players} hostId={room.hostId} meId={me?.playerId} secret />
-        <p className="muted small secret-note">🤫 Who’s winning stays secret until the end of the game</p>
+        <Scoreboard players={standings} hostId={room.hostId} meId={me?.playerId} highlight={revealed ? gained : undefined} />
       </section>
     </div>
   );

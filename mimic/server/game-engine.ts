@@ -440,8 +440,7 @@ export class Room {
       nickname: p.nickname,
       avatar: p.avatar,
       connected: p.connected,
-      // The standings stay secret until the match is over.
-      score: this.phase === 'listen' || this.phase === 'record' || this.phase === 'results' ? 0 : p.score,
+      score: p.score,
     }));
     const m = this.match;
     const r = m?.round;

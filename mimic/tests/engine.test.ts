@@ -225,15 +225,12 @@ describe('no repeats and the results show', () => {
     expect(lastIsBest).toEqual(new Set([true, false]));
   });
 
-  it('keeps the standings secret until the match is over', () => {
+  it('shows the running totals during the match', () => {
     const { room, startRecording, goodTake, score } = makeRoom(2);
     startRecording();
     room.submitTake('p1', goodTake());
     room.submitTake('p2', silence(1.5));
     expect(score('p1')).toBeGreaterThan(0);
-    expect(room.snapshot().players.every(p => p.score === 0)).toBe(true);
-    room.removePlayer('p2'); // too few players: the match ends
-    expect(room.phase).toBe('finished');
     expect(room.snapshot().players.find(p => p.id === 'p1')!.score).toBe(score('p1'));
   });
 });
