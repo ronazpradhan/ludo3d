@@ -110,7 +110,6 @@ export class MimicStore {
     if (this.state.myTake && this.state.myTake.key !== roundKey(snap)) patch.myTake = null;
     if (prev && prev.phase !== snap.phase) {
       if (snap.phase === 'results') sounds.reveal();
-      if (snap.phase === 'finished') sounds.victory();
     }
     this.set(patch);
   }

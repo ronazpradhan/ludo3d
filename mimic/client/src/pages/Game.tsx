@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { COUNTDOWN_MS, RECORDING_RATE, WORDS_JUDGE_MS, listenLeadMs, RESULTS_OUTRO_MS, RESULTS_SCORE_MS, scoreLabel } from '../../../shared/constants';
+import { COUNTDOWN_MS, RECORDING_RATE, RESULTS_OUTRO_MS, RESULTS_REVEAL_MS, WORDS_JUDGE_MS, listenLeadMs, scoreLabel } from '../../../shared/constants';
 import type { CategoryInfo, PublicPlayer, RoomSnapshot, ScoreParts } from '../../../shared/types';
 import { AudioGraph } from '../components/AudioGraph';
 import { Avatar, Scoreboard } from '../components/bits';
@@ -85,8 +85,9 @@ export function Game({ room }: { room: RoomSnapshot }) {
             {room.phase === 'record' && <RecordStage room={room} mic={mic} setMic={setMic} />}
           </div>
           <aside className="card game__side" aria-label="Scoreboard">
-            <h2 className="side-h">Scores</h2>
-            <Scoreboard players={room.players} hostId={room.hostId} meId={me?.playerId} done={round.submittedIds} />
+            <h2 className="side-h">Players</h2>
+            <Scoreboard players={room.players} hostId={room.hostId} meId={me?.playerId} done={round.submittedIds} secret />
+            <p className="muted small secret-note">🤫 Standings are revealed at the end</p>
           </aside>
         </div>
       )}
@@ -281,16 +282,9 @@ function RecordStage({ room, mic, setMic }: { room: RoomSnapshot; mic: MicState;
   if (submitted) {
     return (
       <section className="card stage stage--done" aria-live="polite">
-        {mine ? (
-          <>
-            <span className="eyebrow">Your copy scored</span>
-            <p className="big-score">{mine.score}</p>
-            <p className="stage__big">{mine.verdict === 'silent' ? 'We couldn’t hear you' : mine.verdict === 'replay' ? 'That sounded like a replay' : scoreLabel(mine.score)}</p>
-            {mine.parts && <Parts parts={mine.parts} />}
-          </>
-        ) : (
-          <p className="stage__big">Take sent ✓</p>
-        )}
+        <span className="eyebrow">Your copy is in</span>
+        <p className="stage__big">Take sent ✓</p>
+        <p className="muted small">{mine?.verdict === 'silent' ? 'We couldn’t hear much, though…' : 'Scores are revealed after everyone’s been heard. 🤫'}</p>
         <AudioGraph clip={round.clip} span={round.clip.duration} at={null} trace={trace} label="The sound and your copy" />
         <p className="muted">{waiting > 0 ? `Waiting for ${waiting} more…` : 'Everyone’s done!'}</p>
       </section>
@@ -306,7 +300,7 @@ function RecordStage({ room, mic, setMic }: { room: RoomSnapshot; mic: MicState;
           <p className="muted small">It stops by itself when you go quiet. Your voice shows in green.</p>
         </>
       ) : state === 'sending' ? (
-        <p className="stage__big">Scoring your copy…</p>
+        <p className="stage__big">Sending your copy…</p>
       ) : state === 'missed' || MIC_HELP[mic] ? (
         <p className="stage__big">No take this round</p>
       ) : (
@@ -355,8 +349,8 @@ function Parts({ parts, compact = false }: { parts: ScoreParts; compact?: boolea
 }
 
 /**
- * Plays everyone's take to everyone, worst first and best last, revealing each score right after its take.
- * The server sets the timing (the playlist), so every phone plays the same take at the same moment.
+ * Plays everyone's take to everyone in a random order with the scores hidden, then a 3-2-1 drumroll, then
+ * reveals every score of the round at once. The server sets the timing, so every phone is in step.
  */
 function Results({ room, byId }: { room: RoomSnapshot; byId: Map<string, PublicPlayer> }) {
   const store = useStore();
@@ -396,65 +390,82 @@ function Results({ room, byId }: { room: RoomSnapshot; byId: Map<string, PublicP
     };
   }, [key, round.phaseStartedAt, store]);
 
+  const elapsed = now - round.phaseStartedAt;
+  const revealAt = res?.revealAt ?? 0;
+  const revealed = elapsed >= revealAt;
+  const drum = !revealed && elapsed >= revealAt - RESULTS_REVEAL_MS ? Math.max(1, Math.ceil((revealAt - elapsed) / 1000)) : 0;
+
+  // Drumroll beeps on 3, 2, 1, and a higher one as the scores appear.
+  useEffect(() => {
+    if (drum >= 1 && drum <= 3) sounds.tick();
+  }, [drum]);
+  const wasRevealed = useRef(revealed);
+  useEffect(() => {
+    if (revealed && !wasRevealed.current) sounds.go();
+    wasRevealed.current = revealed;
+  }, [revealed]);
+
   if (!res) return null;
   const last = round.number >= round.total;
-  const elapsed = now - round.phaseStartedAt;
   const takeOf = new Map(res.takes.map(t => [t.playerId, t]));
-  const current = res.playlist.find(s => elapsed < s.at + s.ms + RESULTS_SCORE_MS);
-  const allShown = !current;
   const left = round.phaseEndsAt - now;
-  const playingNow = current && elapsed >= current.at && elapsed < current.at + current.ms ? current : null;
+  const playingNow = res.playlist.find(s => elapsed >= s.at && elapsed < s.at + s.ms) ?? null;
+  const allHeard = res.playlist.every(s => elapsed >= s.at + s.ms);
 
   return (
     <div className="results">
       <section className="card reveal" aria-live="polite">
         <span className="eyebrow">That was</span>
         <p className="reveal__answer">{res.clip.name}</p>
-        <p className="muted small">
-          {allShown ? 'Everyone’s been heard!' : playingNow ? `🔊 Playing ${byId.get(playingNow.playerId)?.nickname ?? 'a'}’s take` : 'Listening to everyone’s takes…'}
-        </p>
-        <ol className="takes">
-          {res.playlist.map((step, i) => {
+        {drum ? (
+          <p className="drumroll" key={drum}>
+            Scores in <b>{drum}</b>
+          </p>
+        ) : (
+          <p className="muted small">
+            {revealed ? 'Here’s how everyone did!' : playingNow ? `🔊 Playing ${byId.get(playingNow.playerId)?.nickname ?? 'a'}’s take` : allHeard ? 'Everyone’s been heard…' : 'Listening to everyone’s takes…'}
+          </p>
+        )}
+        <ol className={'takes' + (revealed ? ' is-revealed' : '')}>
+          {res.playlist.map(step => {
             const t = takeOf.get(step.playerId)!;
             const p = byId.get(step.playerId);
-            const state = elapsed < step.at ? 'waiting' : elapsed < step.at + step.ms ? 'playing' : 'shown';
-            const shown = state === 'shown';
+            const state = elapsed < step.at ? 'waiting' : elapsed < step.at + step.ms ? 'playing' : 'heard';
             return (
-              <li
-                key={step.playerId}
-                className={`take take--${state}` + (step.playerId === me?.playerId ? ' is-me' : '') + (shown && t.best ? ' is-best' : '')}
-              >
-                <span className="take__rank">{res.playlist.length - i}</span>
+              <li key={step.playerId} className={`take take--${revealed ? 'shown' : state}` + (step.playerId === me?.playerId ? ' is-me' : '') + (revealed && t.best ? ' is-best' : '')}>
+                <span className="take__rank" aria-hidden="true">{state === 'playing' && !revealed ? '🔊' : '🎤'}</span>
                 {p && <Avatar id={p.avatar} size={34} />}
                 <span className="take__who">
-                  {p?.nickname ?? 'Someone'} {shown && t.best && <span className="tag tag--host">best +30</span>}
+                  {p?.nickname ?? 'Someone'} {revealed && t.best && <span className="tag tag--host">best +30</span>}
                   <span className="take__bar" aria-hidden="true">
-                    <i style={{ transform: `scaleX(${shown ? t.score / 100 : state === 'playing' ? Math.min(1, (elapsed - step.at) / Math.max(1, step.ms)) : 0})` }} className={state === 'playing' ? 'is-progress' : ''} />
+                    <i
+                      style={{ transform: `scaleX(${revealed ? t.score / 100 : state === 'playing' ? Math.min(1, (elapsed - step.at) / Math.max(1, step.ms)) : state === 'heard' ? 1 : 0})` }}
+                      className={revealed ? '' : 'is-progress'}
+                    />
                   </span>
-                  {shown && t.parts && <Parts parts={t.parts} compact />}
+                  {revealed && t.parts && <Parts parts={t.parts} compact />}
                   <span className="take__label">
-                    {state === 'playing' ? '🔊 Playing…' : !shown ? 'Up next' : t.verdict === 'none' ? 'No take' : t.verdict === 'silent' ? 'Silent' : t.verdict === 'replay' ? 'Replay — not counted' : scoreLabel(t.score)}
+                    {revealed
+                      ? t.verdict === 'none' ? 'No take' : t.verdict === 'silent' ? 'Silent' : t.verdict === 'replay' ? 'Replay — not counted' : scoreLabel(t.score)
+                      : state === 'playing' ? '🔊 Playing…' : state === 'heard' ? (step.ms ? 'Heard ✓' : 'No take') : 'Up next'}
                   </span>
                 </span>
-                <span className="take__score">{shown ? t.score : '?'}</span>
+                <span className="take__score">{revealed ? t.score : '?'}</span>
               </li>
             );
           })}
         </ol>
+        {revealed && (
+          <div className="next-bar" role="timer" aria-label="Next round">
+            <span>{last ? 'Final results in' : 'Next sound in'} {Math.max(0, Math.ceil(left / 1000))}</span>
+            <i style={{ transform: `scaleX(${Math.max(0, left / RESULTS_OUTRO_MS)})` }} />
+          </div>
+        )}
       </section>
       <section className="card">
-        <h2 className="side-h">Leaderboard</h2>
-        {allShown ? (
-          <>
-            <Scoreboard players={room.players} hostId={room.hostId} meId={me?.playerId} highlight={new Map(res.takes.map(t => [t.playerId, t.points]))} />
-            <div className="next-bar" role="timer" aria-label="Next round">
-              <span>{last ? 'Final results in' : 'Next sound in'} {Math.max(0, Math.ceil(left / 1000))}</span>
-              <i style={{ transform: `scaleX(${Math.max(0, left / RESULTS_OUTRO_MS)})` }} />
-            </div>
-          </>
-        ) : (
-          <p className="muted">Scores update after everyone’s take has played.</p>
-        )}
+        <h2 className="side-h">Players</h2>
+        <Scoreboard players={room.players} hostId={room.hostId} meId={me?.playerId} secret />
+        <p className="muted small secret-note">🤫 Who’s winning stays secret until the end of the game</p>
       </section>
     </div>
   );

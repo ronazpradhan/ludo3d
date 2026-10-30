@@ -17,8 +17,9 @@ import {
   MIN_PLAYERS,
   RECORDING_RATE,
   RESULTS_INTRO_MS,
+  RESULTS_GAP_MS,
   RESULTS_OUTRO_MS,
-  RESULTS_SCORE_MS,
+  RESULTS_REVEAL_MS,
   UPLOAD_GRACE_MS,
   WORDS_WEIGHT,
 } from '../shared/constants';
@@ -350,17 +351,24 @@ export class Room {
       const p = this.players.get(t.playerId);
       if (p) p.score += t.points;
     }
-    // Play every take to everyone, worst first so the best copy comes last, each followed by its score.
+    // Play every take to everyone in a random order (so the order gives nothing away), then a drumroll,
+    // then every score at once.
+    const order = [...results];
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [order[i], order[j]] = [order[j]!, order[i]!];
+    }
     const playlist: PlaybackStep[] = [];
     let at = RESULTS_INTRO_MS;
-    for (const t of [...results].reverse()) {
+    for (const t of order) {
       const pcm = r.takes.get(t.playerId)?.pcm;
       const ms = pcm ? Math.round((pcm.length / RECORDING_RATE) * 1000) : 0;
       playlist.push({ playerId: t.playerId, at, ms });
-      at += ms + RESULTS_SCORE_MS;
+      at += ms + RESULTS_GAP_MS;
     }
-    this.lastResult = { number: r.number, clip: { id: r.clip.id, name: r.clip.name, category: r.clip.category }, takes: results, playlist };
-    this.setPhase(r, 'results', this.timing.resultsMs ?? at + RESULTS_OUTRO_MS, () => this.nextRound());
+    const revealAt = at + RESULTS_REVEAL_MS;
+    this.lastResult = { number: r.number, clip: { id: r.clip.id, name: r.clip.name, category: r.clip.category }, takes: order, playlist, revealAt };
+    this.setPhase(r, 'results', this.timing.resultsMs ?? revealAt + RESULTS_OUTRO_MS, () => this.nextRound());
   }
 
   /** Someone's recording from the round being shown, for playback during the results. */
@@ -432,7 +440,8 @@ export class Room {
       nickname: p.nickname,
       avatar: p.avatar,
       connected: p.connected,
-      score: p.score,
+      // The standings stay secret until the match is over.
+      score: this.phase === 'listen' || this.phase === 'record' || this.phase === 'results' ? 0 : p.score,
     }));
     const m = this.match;
     const r = m?.round;

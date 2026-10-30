@@ -518,3 +518,12 @@ b { font-weight: 700; }
 .judge { position: relative; overflow: hidden; margin: 10px 0 0; padding: 8px 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); font-size: 13px; color: var(--muted); }
 .judge--ready { color: var(--ok); }
 .judge__bar { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--purple-hi); transition: width 0.3s; }
+
+/* ---------- suspense ---------- */
+.secret-note { margin: 10px 0 0; text-align: center; }
+.drumroll { margin: 4px 0 0; font-size: 18px; color: var(--lime); animation: pop 0.35s var(--ease) both; }
+.drumroll b { font-family: var(--display); font-size: 28px; }
+.takes.is-revealed .take { animation: pop 0.4s var(--ease) both; }
+.takes.is-revealed .take__score { color: var(--lime); }
+.take--heard .take__bar i { background: rgba(255, 255, 255, 0.25); }
+.final__drum { min-height: 320px; align-content: center; text-align: center; }

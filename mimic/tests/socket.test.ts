@@ -232,7 +232,7 @@ describe('a full match with independent clients', () => {
       // Everyone sent a take: the round ends early with the best take getting the bonus.
       const res = await stateWhere(players[2]!, s => s.phase === 'results' && s.lastResult?.number === round);
       expect(res.lastResult!.clip.name).toBe(clipName);
-      expect(res.lastResult!.takes[0]).toMatchObject({ playerId: idOf(0), best: true, points: (good.score as number) + POINTS.bestTakeBonus });
+      expect(res.lastResult!.takes.find(t => t.playerId === idOf(0))).toMatchObject({ playerId: idOf(0), best: true, points: (good.score as number) + POINTS.bestTakeBonus });
       // Takes can be played back now, as the same bytes that were sent.
       const fetched = await call(players[1]!, 'get_take', { playerId: idOf(0) });
       expect(fetched.ok).toBe(true);
@@ -250,13 +250,13 @@ describe('a full match with independent clients', () => {
   }, 30_000);
 
   it('ends the round on the server deadline when not everyone sends a take', async () => {
-    const { players } = await setupRoom(2);
+    const { players, idOf } = await setupRoom(2);
     await call(players[0]!, 'start_game');
     const rec = await stateWhere(players[0]!, s => s.phase === 'record');
     await call(players[0]!, 'submit_take', goodTake(rec));
     const res = await stateWhere(players[0]!, s => s.phase === 'results');
     expect(res.serverNow).toBeGreaterThanOrEqual(rec.round!.phaseEndsAt - 5);
-    expect(res.lastResult!.takes.find(t => t.playerId !== res.lastResult!.takes[0]!.playerId)).toMatchObject({ verdict: 'none', points: 0 });
+    expect(res.lastResult!.takes.find(t => t.playerId === idOf(1))).toMatchObject({ verdict: 'none', points: 0 });
   });
 
   it('refuses takes that are not PCM, too big, or too fast', async () => {

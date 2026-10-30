@@ -34,8 +34,14 @@ export const WORDS_JUDGE_MS = 5000;
 export const WORDS_WEIGHT = 0.35;
 /** Results: the answer is shown, then every take is played to everyone, each followed by its score. */
 export const RESULTS_INTRO_MS = 1800;
-export const RESULTS_SCORE_MS = 1600;
-export const RESULTS_OUTRO_MS = 3500;
+/** Pause between one take and the next during the results. */
+export const RESULTS_GAP_MS = 800;
+/** The 3-2-1 drumroll after the last take, before the round's scores are revealed all at once. */
+export const RESULTS_REVEAL_MS = 3000;
+/** Time to read the revealed scores before the next sound. */
+export const RESULTS_OUTRO_MS = 6000;
+/** The final screen's drumroll before the winner is shown. */
+export const FINAL_REVEAL_MS = 3000;
 
 export const ROUND_OPTIONS = [5, 8, 10] as const;
 

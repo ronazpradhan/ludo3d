@@ -99,8 +99,10 @@ export interface RoundResult {
   number: number;
   clip: { id: string; name: string; category: Category };
   takes: TakeResult[];
-  /** Worst take first, best last. */
+  /** In a random order, so the order gives nothing away. */
   playlist: PlaybackStep[];
+  /** ms after the results begin when every score is revealed at once. */
+  revealAt: number;
 }
 
 export interface RoomSnapshot {

@@ -1,7 +1,9 @@
-import { MIN_PLAYERS } from '../../../shared/constants';
+import { useEffect, useState } from 'react';
+import { FINAL_REVEAL_MS, MIN_PLAYERS } from '../../../shared/constants';
 import type { RoomSnapshot } from '../../../shared/types';
 import { Avatar, Scoreboard } from '../components/bits';
 import { useMimic, useStore } from '../hooks/useMimic';
+import { sounds } from '../lib/sound';
 
 export function Final({ room }: { room: RoomSnapshot }) {
   const store = useStore();
@@ -14,6 +16,29 @@ export function Final({ room }: { room: RoomSnapshot }) {
   const host = room.players.find(p => p.id === room.hostId);
   const best = ranked[0]?.score ?? 0;
   const winners = ranked.filter(p => p.score === best);
+
+  // A drumroll first: the standings were secret all game.
+  const [drum, setDrum] = useState(Math.ceil(FINAL_REVEAL_MS / 1000));
+  useEffect(() => {
+    if (drum <= 0) {
+      sounds.victory();
+      return;
+    }
+    sounds.tick();
+    const t = setTimeout(() => setDrum(d => d - 1), 1000);
+    return () => clearTimeout(t);
+  }, [drum]);
+
+  if (drum > 0)
+    return (
+      <div className="final">
+        <section className="card final__hero final__drum" aria-live="polite">
+          <span className="eyebrow">Match over</span>
+          <h1 className="final__title">And the winner is…</h1>
+          <span className="count" key={drum}>{drum}</span>
+        </section>
+      </div>
+    );
 
   return (
     <div className="final">

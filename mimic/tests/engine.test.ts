@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { COUNTDOWN_MS, LISTEN_TAIL_MS, listenLeadMs, RESULTS_INTRO_MS, RESULTS_OUTRO_MS, RESULTS_SCORE_MS, MAX_PLAYERS, POINTS, UPLOAD_GRACE_MS } from '../shared/constants';
+import { COUNTDOWN_MS, LISTEN_TAIL_MS, listenLeadMs, RESULTS_GAP_MS, RESULTS_INTRO_MS, RESULTS_OUTRO_MS, RESULTS_REVEAL_MS, MAX_PLAYERS, POINTS, UPLOAD_GRACE_MS } from '../shared/constants';
 import { DEFAULT_TIMING, Room } from '../server/game-engine';
 import { roundPoints } from '../server/scoring';
 import { library, makeRoom, pcmOf, silence, TIMING } from './helpers';
@@ -101,7 +101,7 @@ describe('a round', () => {
     room.submitTake('p2', silence(1));
     const s = room.snapshot();
     expect(s.phase).toBe('results');
-    const best = s.lastResult!.takes[0]!;
+    const best = s.lastResult!.takes.find(t => t.best)!;
     expect(best.playerId).toBe('p1');
     expect(best.best).toBe(true);
     expect(score('p1')).toBe(best.score + POINTS.bestTakeBonus);
@@ -189,7 +189,7 @@ describe('no repeats and the results show', () => {
     expect(seen.size).toBe(Math.min(10, fx));
   });
 
-  it('plays every take, worst first, then shows its score; the results last as long as that takes', () => {
+  it('plays every take in a random order, then reveals every score at once; the results last as long as that takes', () => {
     const { room, clock, goodTake } = makeRoom(3, { ...DEFAULT_TIMING, loadMs: 0 });
     room.start('p1');
     clock.advance(room.snapshot().round!.phaseEndsAt - clock.now());
@@ -200,14 +200,41 @@ describe('no repeats and the results show', () => {
     const s = room.snapshot();
     expect(s.phase).toBe('results');
     const list = s.lastResult!.playlist;
-    const scores = list.map(st => s.lastResult!.takes.find(t => t.playerId === st.playerId)!.score);
-    expect([...scores].sort((a, b) => a - b)).toEqual(scores);
-    expect(list[list.length - 1]!.playerId).toBe('p1');
+    expect(list.map(st => st.playerId).sort()).toEqual(['p1', 'p2', 'p3']);
+    // The takes come in the same order as the playlist, so their order doesn't give the winner away.
+    expect(s.lastResult!.takes.map(t => t.playerId)).toEqual(list.map(st => st.playerId));
     expect(list.find(st => st.playerId === 'p1')!.ms).toBe(Math.round((good.length / 12_000) * 1000));
     expect(list[0]!.at).toBe(RESULTS_INTRO_MS);
-    for (let i = 1; i < list.length; i++) expect(list[i]!.at).toBe(list[i - 1]!.at + list[i - 1]!.ms + RESULTS_SCORE_MS);
+    for (let i = 1; i < list.length; i++) expect(list[i]!.at).toBe(list[i - 1]!.at + list[i - 1]!.ms + RESULTS_GAP_MS);
     const end = list[list.length - 1]!;
-    expect(s.round!.phaseEndsAt - s.round!.phaseStartedAt).toBe(end.at + end.ms + RESULTS_SCORE_MS + RESULTS_OUTRO_MS);
+    expect(s.lastResult!.revealAt).toBe(end.at + end.ms + RESULTS_GAP_MS + RESULTS_REVEAL_MS);
+    expect(s.round!.phaseEndsAt - s.round!.phaseStartedAt).toBe(s.lastResult!.revealAt + RESULTS_OUTRO_MS);
+  });
+
+  it('does not always put the best take last', () => {
+    const lastIsBest = new Set<boolean>();
+    for (let k = 0; k < 30 && lastIsBest.size < 2; k++) {
+      const { room, startRecording, goodTake } = makeRoom(3);
+      startRecording();
+      room.submitTake('p1', goodTake());
+      room.submitTake('p2', silence(1.5));
+      room.submitTake('p3', silence(1.5));
+      const list = room.snapshot().lastResult!.playlist;
+      lastIsBest.add(list[list.length - 1]!.playerId === 'p1');
+    }
+    expect(lastIsBest).toEqual(new Set([true, false]));
+  });
+
+  it('keeps the standings secret until the match is over', () => {
+    const { room, startRecording, goodTake, score } = makeRoom(2);
+    startRecording();
+    room.submitTake('p1', goodTake());
+    room.submitTake('p2', silence(1.5));
+    expect(score('p1')).toBeGreaterThan(0);
+    expect(room.snapshot().players.every(p => p.score === 0)).toBe(true);
+    room.removePlayer('p2'); // too few players: the match ends
+    expect(room.phase).toBe('finished');
+    expect(room.snapshot().players.find(p => p.id === 'p1')!.score).toBe(score('p1'));
   });
 });
 
