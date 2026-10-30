@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { COUNTDOWN_MS, listenLeadMs, RESULTS_OUTRO_MS, RESULTS_SCORE_MS, scoreLabel } from '../../../shared/constants';
+import { COUNTDOWN_MS, RECORDING_RATE, WORDS_JUDGE_MS, listenLeadMs, RESULTS_OUTRO_MS, RESULTS_SCORE_MS, scoreLabel } from '../../../shared/constants';
 import type { CategoryInfo, PublicPlayer, RoomSnapshot, ScoreParts } from '../../../shared/types';
 import { AudioGraph } from '../components/AudioGraph';
 import { Avatar, Scoreboard } from '../components/bits';
 import { useMimic, useStore } from '../hooks/useMimic';
 import { clipAudio, type MicState, openMic, playClip, playPcm, type Recording, record, stopPlayback, unlock } from '../lib/audio';
+import { judgeWords, loadJudge, prepareReference } from '../lib/judge';
 import { sounds } from '../lib/sound';
 import { roundKey } from '../lib/store';
 import { LiveTrace, type TracePoint } from '../lib/trace';
@@ -44,6 +45,9 @@ export function Game({ room }: { room: RoomSnapshot }) {
   const round = room.round;
   const byId = useMemo(() => new Map(room.players.map(p => [p.id, p])), [room.players]);
   const [mic, setMic] = useState<MicState>('unknown');
+
+  // A player who joined mid-way or reloaded still gets the word judge.
+  useEffect(() => loadJudge(), []);
 
   // Ask for the mic as soon as the round starts, so recording can begin the instant the countdown ends.
   useEffect(() => {
@@ -109,6 +113,7 @@ function Listen({ room, mic }: { room: RoomSnapshot; mic: MicState }) {
     void clipAudio(round.clip) // download it first; the round waits until everyone has it
       .then(async () => {
         if (cancelled) return;
+        void prepareReference(round.clip);
         if (round.loading) return store.clipReady(round.number);
         const ok = await unlock();
         if (cancelled) return;
@@ -238,8 +243,10 @@ function RecordStage({ room, mic, setMic }: { room: RoomSnapshot; mic: MicState;
     if (!r) return;
     setState('sending');
     const pcm = await r.stop();
-    if (pcm.length < 0.2 * 12_000) return setState('missed');
-    const fb = await store.submitTake(pcm);
+    if (pcm.length < 0.2 * RECORDING_RATE) return setState('missed');
+    // The word judge on this phone checks the words, if it's ready; otherwise the take goes without.
+    const words = await judgeWords(round.clip, pcm, RECORDING_RATE, WORDS_JUDGE_MS).catch(() => null);
+    const fb = await store.submitTake(pcm, words);
     if (!fb) setState('missed');
   };
 
@@ -331,6 +338,7 @@ function Parts({ parts, compact = false }: { parts: ScoreParts; compact?: boolea
     ['🥁', 'Rhythm', parts.rhythm],
     ['🎵', 'Pitch', parts.melody],
     ['⏱️', 'Length', parts.length],
+    ['💬', 'Words', parts.words ?? null],
   ];
   return (
     <span className={'parts' + (compact ? ' parts--compact' : '')}>

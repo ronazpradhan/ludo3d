@@ -124,8 +124,8 @@ octave don't matter) and the best take of the round gets +30. Rooms are private 
 public (listed on the Mimic home screen). React + TypeScript under `mimic/`, served at `/mimic/` by the same
 server; `npm install` builds it (or run `npm run build`).
 
-**Sounds:** 20 categories modelled on soundbuttonslab.com's soundboards (Memes, Goofy ahh, Rizz, Reactions,
-Viral, Discord, Roblox, Among Us, FNAF, Peter Griffin, SpongeBob, Anime, Games, Movies, Farts) plus Nepal trending,
+**Sounds:** 21 categories modelled on soundbuttonslab.com's soundboards (Memes, Goofy ahh, Rizz, Reactions,
+Viral, IShowSpeed & Ronaldo, Discord, Roblox, Among Us, FNAF, Peter Griffin, SpongeBob, Anime, Games, Movies, Farts) plus Nepal trending,
 Nepali, Indian memes, CID and Bollywood. The audio comes from myinstants.com (soundbuttonslab's robots.txt
 disallows tools from fetching its sound files); a themed category only keeps clips whose title matches the theme.
 Only the links are in the repo (`mimic/sounds/sources.json`); `npm run build` downloads the audio (into
@@ -133,6 +133,13 @@ Only the links are in the repo (`mimic/sounds/sources.json`); `npm run build` do
 Refresh or change the lists with `node mimic/scripts/fetch-sounds.mjs` (categories are at the top of that file).
 Extra clips of your own: put `.mp3`/`.wav` files in `mimic/sounds/<category>/` and rebuild.
 Recording stops by itself about a second after you go quiet (capped at the clip's length + 2 s).
+
+**Word judge:** for sounds with words in them, each phone also checks that a take says the same words. It runs
+the ZIPA phone recogniser ([Zhu et al., ACL 2025](https://github.com/lingjzhu/zipa), small CTC model, int8 ONNX,
+weights CC BY 4.0) in the browser with onnxruntime-web, turns the sound and the take into phones (speech sounds)
+and compares them, accent-tolerant; that is 35% of the score ("💬 Words"). The model (70 MB) is downloaded at
+build time (`mimic/scripts/fetch-zipa.mjs`) and once per phone, then cached. Sounds without words (farts,
+ringtones) and phones where the model can't load are scored on how they sound alone.
 
 Rooms live in memory: a restart or redeploy ends every room (players see "room no longer exists").
 Mic recording needs https (Render) or localhost. `npm run check` = typecheck + all tests + build.

@@ -27,7 +27,11 @@ export const LOAD_MAX_MS = 6000;
 export const COUNTDOWN_MS = 3000;
 /** Recording starts for everyone at once and runs for the round's take length. This extra time
  *  only covers sending the take to the server; nobody can record longer than the take length. */
-export const UPLOAD_GRACE_MS = 5000;
+export const UPLOAD_GRACE_MS = 8000;
+/** How long a phone may spend judging a take's words before sending it without. */
+export const WORDS_JUDGE_MS = 5000;
+/** Share of the score that comes from saying the right words, for sounds that have words. */
+export const WORDS_WEIGHT = 0.35;
 /** Results: the answer is shown, then every take is played to everyone, each followed by its score. */
 export const RESULTS_INTRO_MS = 1800;
 export const RESULTS_SCORE_MS = 1600;

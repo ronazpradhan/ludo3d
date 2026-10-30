@@ -72,6 +72,8 @@ export interface ScoreParts {
   rhythm: number;
   melody: number | null;
   length: number;
+  /** saying the sound's words, judged on the player's phone; null when the sound has none or it wasn't judged */
+  words: number | null;
 }
 
 export interface TakeResult {
@@ -160,7 +162,8 @@ export interface ClientToServerEvents {
   update_settings: (p: Partial<RoomSettings>, ack?: Ack) => void;
   start_game: (ack?: Ack) => void;
   /** 16-bit little-endian mono PCM at RECORDING_RATE. */
-  submit_take: (pcm: ArrayBuffer, ack?: Ack<TakeFeedback>) => void;
+  /** `words`: how well the take says the sound's words (0..1), from the word judge on the player's phone. */
+  submit_take: (pcm: ArrayBuffer, meta: { words: number | null }, ack?: Ack<TakeFeedback>) => void;
   /** During the results: someone's take from this round, as 16-bit PCM. */
   get_take: (p: { playerId: string }, ack: Ack<{ pcm: ArrayBuffer }>) => void;
   /** This round's sound is downloaded and ready to play. */

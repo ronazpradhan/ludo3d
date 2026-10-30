@@ -90,7 +90,9 @@ export function attachMimic(httpServer: HttpServer, options: MimicOptions = {}):
       'Content-Security-Policy',
       [
         "default-src 'self'",
-        "script-src 'self'",
+        // The word judge runs a speech model in WebAssembly, in a worker.
+        "script-src 'self' 'wasm-unsafe-eval'",
+        "worker-src 'self'",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
         `connect-src 'self' ws://${host} wss://${host}`,
@@ -108,7 +110,8 @@ export function attachMimic(httpServer: HttpServer, options: MimicOptions = {}):
     express.static(clientDir, {
       index: false,
       setHeaders: (res, file) => {
-        res.setHeader('Cache-Control', /[\\/]assets[\\/]/.test(file) ? 'public, max-age=31536000, immutable' : 'no-cache');
+        // Hashed assets and the versioned word-judge model (zipa/<rev>/) never change.
+        res.setHeader('Cache-Control', /[\\/](assets|zipa)[\\/]/.test(file) ? 'public, max-age=31536000, immutable' : 'no-cache');
       },
     }),
   );

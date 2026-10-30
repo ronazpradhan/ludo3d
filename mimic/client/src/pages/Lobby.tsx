@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MAX_PLAYERS, MIN_PLAYERS, ROUND_OPTIONS, VISIBILITY } from '../../../shared/constants';
 import type { Category, RoomSettings, RoomSnapshot } from '../../../shared/types';
 import { PlayerChip } from '../components/bits';
 import { MicCheck } from '../components/MicCheck';
 import { useMimic, useStore } from '../hooks/useMimic';
+import { loadJudge, useJudge } from '../lib/judge';
 
 const VIS_LABEL: Record<RoomSettings['visibility'], string> = { private: '🔒 Private', public: '🌐 Public' };
 
@@ -54,6 +55,9 @@ export function Lobby({ room }: { room: RoomSnapshot }) {
     }
   };
   const host = room.players.find(p => p.id === room.hostId);
+
+  // Fetch the word judge while people gather, so it's ready by the first round.
+  useEffect(() => loadJudge(), []);
 
   return (
     <div className="lobby">
@@ -116,6 +120,7 @@ export function Lobby({ room }: { room: RoomSnapshot }) {
 
       <section className="card lobby__mic" aria-label="Microphone check">
         <MicCheck />
+        <JudgeStatus />
       </section>
 
       <div className="lobby__actions">
@@ -131,5 +136,25 @@ export function Lobby({ room }: { room: RoomSnapshot }) {
         )}
       </div>
     </div>
+  );
+}
+
+/** Whether this phone's word judge (the speech model that checks a take says the right words) is ready. */
+function JudgeStatus() {
+  const j = useJudge();
+  const text =
+    j.status === 'ready'
+      ? 'Word judge ready: copies that say the right words score higher'
+      : j.status === 'loading'
+        ? `Getting the word judge (one time, 70 MB)… ${Math.round(j.progress * 100)}%`
+        : j.status === 'failed'
+          ? 'Word judge unavailable on this device: you’re scored on how you sound'
+          : '';
+  if (!text) return null;
+  return (
+    <p className={'judge judge--' + j.status} title="Speech model: ZIPA by Zhu et al. (CC BY 4.0)">
+      <span aria-hidden="true">{j.status === 'ready' ? '💬' : j.status === 'loading' ? '⏳' : '🔇'}</span> {text}
+      {j.status === 'loading' && <span className="judge__bar" style={{ width: `${Math.round(j.progress * 100)}%` }} />}
+    </p>
   );
 }

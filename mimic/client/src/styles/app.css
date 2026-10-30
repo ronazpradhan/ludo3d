@@ -513,3 +513,8 @@ b { font-weight: 700; }
 .dialog__actions { display: grid; gap: 10px; }
 @keyframes fade-in { from { opacity: 0; } }
 @keyframes pop-in { from { opacity: 0; transform: scale(0.94); } }
+
+/* ---------- word judge status ---------- */
+.judge { position: relative; overflow: hidden; margin: 10px 0 0; padding: 8px 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); font-size: 13px; color: var(--muted); }
+.judge--ready { color: var(--ok); }
+.judge__bar { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--purple-hi); transition: width 0.3s; }

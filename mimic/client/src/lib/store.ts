@@ -216,11 +216,11 @@ export class MimicStore {
   }
 
   /** Sends my recorded take; the server scores it and answers with my score. */
-  async submitTake(pcm: Int16Array): Promise<TakeFeedback | null> {
+  async submitTake(pcm: Int16Array, words: number | null = null): Promise<TakeFeedback | null> {
     const key = roundKey(this.state.room);
     const buf = pcm.buffer.slice(pcm.byteOffset, pcm.byteOffset + pcm.byteLength) as ArrayBuffer;
     this.set({ busy: true });
-    const res = await this.call<TakeFeedback>(done => this.socket.emit('submit_take', buf, done), 15_000);
+    const res = await this.call<TakeFeedback>(done => this.socket.emit('submit_take', buf, { words }, done), 15_000);
     this.set({ busy: false });
     if (!res.ok) {
       this.notify(res.message);

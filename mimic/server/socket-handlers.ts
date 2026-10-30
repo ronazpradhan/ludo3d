@@ -243,13 +243,15 @@ export function registerMimicHandlers(io: MimicServer, lib: Library, options: Ha
 
     socket.on(
       'submit_take',
-      guarded('submit_take', (reply, payload: unknown) => {
+      guarded('submit_take', (reply, payload: unknown, meta: unknown) => {
         if (!limiters.take.take(id)) return refuse(reply, 'RATE_LIMITED', 'Too many recordings. Wait a moment.');
         const s = seat(socket);
         if (!s) return refuse(reply, 'NOT_IN_ROOM', 'You are not in a room.');
         const pcm = toPcm(payload);
         if (!pcm) return refuse(reply, 'BAD_INPUT', 'That recording could not be read.');
-        const r = s.room.submitTake(s.player.id, pcm);
+        const w = typeof meta === 'object' && meta !== null ? (meta as { words?: unknown }).words : null;
+        const words = typeof w === 'number' && Number.isFinite(w) ? Math.max(0, Math.min(1, w)) : null;
+        const r = s.room.submitTake(s.player.id, pcm, words);
         reply(r.ok ? { ok: true, ...r.feedback } : r);
       }),
     );

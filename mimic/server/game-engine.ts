@@ -20,6 +20,7 @@ import {
   RESULTS_OUTRO_MS,
   RESULTS_SCORE_MS,
   UPLOAD_GRACE_MS,
+  WORDS_WEIGHT,
 } from '../shared/constants';
 import { int16ToFloat } from '../shared/dsp';
 import type { Avatar, Clip, ErrorCode, OpenRoom, PlaybackStep, PublicPlayer, RoomPhase, RoomSettings, RoomSnapshot, RoundResult, TakeFeedback } from '../shared/types';
@@ -317,7 +318,7 @@ export class Room {
   }
 
   /** Scores one player's take. Each player gets one take per round. */
-  submitTake(by: string, pcm: Int16Array): Result<{ feedback: TakeFeedback }> {
+  submitTake(by: string, pcm: Int16Array, words: number | null = null): Result<{ feedback: TakeFeedback }> {
     const r = this.match?.round;
     if (!r || r.phase !== 'record') return fail('WRONG_PHASE', 'Recording is closed right now.');
     if (!this.players.has(by)) return fail('NOT_IN_ROOM', 'You are not in this room.');
@@ -328,11 +329,14 @@ export class Room {
     this.touch();
     const scored = scoreImitation(referenceFor(r.clip, this.lib), int16ToFloat(pcm), RECORDING_RATE);
     const pct = (v: number) => Math.round(v * 100);
-    const parts = scored.verdict === 'ok' ? { tone: pct(scored.parts.tone), rhythm: pct(scored.parts.rhythm), melody: scored.parts.melody === null ? null : pct(scored.parts.melody), length: pct(scored.parts.length) } : null;
-    r.takes.set(by, { playerId: by, score: scored.score, verdict: scored.verdict, hasAudio: true, parts, pcm });
+    const ok = scored.verdict === 'ok';
+    const parts = ok ? { tone: pct(scored.parts.tone), rhythm: pct(scored.parts.rhythm), melody: scored.parts.melody === null ? null : pct(scored.parts.melody), length: pct(scored.parts.length), words: words === null ? null : pct(words) } : null;
+    // For a sound with words, saying them right counts for a share of the score.
+    const score = ok && words !== null ? Math.max(1, Math.round((1 - WORDS_WEIGHT) * scored.score + WORDS_WEIGHT * 100 * words)) : scored.score;
+    r.takes.set(by, { playerId: by, score, verdict: scored.verdict, hasAudio: true, parts, pcm });
     this.checkEveryoneSubmitted();
     if (r.phase === 'record') this.listener.state(this);
-    return { ok: true, feedback: { score: scored.score, verdict: scored.verdict, parts } };
+    return { ok: true, feedback: { score, verdict: scored.verdict, parts } };
   }
 
   private endRound(): void {

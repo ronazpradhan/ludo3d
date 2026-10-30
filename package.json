@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build": "tsc -p mimic/tsconfig.server.json && vite build --config mimic/vite.config.mts && node mimic/scripts/build-library.mjs",
+    "build": "tsc -p mimic/tsconfig.server.json && vite build --config mimic/vite.config.mts && node mimic/scripts/build-library.mjs && node mimic/scripts/fetch-zipa.mjs",
     "postinstall": "npm run build",
     "dev:mimic": "vite --config mimic/vite.config.mts",
     "typecheck": "tsc -p mimic/tsconfig.json && tsc -p mimic/tsconfig.server.json --noEmit",
@@ -25,6 +25,7 @@
     "@vitejs/plugin-react": "^5.2.0",
     "express": "^5.3.0",
     "mpg123-decoder": "^1.0.3",
+    "onnxruntime-web": "1.30.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "socket.io": "^4.8.4",

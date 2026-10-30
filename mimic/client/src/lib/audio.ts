@@ -52,7 +52,7 @@ export interface ClipAudio {
   samples: Float32Array;
   rate: number;
 }
-type PlayableClip = { id: string; events?: ClipSpec['events']; audio?: string };
+export type PlayableClip = { id: string; events?: ClipSpec['events']; audio?: string };
 
 const loaded = new Map<string, Promise<ClipAudio>>();
 /**
