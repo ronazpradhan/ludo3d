@@ -50,7 +50,7 @@ function createRoomServer({ prefix, adapter: A, send, now = Date.now, log, randI
         code: room.code, gameType: A.gameType, hostPid: room.hostPid, status: room.status,
         gameNo: room.gameNo, listed: room.listed, minPlayers: A.minPlayers, maxPlayers: A.maxPlayers,
         ...(A.roomInfo ? A.roomInfo(room) : {}),
-        players: room.players.map(p => ({ pid: p.pid, name: p.name, ready: p.ready, connected: p.connected, score: room.scores[p.pid] || 0, ...(A.playerInfo ? A.playerInfo(room, p) : {}) })),
+        players: room.players.map(p => ({ pid: p.pid, name: p.name, ready: p.ready, connected: p.connected, mic: !!p.mic, score: room.scores[p.pid] || 0, ...(A.playerInfo ? A.playerInfo(room, p) : {}) })),
         names: room.names, history: room.history,
       },
       game: room.game ? A.view(room, pid) : null,
@@ -86,7 +86,7 @@ function createRoomServer({ prefix, adapter: A, send, now = Date.now, log, randI
   function unbind(ws) {
     const b = ws[BK]; ws[BK] = null; if (!b) return;
     const room = rooms.get(b.code), p = room && findPlayer(room, b.pid);
-    if (p && p.ws === ws) { p.ws = null; p.connected = false; p.lastSeen = now(); broadcast(room); }
+    if (p && p.ws === ws) { p.ws = null; p.connected = false; p.mic = false; p.lastSeen = now(); broadcast(room); }
   }
 
   function addPlayer(room, name) {
@@ -200,6 +200,19 @@ function createRoomServer({ prefix, adapter: A, send, now = Date.now, log, randI
       (room.chat || (room.chat = [])).push(msg); if (room.chat.length > CHAT_KEEP) room.chat.shift();
       for (const p of room.players) if (p.ws) send(p.ws, { t: T('chat'), ...msg });
     },
+    // voice chat: the audio goes browser to browser (WebRTC); the server shares who has their mic on
+    // and passes connection-setup messages between two players at the same table.
+    vmic(ws, m) {
+      const b = bound(ws); if (!b) return err(ws, 'NOT_IN_ROOM');
+      if (b.p.mic === !!m.on) return;
+      b.p.mic = !!m.on; broadcast(b.room);
+    },
+    vsig(ws, m) {
+      const b = bound(ws); if (!b) return;
+      const to = findPlayer(b.room, String(m.to || ''));
+      if (!to || !to.ws || to === b.p || !m.d || typeof m.d !== 'object' || JSON.stringify(m.d).length > 20000) return;
+      send(to.ws, { t: T('vsig'), from: b.p.pid, d: m.d });
+    },
     // game-specific extras outside the turn order (e.g. Flash's sapati / borrowing). Identity comes from the socket.
     x(ws, m) {
       const b = bound(ws); if (!b) return err(ws, 'NOT_IN_ROOM');
@@ -237,16 +250,17 @@ function createRoomServer({ prefix, adapter: A, send, now = Date.now, log, randI
   }
 
   // Simple per-connection rate limit so a script can't flood the server.
-  function allow(ws) {
-    const t = now(), r = ws[RK] || (ws[RK] = { t, n: 0 });
+  function allow(ws, key = RK, max = 25) {
+    const t = now(), r = ws[key] || (ws[key] = { t, n: 0 });
     if (t - r.t > 1000) { r.t = t; r.n = 0; }
-    return ++r.n <= 25;
+    return ++r.n <= max;
   }
 
   function handle(ws, m) {
     const name = typeof m.t === 'string' && m.t.startsWith(prefix) ? m.t.slice(prefix.length) : '';
     const h = Object.prototype.hasOwnProperty.call(H, name) && H[name];
     if (!h) return;
+    if (name === 'vsig') { if (allow(ws, RK + 'v', 60)) h(ws, m); return; }   // voice setup comes in quick bursts; extras are dropped silently
     if (!allow(ws)) return err(ws, 'RATE_LIMIT');
     try { h(ws, m); } catch (e) { log({ type: 'ERROR', msg: String(e && e.message) }); err(ws, 'SERVER_ERROR'); }
   }

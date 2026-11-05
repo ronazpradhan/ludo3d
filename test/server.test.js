@@ -64,6 +64,12 @@ test('Ludo relay: join, presence, peers and emit work as before', async () => {
   b.send({ t: 'emit', room: 'ludo-tst01', topic: 'sync', data: { g: 0, n: 0 } });
   const lg = await b.wait(m => m.t === 'ev' && m.topic === 'log');
   assert.deepStrictEqual(lg.data, { g: 0, l: String(ra.data.v) });
+  // voice setup goes only to the named peer
+  b.send({ t: 'emit', room: 'ludo-tst01', topic: 'v', data: { to: wa.id, d: { sdp: 1 } } });
+  const v = await a.wait(m => m.t === 'ev' && m.topic === 'v');
+  assert.deepStrictEqual(v.data, { d: { sdp: 1 } }); assert.strictEqual(v.from, wb.id);
+  assert.ok(!b.inbox.some(m => m.t === 'ev' && m.topic === 'v'));
+  assert.ok(JSON.parse((await get('/ice.json')).body).iceServers.length >= 1);
   a.send({ t: 'ping' }); await a.wait(m => m.t === 'pong');
   b.send({ t: 'leave', room: 'ludo-tst01' });
   await a.next(m => m.t === 'peers' && m.peers.length === 1);

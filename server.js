@@ -18,6 +18,11 @@ const server = http.createServer((req, res) => {
   if (mimic && mimic.handle(req, res)) return;
   let url = '/'; try { url = decodeURIComponent((req.url || '/').split('?')[0]); } catch (e) {}
   if (url === '/healthz') { res.writeHead(200); return res.end('ok'); }
+  if (url === '/ice.json') {   // voice chat connection helpers; set TURN_URLS/TURN_USERNAME/TURN_CREDENTIAL for players behind strict networks
+    const ice = [{ urls: 'stun:stun.l.google.com:19302' }];
+    if (process.env.TURN_URLS) ice.push({ urls: process.env.TURN_URLS.split(','), username: process.env.TURN_USERNAME, credential: process.env.TURN_CREDENTIAL });
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' }); return res.end(JSON.stringify({ iceServers: ice }));
+  }
   let file = path.join(PUB, url === '/' ? 'index.html' : url);
   if (!file.startsWith(PUB + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) file = path.join(PUB, 'index.html');
   const size = fs.statSync(file).size, type = MIME[path.extname(file).toLowerCase()] || 'application/octet-stream';
@@ -99,6 +104,11 @@ wss.on('connection', ws => {
     } else if (m.t === 'emit') {
       const r = rooms.get(m.room);
       if (!r || !r.has(ws.id) || typeof m.topic !== 'string' || m.topic.length > 20) return;
+      if (m.topic === 'v') {   // voice-chat setup: only to the one player it's for
+        const to = m.data && r.get(String(m.data.to));
+        if (to && to.ws !== ws && to.ws.readyState === 1) to.ws.send(JSON.stringify({ t: 'ev', room: m.room, topic: 'v', data: { d: m.data.d }, from: ws.id }));
+        return;
+      }
       if (m.room.startsWith('ludo-') && (m.topic === 'g' || m.topic === 'sync' || m.topic === 'seed')) {
         for (const o of ludoDice.handle(m.room, m.topic, m.data)) {
           const out = JSON.stringify({ t: 'ev', room: m.room, topic: o.topic, data: o.data, from: 'srv' });

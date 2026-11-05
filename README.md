@@ -72,6 +72,16 @@ Ludo has its chat panel (💬). The card games (Jutpatti, Flash, Dhumbal) share 
 max 200 characters, one every 0.5s, and keeps the last 30 for anyone who rejoins. On phones the panel
 stays above the keyboard and its text box is 16px so iPhones don't zoom in.
 
+## Voice chat
+
+Ludo, Jutpatti, Flash and Dhumbal have voice (`public/js/voice.js`): 🎤 turns your mic on/off, 🎧 turns
+hearing others on/off (turning 🎧 off also mutes your mic). Mimic doesn't use it, since it needs the mic itself.
+Audio goes browser to browser over WebRTC; the server only shares who has their mic on and relays the setup
+messages to the one player they're for (`vmic`/`vsig` in the card rooms, topic `v` on the Ludo relay). The mic is
+off until you tap it, and players only connect while one of them has a mic on. Connections use Google's public
+STUN server; players on strict networks (some mobile carriers, offices) may need a TURN server. Set
+`TURN_URLS` (comma-separated), `TURN_USERNAME` and `TURN_CREDENTIAL`, and `/ice.json` hands it to browsers.
+
 ## Ludo dice: fair and server-rolled
 
 Every roll is an even 1-in-6; the dice never looks at the board. Online, the **server** rolls

@@ -1,0 +1,22 @@
+/* Voice chat buttons (see js/voice.js). Shown only while you're in a room. */
+#vcbar{display:none;position:fixed;left:14px;bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:8;flex-direction:column;gap:8px;align-items:flex-start}
+body.vc-on #vcbar{display:flex}
+#vcbar button{position:relative;width:46px;height:46px;border-radius:50%;font-size:19px;color:#fff;padding:0;cursor:pointer;transition:transform .3s var(--sp),box-shadow .25s,background .25s}
+#vcbar button:active{transform:scale(.9)}
+#vcmic:not(.off){background:rgba(34,197,94,.35);box-shadow:0 0 0 2px #22c55e}
+#vcmic.live{box-shadow:0 0 0 3px #22c55e,0 0 18px 4px rgba(34,197,94,.65)}
+#vcbar button.off::after{content:'';position:absolute;left:50%;top:50%;width:62%;height:2.5px;border-radius:2px;background:#ff453a;transform:translate(-50%,-50%) rotate(-45deg);box-shadow:0 0 0 1.5px rgba(0,0,0,.45)}
+#vcbar button.off{opacity:.8}
+#vcn{position:absolute;top:-4px;right:-4px;background:#22c55e;color:#04210f;border-radius:99px;font-size:11px;font-weight:800;padding:0 6px;line-height:18px}#vcn:empty{display:none}
+#vctalk{position:absolute;left:54px;bottom:0;white-space:nowrap;max-width:min(240px,calc(100vw - 90px));overflow:hidden;text-overflow:ellipsis;background:rgba(0,0,0,.7);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;pointer-events:none}
+#vctalk:empty{display:none}
+/* card tables: above the ✕ button */
+body.jp #vcbar{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
+@media(max-width:640px){
+ body.jp #vcbar{top:calc(58px + env(safe-area-inset-top,0px));bottom:auto;left:10px;gap:6px}
+ body.jp #vcbar button{width:40px;height:40px;font-size:16px}
+ body.jp #vctalk{left:48px;bottom:auto;top:0}
+}
+/* Ludo: a row beside the ✕ button, clear of the seat names */
+body:not(.jp) #vcbar{flex-direction:row;left:70px;bottom:calc(34px + env(safe-area-inset-bottom,0px))}
+body:not(.jp) #vctalk{left:0;bottom:56px}
