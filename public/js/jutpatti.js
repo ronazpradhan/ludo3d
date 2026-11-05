@@ -45,7 +45,7 @@ const colorOf = pid => { const i = S ? Object.keys(S.room.names).indexOf(pid) : 
 const cardTxt = c => c ? c.slice(0, -1) + SUIT[c.slice(-1)] : '';
 const rankPlural = r => ({ J: 'Jacks', Q: 'Queens', K: 'Kings', A: 'Aces' }[r] || r + 's');
 const gkey = g => g.join(',');
-async function copy(t) { try { await navigator.clipboard.writeText(t); } catch (e) { const a = document.createElement('textarea'); a.value = t; document.body.append(a); a.select(); try { document.execCommand('copy'); } catch (e2) {} a.remove(); } toast('Copied!'); }
+async function copy(t) { try { await navigator.clipboard.writeText(t); } catch (e) { const a = document.createElement('textarea'); a.value = t; document.body.append(a); a.select(); try { document.execCommand('copy'); } catch (e2) {} a.remove(); } toast('Copied'); }
 function show(id, on) { $(id).style.display = on ? 'flex' : 'none'; }
 const handEls = () => [...$('hand').querySelectorAll('.pc')];
 const seatEl = pid => document.querySelector('.st[data-pid="' + pid + '"]');
@@ -151,7 +151,7 @@ function renderLobby() {
     const i = document.createElement('i'), n = document.createElement('span'), e = document.createElement('em');
     n.textContent = (p.pid === me ? p.name + ' (you)' : p.name);
     if (p.pid === R.hostPid) { const h = document.createElement('small'); h.className = 'host'; h.textContent = '👑 host'; n.append(h); }
-    e.textContent = !p.connected ? 'Offline' : p.pid === R.hostPid ? 'Host' : p.ready ? 'Ready ✓' : 'Not ready';
+    e.textContent = !p.connected ? 'Offline' : p.pid === R.hostPid ? 'Host' : p.ready ? 'Ready' : 'Not ready';
     b.append(i, n, e); L.append(b);
   });
   for (let k = R.players.length; k < R.minPlayers; k++) { const b = document.createElement('div'); b.className = 'seat off'; b.innerHTML = '<i></i><span>Waiting for a player…</span>'; L.append(b); }
@@ -159,7 +159,7 @@ function renderLobby() {
   R.handSizes.forEach(h => { const b = document.createElement('button'); b.className = 'pill' + (h === R.handSize ? ' on' : ''); b.textContent = h; b.disabled = !host;
     b.onclick = () => { if (host && h !== R.handSize) { sfx.tick(); send({ t: 'jp:opts', handSize: h }); } }; H.append(b); });
   $('lready').style.display = host ? 'none' : ''; $('lready').classList.toggle('on', !!(mine && mine.ready));
-  $('lready').textContent = mine && mine.ready ? 'Ready ✓ (tap to undo)' : "I'm ready";
+  $('lready').textContent = mine && mine.ready ? 'Ready · tap to undo' : "I'm ready";
   const others = R.players.filter(p => p.pid !== R.hostPid), canStart = R.players.length >= R.minPlayers && others.every(p => p.ready && p.connected);
   $('lstart').style.display = host ? '' : 'none'; $('lstart').disabled = !canStart;
   // 🌐 public (listed in open rooms) / 👥 friends only (join by code). Only the host can switch.
@@ -206,8 +206,8 @@ function renderTable() {
   // status line
   const cur = g.current, js = $('jstatus'); let txt;
   if (deal) txt = 'Dealing the cards…';
-  else if (g.status != 'playing') txt = g.winner ? (g.winner === me ? 'You win! 🎉' : nameOf(g.winner) + ' shows their pairs and wins!') : 'Game over';
-  else if (myTurn) txt = g.phase == 'draw' ? 'Your turn · take a card' : you && you.canShow ? 'You have all pairs! 🎉' : 'Your turn · throw a card away';
+  else if (g.status != 'playing') txt = g.winner ? (g.winner === me ? 'You win' : nameOf(g.winner) + ' shows their pairs and wins') : 'Game over';
+  else if (myTurn) txt = g.phase == 'draw' ? 'Your turn · take a card' : you && you.canShow ? 'All pairs · tap Show' : 'Your turn · throw a card away';
   else txt = nameOf(cur) + "'s turn" + (conn[cur] === false ? ' · offline, 2 min to return' : '…');
   js.textContent = txt; js.classList.toggle('me', myTurn);
   const tk = g.turn + ':' + cur + ':' + !!deal; if (tk !== lastTurnKey) { js.classList.remove('pop'); void js.offsetWidth; js.classList.add('pop'); if (myTurn && lastTurnKey) { sfx.chime(); buzz(20); } lastTurnKey = tk; }
@@ -280,7 +280,7 @@ function logLine(e) {
     case 'CARD_PLAYED': return n + ' threw ' + cardTxt(e.card);
     case 'STOCK_RESHUFFLED': return 'Discard pile shuffled into a new stock';
     case 'PLAYER_SHOWED': return n + (e.pid === me ? ' show' : ' shows') + ' all pairs';
-    case 'PLAYER_WON': return '🏆 ' + n + (e.pid === me ? ' win!' : ' wins!');
+    case 'PLAYER_WON': return n + (e.pid === me ? ' win' : ' wins');
     case 'GAME_ENDED': return e.reason == 'turn-limit' ? 'Turn limit reached · no winner' : e.reason == 'not-enough-players' ? 'Not enough players left · no winner' : null;
     case 'PLAYER_JOINED': return n + ' joined';
     case 'PLAYER_LEFT': return n + ' left';
@@ -306,7 +306,7 @@ function renderReveal() {
 
 function renderEnd() {
   const g = S.game, R = S.room, mine = R.players.find(p => p.pid === me);
-  $('etitle').textContent = !g ? 'Game over' : g.winner ? (g.winner === me ? 'You win! 🎉' : nameOf(g.winner) + ' wins!') : 'No winner this time';
+  $('etitle').textContent = !g ? 'Game over' : g.winner ? (g.winner === me ? 'You win' : nameOf(g.winner) + ' wins') : 'No winner this time';
   const W = $('whand');
   if (W.dataset.game != R.gameNo) {
     W.dataset.game = R.gameNo; W.textContent = '';
@@ -316,7 +316,7 @@ function renderEnd() {
   R.players.slice().sort((a, b) => b.score - a.score).forEach((p, i) => {
     const d = document.createElement('div'); d.className = 'rk' + (g && p.pid === g.winner ? ' w' : ''); d.style.animationDelay = i * .07 + 's'; d.style.setProperty('--c', colorOf(p.pid));
     const n = document.createElement('span'); n.className = 'n'; n.textContent = p.name + (p.pid === me ? ' (you)' : '');
-    const s = document.createElement('small'); s.textContent = p.score + ' win' + (p.score == 1 ? '' : 's') + (p.ready ? ' · rematch ✓' : p.connected ? '' : ' · offline');
+    const s = document.createElement('small'); s.textContent = p.score + ' win' + (p.score == 1 ? '' : 's') + (p.ready ? ' · rematch' : p.connected ? '' : ' · offline');
     d.append(document.createElement('i'), n, s); K.append(d);
   });
   $('again').textContent = mine && mine.ready ? 'Waiting… (tap to cancel)' : 'Rematch';

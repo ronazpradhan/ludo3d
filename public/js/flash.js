@@ -38,7 +38,7 @@ const nameOf = pid => pid === me ? 'You' : (S && S.room.names[pid]) || 'Player';
 const colorOf = pid => { const i = S ? Object.keys(S.room.names).indexOf(pid) : 0; return COLORS[(i < 0 ? 0 : i) % COLORS.length]; };
 const avatarOf = pid => { let h = 7; for (const ch of String(pid || '')) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return AV[h % AV.length]; };
 const rs = n => 'Rs ' + (n ?? 0).toLocaleString('en-IN');
-async function copy(t) { try { await navigator.clipboard.writeText(t); } catch (e) { const a = document.createElement('textarea'); a.value = t; document.body.append(a); a.select(); try { document.execCommand('copy'); } catch (e2) {} a.remove(); } toast('Copied!'); }
+async function copy(t) { try { await navigator.clipboard.writeText(t); } catch (e) { const a = document.createElement('textarea'); a.value = t; document.body.append(a); a.select(); try { document.execCommand('copy'); } catch (e2) {} a.remove(); } toast('Copied'); }
 function show(id, on) { $(id).style.display = on ? 'flex' : 'none'; }
 const seatEl = pid => document.querySelector('.st[data-pid="' + pid + '"]');
 const placeOf = pid => (pid === me ? $('hand') : seatEl(pid) || $('pot')).getBoundingClientRect();
@@ -130,7 +130,7 @@ function renderLobby() {
     i.className = 'av'; i.textContent = avatarOf(p.pid);
     n.textContent = p.pid === me ? p.name + ' (you)' : p.name;
     if (p.pid === R.hostPid) { const h = document.createElement('small'); h.className = 'host'; h.textContent = '👑 host'; n.append(h); }
-    e.textContent = !p.connected ? 'Offline' : p.pid === R.hostPid ? 'Host' : p.ready ? 'Ready ✓' : 'Not ready';
+    e.textContent = !p.connected ? 'Offline' : p.pid === R.hostPid ? 'Host' : p.ready ? 'Ready' : 'Not ready';
     b.append(i, n, e); L.append(b);
   });
   for (let k = R.players.length; k < R.minPlayers; k++) { const b = document.createElement('div'); b.className = 'seat off'; b.innerHTML = '<i></i><span>Waiting for a player…</span>'; L.append(b); }
@@ -139,7 +139,7 @@ function renderLobby() {
   $('lvis').querySelectorAll('button').forEach(b => { const v = b.dataset.l == '1'; b.classList.toggle('on', v === !!R.listed); b.disabled = !host;
     b.onclick = () => { if (host && v !== !!R.listed) { sfx.tick(); send({ t: P + 'opts', listed: v }); toast(v ? 'Public — anyone can see this room' : 'Friends only — join with the code'); } }; });
   $('lready').style.display = host ? 'none' : ''; $('lready').classList.toggle('on', !!(mine && mine.ready));
-  $('lready').textContent = mine && mine.ready ? 'Ready ✓ (tap to undo)' : "I'm ready";
+  $('lready').textContent = mine && mine.ready ? 'Ready · tap to undo' : "I'm ready";
   const others = R.players.filter(p => p.pid !== R.hostPid), canStart = R.players.length >= R.minPlayers && others.every(p => p.ready && p.connected);
   $('lstart').style.display = host ? '' : 'none'; $('lstart').disabled = !canStart;
   $('lnote').textContent = host ? '' : 'Waiting for the host…';
@@ -163,7 +163,7 @@ function renderTable() {
     const stt = document.createElement('span'); stt.className = 'state' + (p.packed ? ' packed' : p.seen ? ' seen' : ''); stt.textContent = p.packed ? 'packed' : p.seen ? 'seen' : 'blind';
     const bet = document.createElement('small'); bet.className = 'bet'; bet.textContent = 'in pot ' + rs(p.bet);
     d.append(av, nm, ch, stt, bet);
-    const owes = owedBy(p.pid); if (owes) { const o = document.createElement('small'); o.className = 'owe'; o.textContent = '💰 owes ' + rs(owes); d.append(o); }
+    const owes = owedBy(p.pid); if (owes) { const o = document.createElement('small'); o.className = 'owe'; o.textContent = 'owes ' + rs(owes); d.append(o); }
     // cards I'm allowed to see: shown at a Show, or theirs from my private side show
     const shown = res && res.shown && res.shown[p.pid], side = g.sideShow && g.sideShow.with === p.pid ? g.sideShow : null;
     const hand = shown ? shown.hand : side ? side.theirHand : null;
@@ -266,7 +266,7 @@ function renderReveal(g, res) {
     h.hand.forEach((c, k) => { const e = cardEl(c); flipIn(e, 200 + i * 350 + k * 110); cs.append(e); });
     const hn = document.createElement('span'); hn.className = 'hn'; hn.textContent = h.name;
     box.append(who, cs, hn);
-    if (h.win) { const w = document.createElement('span'); w.className = 'badge'; w.textContent = shown ? '🏆 Wins ' + rs(res.pot) : '✓ Stays in'; box.append(w); }
+    if (h.win) { const w = document.createElement('span'); w.className = 'badge'; w.textContent = shown ? 'Wins ' + rs(res.pot) : 'Stays in'; box.append(w); }
     row.append(box);
   });
   if (note) { const n = document.createElement('div'); n.className = 'rnote'; n.textContent = note; R.append(n); }
@@ -276,14 +276,14 @@ function renderEnd() {
   const R = S.room, mine = R.players.find(p => p.pid === me);
   const fin = p => p.final ?? p.chips ?? 0;   // after sapati is paid back
   const st = R.players.slice().sort((a, b) => fin(b) - fin(a)), top = st.length ? fin(st[0]) : 0, winners = st.filter(p => fin(p) === top);
-  $('etitle').textContent = winners.length > 1 ? 'Tie for the round!' : (winners[0] && winners[0].pid === me ? 'You win the round! 🎉' : (winners[0] ? winners[0].name + ' wins the round!' : 'Round over'));
+  $('etitle').textContent = winners.length > 1 ? 'Tie for the round' : (winners[0] && winners[0].pid === me ? 'You win the round' : (winners[0] ? winners[0].name + ' wins the round' : 'Round over'));
   $('esub').textContent = `Round ${R.round}`;
   const K = $('ranks'); K.textContent = '';
   st.forEach((p, i) => {
     const d = document.createElement('div'); d.className = 'rk' + (fin(p) === top ? ' w' : ''); d.style.animationDelay = i * .07 + 's'; d.style.setProperty('--c', colorOf(p.pid));
     const n = document.createElement('span'); n.className = 'n'; n.textContent = avatarOf(p.pid) + ' ' + p.name + (p.pid === me ? ' (you)' : '');
     const sp = (p.lent || 0) - (p.borrowed || 0);
-    const s = document.createElement('small'); s.textContent = rs(fin(p)) + (sp ? ` (chips ${rs(fin(p) - sp)} ${sp > 0 ? '+' : '−'} sapati ${rs(Math.abs(sp))})` : '') + ' · ' + p.score + ' round' + (p.score == 1 ? '' : 's') + (p.ready ? ' · ready ✓' : '');
+    const s = document.createElement('small'); s.textContent = rs(fin(p)) + (sp ? ` (chips ${rs(fin(p) - sp)} ${sp > 0 ? '+' : '−'} sapati ${rs(Math.abs(sp))})` : '') + ' · ' + p.score + ' round' + (p.score == 1 ? '' : 's') + (p.ready ? ' · ready' : '');
     d.append(document.createElement('i'), n, s); K.append(d);
   });
   $('again').textContent = mine && mine.ready ? 'Waiting… (tap to cancel)' : 'Next round';
@@ -365,7 +365,7 @@ function play(e) {
   } else if (e.type == 'CHAAL' || e.type == 'SHOW' || e.type == 'SIDESHOW_ASKED') { coins(placeOf(e.pid), pot, e.type == 'CHAAL' && !e.blind ? 4 : 3); sfx.tick(); }
   else if (e.type == 'HAND_WON') { coins(pot, placeOf(e.pid), 8); $('pot').classList.remove('bump'); void $('pot').offsetWidth; $('pot').classList.add('bump'); e.pid === me ? sfx.win() : sfx.chime(); }
   else if (e.type == 'PACKED') sfx.tick();
-  else if (e.type == 'SAPATI_GIVEN') { if (e.to === me) { toast(`💰 ${e.pid === 'bank' ? 'The bank' : nameOf(e.pid)} lent you ${rs(e.amount)}`); sfx.chime(); sapOpen = false; render(); }
+  else if (e.type == 'SAPATI_GIVEN') { if (e.to === me) { toast(`${e.pid === 'bank' ? 'The bank' : nameOf(e.pid)} lent you ${rs(e.amount)}`); sfx.chime(); sapOpen = false; render(); }
     else if (e.pid === me) toast(`You lent ${nameOf(e.to)} ${rs(e.amount)}`); }
   else if (e.type == 'SAPATI_DECLINED' && e.to === me) toast(`${nameOf(e.pid)} ${e.why == 'no answer' ? "didn't answer" : 'said no'} — you can ask the bank now`);
   else if (e.type == 'SAPATI_ASKED' && e.to === me) sfx.chime();

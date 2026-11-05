@@ -4,7 +4,7 @@ body.jp{--cardw:clamp(46px,8.4vw,74px);--red:#e11d48;--gold:#ffd740}
 
 /* status line */
 #jstatus{padding:9px 20px;font-weight:600;font-size:15px;background:#000;border-radius:999px;border:.5px solid rgba(255,255,255,.18);box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:92vw;text-align:center;min-height:38px;transition:background .3s}
-#jstatus.me{background:var(--accent);box-shadow:0 8px 30px rgba(139,92,246,.45)}
+#jstatus.me{background:var(--accent)}
 #jstatus.pop{animation:jpop .5s var(--sp)}@keyframes jpop{from{transform:scale(.7);opacity:0}}
 
 /* felt + seats */
@@ -54,7 +54,7 @@ button.pc.can:active{transform:scale(.93)}
 #hand .grp.bad{animation:shk .45s 2}
 #hand .pc{cursor:grab;top:0}
 #hand:not(.wait) .pc:hover{top:-8px}
-#hand .pc.sel{top:-18px;box-shadow:0 0 0 3px var(--accent),0 10px 24px rgba(139,92,246,.55)}
+#hand .pc.sel{top:-18px;box-shadow:0 0 0 3px var(--accent),0 10px 24px rgba(0,0,0,.45)}
 #hand .pc.pt{top:-10px;box-shadow:0 0 0 3px var(--gold),0 0 26px var(--gold)}
 #hand .pc.undealt{visibility:hidden}
 #hand .pc.new::before{content:'NEW';position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);font-size:9px;font-weight:800;color:#fff;background:var(--accent);border-radius:999px;padding:1px 6px;z-index:2}

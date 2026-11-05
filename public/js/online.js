@@ -7,7 +7,7 @@ const SKEY='ludo3d.session',TAB=(()=>{try{let t=sessionStorage.getItem('ludo3d.t
 $('nick').value=store.get('ludo3d.nick')||'';
 const toast=t=>{const e=$('toast');e.textContent=t;e.classList.remove('on');void e.offsetWidth;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),2400)};
 const getNick=()=>{nick=esc($('nick').value.trim());if(nick)store.set('ludo3d.nick',nick);return nick},reqNick=()=>{const i=$('nick');if(getNick()){i.classList.remove('bad');return true}toast('Enter your name first');i.classList.remove('bad');void i.offsetWidth;i.classList.add('bad');clearTimeout(i._b);i._b=setTimeout(()=>i.classList.remove('bad'),1200);i.focus();return false};let pend='';$('nick').addEventListener('input',()=>{$('nick').classList.remove('bad');$('toast').classList.remove('on')});
-async function copy(t){try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();try{document.execCommand('copy')}catch(e2){}a.remove()}toast('Copied!')}
+async function copy(t){try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();try{document.execCommand('copy')}catch(e2){}a.remove()}toast('Copied')}
 function put(m){inbox[m.n]=m;saveSoon();const w=waiters[m.n];if(w){delete waiters[m.n];w.forEach(f=>f(m))}}
 const wait=n=>inbox[n]?Promise.resolve(inbox[n]):new Promise(r=>(waiters[n]=waiters[n]||[]).push(r));
 // online, the server rolls: we only ask for roll n and the value comes back to everyone at once
@@ -23,7 +23,7 @@ function take(n,c,fb){return new Promise(r=>{if(inbox[n])return r(inbox[n]);(wai
 let backWait=[],backAt=0;
 const waitBack=()=>new Promise(r=>backWait.push(r));
 function applyBot(c,on){if(!(c>=0&&c<4)||seats[c]!=1||!!botFor[c]===!!on)return;botFor[c]=!!on;ui();updBotBar();
- const t=on?'🤖 Bot joined the game for '+PN(c):PN(c)+' is back! 👋';addChat('',t,0,1);toast(t);if(on&&owner[c]===me){sfx.chime();try{if(navigator.vibrate&&(!navigator.userActivation||navigator.userActivation.hasBeenActive))navigator.vibrate([60,60,60])}catch(e){}}}
+ const t=on?'Bot is playing for '+PN(c):PN(c)+' is back';addChat('',t,0,1);toast(t);if(on&&owner[c]===me){sfx.chime();try{if(navigator.vibrate&&(!navigator.userActivation||navigator.userActivation.hasBeenActive))navigator.vibrate([60,60,60])}catch(e){}}}
 function setBot(c,on){applyBot(c,on);if(net)net.emit('bot',{g:gameNo,c,on:!!on})}
 function updBotBar(){const b=$('botbar');if(!b)return;const s=net?owner.indexOf(me):-1;b.style.display=s>=0&&botFor[s]&&started&&!ended?'flex':'none'}
 function iAmBack(){const s=net?owner.indexOf(me):-1;if(s<0||!botFor[s])return;backAt=Date.now();setBot(s,false);backWait.splice(0).forEach(f=>f())}

@@ -37,7 +37,7 @@ const nameOf = pid => pid === me ? 'You' : (S && S.room.names[pid]) || 'Player';
 const colorOf = pid => { const i = S ? Object.keys(S.room.names).indexOf(pid) : 0; return COLORS[(i < 0 ? 0 : i) % COLORS.length]; };
 const avatarOf = pid => { let h = 7; for (const ch of String(pid || '')) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return AV[h % AV.length]; };
 const pts = n => (n > 0 ? '+' : '') + n;
-async function copy(t) { try { await navigator.clipboard.writeText(t); } catch (e) { const a = document.createElement('textarea'); a.value = t; document.body.append(a); a.select(); try { document.execCommand('copy'); } catch (e2) {} a.remove(); } toast('Copied!'); }
+async function copy(t) { try { await navigator.clipboard.writeText(t); } catch (e) { const a = document.createElement('textarea'); a.value = t; document.body.append(a); a.select(); try { document.execCommand('copy'); } catch (e2) {} a.remove(); } toast('Copied'); }
 function show(id, on) { $(id).style.display = on ? 'flex' : 'none'; }
 const buzz = ms => { try { if (navigator.vibrate && (!navigator.userActivation || navigator.userActivation.hasBeenActive)) navigator.vibrate(ms); } catch (e) {} };
 function cardEl(c, tag = 'div') {
@@ -103,7 +103,7 @@ function renderLobby() {
     const i = document.createElement('i'), n = document.createElement('span'), e = document.createElement('em');
     i.className = 'av'; i.textContent = avatarOf(p.pid); n.textContent = p.pid === me ? p.name + ' (you)' : p.name;
     if (p.pid === R.hostPid) { const h = document.createElement('small'); h.className = 'host'; h.textContent = '👑 host'; n.append(h); }
-    e.textContent = !p.connected ? 'Offline' : p.pid === R.hostPid ? 'Host' : p.ready ? 'Ready ✓' : 'Not ready';
+    e.textContent = !p.connected ? 'Offline' : p.pid === R.hostPid ? 'Host' : p.ready ? 'Ready' : 'Not ready';
     b.append(i, n, e); L.append(b);
   });
   for (let k = R.players.length; k < R.minPlayers; k++) { const b = document.createElement('div'); b.className = 'seat off'; b.innerHTML = '<i></i><span>Waiting for a player…</span>'; L.append(b); }
@@ -111,7 +111,7 @@ function renderLobby() {
   $('lvis').querySelectorAll('button').forEach(b => { const v = b.dataset.l == '1'; b.classList.toggle('on', v === !!R.listed); b.disabled = !host;
     b.onclick = () => { if (host && v !== !!R.listed) { sfx.tick(); send({ t: P + 'opts', listed: v }); toast(v ? 'Public — anyone can see this room' : 'Friends only — join with the code'); } }; });
   $('lready').style.display = host ? 'none' : ''; $('lready').classList.toggle('on', !!(mine && mine.ready));
-  $('lready').textContent = mine && mine.ready ? 'Ready ✓ (tap to undo)' : "I'm ready";
+  $('lready').textContent = mine && mine.ready ? 'Ready · tap to undo' : "I'm ready";
   const others = R.players.filter(p => p.pid !== R.hostPid), canStart = R.players.length >= R.minPlayers && others.every(p => p.ready && p.connected);
   $('lstart').style.display = host ? '' : 'none'; $('lstart').disabled = !canStart;
   $('lnote').textContent = host ? '' : 'Waiting for the host…';
@@ -190,7 +190,7 @@ function renderReveal(g, R) {
   const mine = R.players.find(p => p.pid === me), key = R.gameNo + ':' + (mine && mine.ready);
   if (key === revealKey) return; revealKey = key; X.textContent = '';
   const t = document.createElement('div'); t.className = 'rt';
-  t.textContent = r.reason == 'jhyap' ? `${nameOf(r.caller)} called Jhyap and ${r.caller === me ? 'win' : 'wins'}!` : r.reason == 'caught' ? `${nameOf(r.caller)} called Jhyap — but ${nameOf(r.winner)} ${r.winner === me ? 'have' : 'has'} as low or lower!` : 'Game over';
+  t.textContent = r.reason == 'jhyap' ? `${nameOf(r.caller)} called Jhyap and ${r.caller === me ? 'win' : 'wins'}` : r.reason == 'caught' ? `${nameOf(r.caller)} called Jhyap — but ${nameOf(r.winner)} ${r.winner === me ? 'have' : 'has'} as low or lower` : 'Game over';
   X.append(t);
   const row = document.createElement('div'); row.className = 'rv'; X.append(row);
   Object.keys(r.hands || {}).forEach((pid, i) => {
@@ -321,7 +321,7 @@ function play(fresh) {
         fly(e.source == 'pile' ? c : null, src, rectOf(el), { delay: t, done: () => { hideMine.delete(c); const x = c && handSpot(c); if (x) { x.classList.remove('undealt'); if (e.source == 'stock') flipIn(x); else land(x); } } });
       } else fly(e.card || null, src, seatRect(e.pid), { delay: t, scale: .5, fade: true, done: () => sfx.tick() });
       t += 200;
-    } else if (e.type == 'JHYAP') toast(`${nameOf(e.pid)} called Jhyap with ${e.total} points!`);
+    } else if (e.type == 'JHYAP') toast(`${nameOf(e.pid)} called Jhyap with ${e.total} points`);
     else if (e.type == 'GAME_ENDED') {
       const r = S.game.result;
       if (r && r.winner) {   // the losers' points pour over to the winner

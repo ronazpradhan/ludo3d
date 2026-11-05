@@ -120,12 +120,12 @@ function avatarFor(id){let h=7;for(const ch of String(id||''))h=(h*31+ch.charCod
 function avatarOf(c){return seats[c]==2?'🤖':avatarFor(net?owner[c]:(nick||'')+c)}
 const $=id=>document.getElementById(id),rollBtn=$('roll');
 function say(t){const m=$('msg');m.textContent=t;m.classList.remove('pop');void m.offsetWidth;m.classList.add('pop')}
-const pct=c=>Math.round(T[c].reduce((a,t)=>a+(t.p<0?0:t.p),0)/(4*FIN)*100),cardTxt=c=>rank.includes(c)?['🥇','🥈','🥉'][rank.indexOf(c)]||'✔':pct(c)+'%';
+const pct=c=>Math.round(T[c].reduce((a,t)=>a+(t.p<0?0:t.p),0)/(4*FIN)*100),cardTxt=c=>rank.includes(c)?['1st','2nd','3rd','4th','5th'][rank.indexOf(c)]||'Done':pct(c)+'%';
 // Top: one kill counter per colour. Each player's avatar, name and turn ring sit next to their own colour on the board.
 function ui(){const box=$('cards'),ks=seats.map((s,c)=>s?c:'').join();
  if(box.dataset.sig!==ks){box.dataset.sig=ks;box.innerHTML=seats.map((s,c)=>s?`<div class="kc" data-c="${c}" style="--c:${CS[c]}"><i></i><span>⚔ ${caps[c]}</span></div>`:'').join('')}
  [...box.children].forEach(d=>{const c=+d.dataset.c,e=d.querySelector('span'),t='⚔ '+caps[c];if(e.textContent!==t){e.textContent=t;d.classList.remove('bump');void d.offsetWidth;d.classList.add('bump')}});
- const tg=$('tags'),sub=c=>rank.includes(c)?['🥇','🥈','🥉'][rank.indexOf(c)]||'✔':botFor[c]&&seats[c]==1?'🤖 bot playing':'',
+ const tg=$('tags'),sub=c=>rank.includes(c)?['1st','2nd','3rd','4th','5th'][rank.indexOf(c)]||'Done':botFor[c]&&seats[c]==1?'Bot playing':'',
   sig=seats.map((s,c)=>s?c+avatarOf(c)+PN(c)+sub(c):'').join('|');
  if(tg.dataset.sig!==sig){tg.dataset.sig=sig;tg.innerHTML=seats.map((s,c)=>s?`<div class="tg" data-c="${c}" style="--c:${CS[c]}"><i class="av">${avatarOf(c)}${botFor[c]&&seats[c]==1?'<u>🤖</u>':''}</i><b></b><small></small></div>`:'').join('');
   [...tg.children].forEach(d=>{const c=+d.dataset.c;d.querySelector('b').textContent=PN(c)+(net&&owner[c]===me||!net&&seats[c]==1&&seats.filter(x=>x==1).length==1?' (you)':'');d.querySelector('small').textContent=sub(c)});tagSize=null}
@@ -169,7 +169,7 @@ async function moveToken(t,v){let cap=0;
  if(t.p==FIN){const q=t.g.position;burst(q.x,.5,q.z,[C[t.pl],0xffffff,0xffd740],40,6);sfx.home()}
  await settle();return{cap,fin:t.p==FIN}}
 let gameNo=0,ended=false,againPend=false;
-function showEnd(){ended=true;forgetSession();const w=rank[0];$('etitle').textContent=(w!=null?PN(w):'')+' wins!';
+function showEnd(){ended=true;forgetSession();const w=rank[0];$('etitle').textContent=(w!=null?PN(w):'')+' wins';
  $('ranks').innerHTML=rank.map((i,k)=>`<div class="rk ${k==0?'w':''}" style="--c:${CS[i]};animation-delay:${k*.12}s"><span>${['🥇','🥈','🥉','4️⃣'][k]}</span><i></i><span class="n">${PN(i)}${seats[i]==2?' (CPU)':''}</span><small>${k<seats.filter(x=>x).length&&T[i].every(t=>t.p==FIN)?'Finished':pct(i)+'%'}</small></div>`).join('');
  $('enote').textContent='';$('end').style.display='flex';
  if(!ff)for(let i=0;i<7;i++)setTimeout(()=>burst((Math.random()-.5)*10,6,(Math.random()-.5)*10,[0xff5252,0xffd740,0x69f0ae,0x40c4ff,0xffffff],40,6),i*260);
@@ -207,14 +207,14 @@ async function play(){let c=seats.findIndex(s=>s),six=0,pc=-1;const n=seats.filt
   else if(net&&!cpu)v=(await human(nr,c,async()=>{rollBtn.disabled=false;sfx.chime();say('Tap the dice 🎲');await new Promise(r=>rollRes=r);rollBtn.disabled=true;preRoll();return{k:'r'}},()=>({k:'r'}))).v;
   else if(prod){if(cpu)await sleep(450);else{rollBtn.disabled=false;sfx.chime();say(`${PN(c)} — tap the dice`);await new Promise(r=>rollRes=r);rollBtn.disabled=true}if(inbox[nr]&&inbox[nr].k=='r')v=inbox[nr].v|0;else if(net)v=(await decW(nr,{k:'r'})).v;else{v=die();dec(nr,{k:'r',v})}}else v=(await take(nr,c,()=>({k:'r'}))).v;
   await rollDice(v);say(`${PN(c)} rolled ${v}`);let extra=v==6;six=v==6?six+1:0;
-  if(six==3){say('Three sixes — turn lost!');six=0;extra=false;await sleep(750)}
+  if(six==3){say('Three sixes · turn lost');six=0;extra=false;await sleep(750)}
   else{const mv=T[c].filter(t=>can(t,v));
    if(!mv.length){say(`${PN(c)} has no moves`);extra=false;await sleep(650)}
    else{let t;if(mv.length==1){t=mv[0];await sleep(160)}else{const np=dn++,best=()=>mv.reduce((a,b)=>score(b,v)>score(a,v)?b:a);if(ff&&!inbox[np])ff=false;if(inbox[np]&&inbox[np].k=='p'){t=T[c][inbox[np].i];if(!mv.includes(t))t=best()}
      else if(net&&!cpu){const m=await human(np,c,async()=>{const x=await pickToken(mv);return{k:'p',i:x.i}},()=>({k:'p',i:best().i}));t=T[c][m.i];if(!mv.includes(t))t=best()}
      else if(prod){if(cpu){await sleep(320);t=best()}else t=await pickToken(mv);dec(np,{k:'p',i:t.i})}else{say(`${PN(c)} is choosing…`);const m=await take(np,c,()=>({k:'p',i:best().i}));t=T[c][m.i];if(!mv.includes(t))t=best()}}
-    const r=await moveToken(t,v);if(r.cap){extra=true;say('Captured! Bonus roll')}if(r.fin)extra=true;
-    if(T[c].every(x=>x.p==FIN)){rank.push(c);extra=false;ui();sfx.win();say(`${PN(c)} finished #${rank.length}!`);if(!ff)for(let i=0;i<5;i++)setTimeout(()=>burst((Math.random()-.5)*8,6,(Math.random()-.5)*8,[0xff5252,0xffd740,0x69f0ae,0x40c4ff,0xffffff],40,6),i*220);await sleep(1400);
+    const r=await moveToken(t,v);if(r.cap){extra=true;say('Captured · bonus roll')}if(r.fin)extra=true;
+    if(T[c].every(x=>x.p==FIN)){rank.push(c);extra=false;ui();sfx.win();say(`${PN(c)} finished #${rank.length}`);if(!ff)for(let i=0;i<5;i++)setTimeout(()=>burst((Math.random()-.5)*8,6,(Math.random()-.5)*8,[0xff5252,0xffd740,0x69f0ae,0x40c4ff,0xffffff],40,6),i*220);await sleep(1400);
      if(rank.length>=n-1){seats.forEach((s,i)=>{if(s&&!rank.includes(i))rank.push(i)});ui();showEnd();return}}}}
   six=extra?six:0;if(!extra||rank.includes(c)){six=0;do{c=(c+1)%seats.length}while(!seats[c]||rank.includes(c))}}}
 // ---------- online human decisions: timer, then a bot covers the seat ----------
