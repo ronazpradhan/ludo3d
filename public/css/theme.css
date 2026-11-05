@@ -4,7 +4,7 @@
   --bg:#0e1022;--bg-2:#14173a;--surface:#191c3f;--surface-2:#20244d;
   --line:rgba(255,255,255,.09);--line-2:rgba(255,255,255,.16);
   --text:#f3f1ff;--muted:#a6a3c7;
-  --accent:#8b5cf6;--accent-hi:#a78bfa;--accent-lo:#6d3fe0;
+  --accent:#7040f0;--accent-hi:#a78bfa;--accent-lo:#4f25c4;
   --lime:#c8f560;--coral:#ff7a59;
   --shadow:0 10px 30px rgba(3,4,18,.45);
   --bg1:#191c3f;--bg2:#0e1022;--tx:#f3f1ff;
@@ -15,8 +15,6 @@ html{background:
   radial-gradient(40rem 30rem at -20% 110%,rgba(200,245,96,.06),transparent 60%),
   var(--bg) fixed;color:var(--text)}
 body{background:transparent;color:var(--text)}
-/* faint launcher grid behind menus, fading out from the top */
-body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:44px 44px;-webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 30%,transparent 75%);mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 30%,transparent 75%)}
 .blobs{display:none}
 /* no frosted glass anywhere */
 *,*::before,*::after{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
@@ -31,8 +29,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;ba
 .sub{color:var(--muted);opacity:1}
 
 /* buttons: solid purple that presses down */
-.go{border-radius:12px;font-family:var(--display);font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:16px;background:linear-gradient(180deg,#9d72ff,#7c4dff);box-shadow:0 5px 0 var(--accent-lo),0 12px 26px rgba(139,92,246,.32);transition:transform .15s,box-shadow .15s,background .2s}
-.go:hover:not(:disabled){background:linear-gradient(180deg,#ab86ff,#8a5cff)}
+.go{border-radius:12px;font-family:var(--display);font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:16px;background:linear-gradient(180deg,#7040f0,#5d30d8);box-shadow:0 5px 0 var(--accent-lo),0 12px 26px rgba(139,92,246,.32);transition:transform .15s,box-shadow .15s,background .2s}
+.go:hover:not(:disabled){background:linear-gradient(180deg,#7a4cf5,#6537e2)}
 .go:active:not(:disabled){transform:translateY(4px);box-shadow:0 1px 0 var(--accent-lo),0 4px 12px rgba(139,92,246,.25)}
 .go:disabled{opacity:1;background:#34305e;color:#9d98c7;box-shadow:0 5px 0 #26224a}
 .go.alt{background:linear-gradient(180deg,#252a58,#1c2047);color:var(--text);box-shadow:0 5px 0 #0b0d22,inset 0 0 0 1px var(--line-2)}
@@ -48,7 +46,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;ba
 .in:focus{background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 2px var(--accent),0 0 0 4px rgba(139,92,246,.22)}
 
 /* lobby */
-#rcode{color:var(--lime);font-weight:700;text-shadow:0 0 30px rgba(200,245,96,.25)}
+#rcode{color:var(--lime);font-weight:700}
 .seat{background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px var(--line)}
 .seat em{background:rgba(255,255,255,.08);color:var(--text)}
 .rm{background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px var(--line)}
@@ -80,14 +78,63 @@ h1,main h1{background:none;-webkit-background-clip:border-box;background-clip:bo
 main h1{font-size:46px;text-transform:uppercase;letter-spacing:-.01em;line-height:1}
 .grid .game:nth-child(1){--g:#f5b70a}.grid .game:nth-child(2){--g:#22c55e}.grid .game:nth-child(3){--g:#ef4444}.grid .game:nth-child(4){--g:#0ea5e9}.grid .game:nth-child(5){--g:#a78bfa}
 .game{--g:var(--accent);border-radius:18px;overflow:hidden;background:radial-gradient(120% 140% at 0% 50%,color-mix(in srgb,var(--g) 22%,transparent),transparent 55%),linear-gradient(180deg,#1b1e44,#13152f);border:1px solid rgba(255,255,255,.08);box-shadow:0 14px 34px rgba(3,4,18,.5),inset 0 1px 0 rgba(255,255,255,.07);transition:transform .25s var(--sp),border-color .25s,box-shadow .25s}
-.game::after{content:'';position:absolute;left:0;top:18%;bottom:18%;width:3px;border-radius:0 3px 3px 0;background:var(--g);box-shadow:0 0 16px var(--g)}
 a.game:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--g) 55%,transparent);box-shadow:0 18px 40px rgba(3,4,18,.6),0 0 0 1px color-mix(in srgb,var(--g) 30%,transparent),0 0 30px color-mix(in srgb,var(--g) 22%,transparent)}
 a.game:active{transform:scale(.98)}
 .game .art{box-shadow:0 10px 26px color-mix(in srgb,var(--g) 35%,transparent);filter:none}
 .game h2{font-family:var(--display);font-weight:800;letter-spacing:-.02em;font-size:23px}
-.act{font-family:var(--display);font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:13px;border-radius:10px;padding:10px 18px;background:linear-gradient(180deg,#9d72ff,#7c4dff);box-shadow:0 4px 0 var(--accent-lo);transition:transform .15s,box-shadow .15s}
+.act{font-family:var(--display);font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:13px;border-radius:10px;padding:10px 18px;background:linear-gradient(180deg,#7040f0,#5d30d8);box-shadow:0 4px 0 var(--accent-lo);transition:transform .15s,box-shadow .15s}
 a.game:active .act{transform:translateY(3px);box-shadow:0 1px 0 var(--accent-lo)}
 @media(min-width:720px){
  .game{background:radial-gradient(90% 80% at 50% 0%,color-mix(in srgb,var(--g) 24%,transparent),transparent 65%),linear-gradient(180deg,#1b1e44,#13152f)}
- .game::after{left:22%;right:22%;top:0;bottom:auto;width:auto;height:3px;border-radius:0 0 3px 3px}
+ }
+
+/* ---------- usability: readable text, thumb-sized targets ---------- */
+.go,.pill,.in,.seat,#acts button,.cin input,#cctext{font-family:var(--body)}
+.go{min-height:56px;padding:0 20px;font-size:16px;display:flex;align-items:center;justify-content:center;gap:8px}
+.go.alt{min-height:52px}
+.pill{min-height:44px;padding:0 18px;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.row .pill{flex:1}
+.in{min-height:54px;font-size:17px;font-weight:600}
+.row .in,.row .go{min-height:54px}
+.how summary{display:flex;align-items:center;justify-content:center;min-height:44px;font-size:14px;font-weight:600}
+.how p{font-size:14px;line-height:1.5}
+.back{min-height:44px;display:inline-flex;align-items:center;padding:0 16px;font-size:15px;font-weight:600}
+.vis button{width:40px;height:40px;font-size:17px}
+.seat{min-height:60px;font-size:16px}
+.seat .pill{min-height:38px;padding:0 14px;font-size:14px}
+.rm .pill{min-height:40px}
+#cclose,#ccclose{width:40px;height:40px}
+#ccform button,.cin button{width:46px;height:46px}
+#cctext,.cin input{min-height:46px}
+
+/* card tables: bigger corner buttons on phones */
+@media(max-width:640px){
+ #jtable #qbtn,#jtable #snd,body.jp #ccbtn{width:46px;height:46px;font-size:18px}
+ body.jp #ccbtn{top:calc(66px + env(safe-area-inset-top,0px))}
+ body.jp #vcbar{top:calc(66px + env(safe-area-inset-top,0px));gap:10px}
+ body.jp #vcbar button{width:46px;height:46px;font-size:18px}
+ #jstatus{max-width:calc(100vw - 132px)}
 }
+
+/* Flash: a real action bar and a hand you can actually see */
+#acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px;width:min(560px,100%);padding:0 2px}
+#acts button{min-height:58px;border-radius:14px;font-size:15px;font-weight:800;padding:6px 8px;line-height:1.15}
+#acts button small{font-size:12px;margin-top:2px}
+#acts .bet,#acts .raise{box-shadow:0 4px 0 var(--accent-lo)}
+#acts .pack{box-shadow:0 4px 0 #9f1d1d}
+#acts .show{box-shadow:0 4px 0 #b45309}
+#acts button:not(.wait):active{transform:translateY(3px);box-shadow:none}
+#acts .wait{grid-column:1/-1;min-height:46px;font-size:15px}
+body.fl #hand{--cardw:clamp(84px,24vw,112px);gap:10px}
+#sapBtn{min-height:36px;padding:0 14px;font-size:13px;font-weight:700}
+#me{font-size:14px}#mychips{font-size:18px}
+@media(max-width:640px){#acts button{font-size:14px;padding:6px 4px}}
+
+/* Dhumbal and Jutpatti hands a little larger on phones */
+@media(max-width:640px){
+ body.dh #hand{--cardw:clamp(62px,17vw,90px)}
+ body.jp:not(.fl):not(.dh) #hand{--cardw:clamp(56px,17vw,76px)}
+}
+.how summary{list-style:none}.how summary::-webkit-details-marker{display:none}
+.how summary::after{content:'';width:7px;height:7px;margin:-3px 0 0 9px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);transition:transform .2s}
+.how[open] summary::after{transform:rotate(-135deg);margin-top:4px}
