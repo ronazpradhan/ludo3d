@@ -65,6 +65,13 @@ Rejoin: refreshing the tab puts you straight back in your seat; another tab/brow
 button. A player who stays disconnected for 2 minutes during a game is removed and their cards are shuffled
 back into the stock.
 
+## Chat
+
+Ludo has its chat panel (💬). The card games (Jutpatti, Flash, Dhumbal) share a table chat
+(`public/js/cardchat.js`): the room server relays `<prefix>chat` messages as the sender's bound seat,
+max 200 characters, one every 0.5s, and keeps the last 30 for anyone who rejoins. On phones the panel
+stays above the keyboard and its text box is 16px so iPhones don't zoom in.
+
 ## Ludo dice: fair and server-rolled
 
 Every roll is an even 1-in-6; the dice never looks at the board. Online, the **server** rolls

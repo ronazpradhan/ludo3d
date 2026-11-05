@@ -14,7 +14,7 @@ const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', CODE_RE = /^[A-Z0-9]{5}$/
 const LOBBY_GRACE_MS = 45e3;     // a disconnected player is removed from a lobby after this
 const GAME_GRACE_MS = 120e3;     // ...and from a running game after this
 const EMPTY_ROOM_MS = 10 * 60e3; // a room with nobody connected is deleted after this
-const MAX_ROOMS = 2000, HISTORY = 40;
+const MAX_ROOMS = 2000, HISTORY = 40, CHAT_KEEP = 30, CHAT_GAP_MS = 500;
 
 const cleanName = x => String(x ?? '').replace(/[<>&"'`\u0000-\u001f]/g, '').trim().slice(0, 14);
 
@@ -28,6 +28,7 @@ function createRoomServer({ prefix, adapter: A, send, now = Date.now, log, randI
 
   // ---------- helpers ----------
   const err = (ws, code, extra) => send(ws, { t: T('err'), code, ...extra });
+  const chatLog = (ws, room) => send(ws, { t: T('chatlog'), msgs: room.chat || [] });   // recent table chat for anyone (re)joining
   const findPlayer = (room, pid) => room.players.find(p => p.pid === pid);
 
   function newCode() {
@@ -133,7 +134,7 @@ function createRoomServer({ prefix, adapter: A, send, now = Date.now, log, randI
       const p = addPlayer(room, name); room.hostPid = p.pid; bind(ws, room, p); watchers.delete(ws);
       record(room, { type: 'ROOM_CREATED', pid: p.pid });
       send(ws, { t: T('joined'), code: room.code, pid: p.pid, token: p.token });
-      broadcast(room);
+      broadcast(room); chatLog(ws, room);
     },
     join(ws, m) {
       const name = cleanName(m.name); if (!name) return err(ws, 'NAME_REQUIRED');
@@ -144,7 +145,7 @@ function createRoomServer({ prefix, adapter: A, send, now = Date.now, log, randI
       const p = addPlayer(room, name); bind(ws, room, p); watchers.delete(ws);
       record(room, { type: 'PLAYER_JOINED', pid: p.pid });
       send(ws, { t: T('joined'), code: room.code, pid: p.pid, token: p.token });
-      broadcast(room);
+      broadcast(room); chatLog(ws, room);
     },
     resume(ws, m) {
       const room = rooms.get(String(m.code || '').toUpperCase());
@@ -152,7 +153,7 @@ function createRoomServer({ prefix, adapter: A, send, now = Date.now, log, randI
       if (!p) return err(ws, 'SESSION_EXPIRED');
       bind(ws, room, p);
       send(ws, { t: T('joined'), code: room.code, pid: p.pid, token: p.token, resumed: true });
-      broadcast(room);
+      broadcast(room); chatLog(ws, room);
     },
     watch(ws, m) {   // the home screen asks for the open-rooms list (and live updates)
       if (m.on === false) return void watchers.delete(ws);
@@ -187,6 +188,17 @@ function createRoomServer({ prefix, adapter: A, send, now = Date.now, log, randI
       if (!room.players.every(x => x.connected)) return err(ws, 'PLAYER_OFFLINE');
       const e = A.canStart && A.canStart(room); if (e) return err(ws, e);
       startGame(room);
+    },
+    // table chat: text only, sent as the bound player, relayed to everyone in the room
+    chat(ws, m) {
+      const b = bound(ws); if (!b) return err(ws, 'NOT_IN_ROOM');
+      const text = String(m.text ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, 200);
+      if (!text) return;
+      const t = now(); if (t - (b.p.chatAt || 0) < CHAT_GAP_MS) return err(ws, 'RATE_LIMIT');
+      b.p.chatAt = t;
+      const room = b.room, msg = { pid: b.p.pid, name: b.p.name, text, at: t };
+      (room.chat || (room.chat = [])).push(msg); if (room.chat.length > CHAT_KEEP) room.chat.shift();
+      for (const p of room.players) if (p.ws) send(p.ws, { t: T('chat'), ...msg });
     },
     // game-specific extras outside the turn order (e.g. Flash's sapati / borrowing). Identity comes from the socket.
     x(ws, m) {

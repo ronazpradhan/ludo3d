@@ -69,7 +69,7 @@ function begin(a,b,c){if(started)return;clearInterval(lt);begun={ls:[...a],lo:[.
 async function joinRoom(code,create,resume){if(!lob||net)return;if(!reqNick())return;roomCode=code;host=!!create;leaving=false;$('landing').style.display='none';
  try{net=await lob.join('ludo-'+code.toLowerCase())}catch(e){toast('Could not open the room');$('landing').style.display='flex';return}
  const rg=resume&&resume.game;
- document.body.classList.add('online','chat-off');chatOpen=false;if(!rg)$('lobby').style.display='flex';$('rcode').textContent=code;$('clog').textContent='';addChat('','Room '+code,0,1);ls=[0,0,0,0];lo=[null,null,null,null];ln=['','','',''];gotL=0;tries=0;net.presence({id:me});trapBack();
+ document.body.classList.add('online','chat-off');document.body.classList.remove('chat-open');$('chat').classList.remove('open');chatOpen=false;if(!rg)$('lobby').style.display='flex';$('rcode').textContent=code;$('clog').textContent='';addChat('','Room '+code,0,1);ls=[0,0,0,0];lo=[null,null,null,null];ln=['','','',''];gotL=0;tries=0;net.presence({id:me});trapBack();
  {const Lb=resume&&resume.lobby;if(host&&Lb&&Array.isArray(Lb.ls)&&(Lb.ls.length==4||Lb.ls.length==6)&&Array.isArray(Lb.lo)&&Array.isArray(Lb.ln)){   // host coming back keeps CPU/closed seats, friends re-sit by themselves
   ls=Lb.ls.map((x,i)=>x==1&&Lb.lo[i]!==me?0:x|0);lo=Lb.lo.map((x,i)=>ls[i]==1&&x?String(x).slice(0,12):null);ln=Lb.ln.map((x,i)=>ls[i]==1?esc(x):'')}}
  offs=[net.on('lobby',m=>{const d=m.data;if(host||m.sameTab||!d||d.c!==code||!Array.isArray(d.ls))return;ls=d.ls.map(x=>x|0);lo=d.lo.map(x=>x?String(x).slice(0,12):null);ln=d.ln.map(esc);gotL=1;renderLobby()}),
@@ -108,7 +108,11 @@ $('csend').onclick=sendChat;
 $('botback').onclick=iAmBack;$('stage').addEventListener('pointerdown',iAmBack);$('ctext').onkeydown=e=>{if(e.key=='Enter')sendChat()};
 // chat: ✕ closes it (side panel on desktop, slide-over on phones), 💬 button brings it back
 const chatHidden=()=>innerWidth<900?!chatOpen:document.body.classList.contains('chat-off');
-function setChat(open){if(innerWidth<900){chatOpen=open;$('chat').classList.toggle('open',open)}else document.body.classList.toggle('chat-off',!open);if(open){unread=0;$('cbadge').textContent='';$('float').textContent=''}}
+function setChat(open){if(innerWidth<900){chatOpen=open;$('chat').classList.toggle('open',open);document.body.classList.toggle('chat-open',open);if(!open)$('ctext').blur()}else document.body.classList.toggle('chat-off',!open);if(open){unread=0;$('cbadge').textContent='';$('float').textContent=''}fitChat()}
+// phones: keep the chat panel above the on-screen keyboard (iPhones don't shrink the page for it)
+function fitChat(){const c=$('chat'),vv=window.visualViewport;if(!vv||innerWidth>=900||!chatOpen||innerHeight-vv.height<120){c.style.top=c.style.bottom=c.style.height='';return}
+ c.style.top=(vv.offsetTop+8)+'px';c.style.bottom='auto';c.style.height=(vv.height-16)+'px';$('clog').scrollTop=1e9}
+if(window.visualViewport){visualViewport.addEventListener('resize',fitChat);visualViewport.addEventListener('scroll',fitChat)}$('ctext').addEventListener('focus',()=>setTimeout(fitChat,300));
 $('ctog').onclick=()=>setChat(chatHidden());$('cclose').onclick=()=>setChat(false);
 // ---------- rejoin: remember the room + every dice/pick decision in this browser ----------
 // The game is deterministic: same decisions in = same board out. So saving the decision log is enough

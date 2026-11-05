@@ -45,7 +45,7 @@ h1{margin:0;font-size:60px;font-weight:800;letter-spacing:-2.5px;background:line
 .ch{padding:14px 16px;font-weight:700;border-bottom:.5px solid rgba(255,255,255,.12)}.ch small{opacity:.5;font-weight:500;margin-left:6px}
 #clog{flex:1;overflow:auto;padding:10px 14px;font-size:14px;line-height:1.4}.cm{margin:7px 0;word-break:break-word}.cm.sys{opacity:.5;font-size:12px}
 #emo{display:none;padding:8px 10px;border-top:.5px solid rgba(255,255,255,.12);max-height:190px;overflow:auto}#emo.on{display:block}#egrid{display:flex;flex-wrap:wrap;gap:2px}#egrid button{border:0;background:none;font-size:23px;line-height:1;width:12.5%;padding:5px 0;cursor:pointer;border-radius:8px}#egrid button:active{background:rgba(255,255,255,.18)}.cin #ebtn{background:rgba(255,255,255,.12);font-size:18px;width:40px}
-.cin{display:flex;gap:6px;padding:10px;border-top:.5px solid rgba(255,255,255,.12)}.cin input{flex:1;min-width:0;border:0;border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.1);color:#fff;font:14px inherit;font-family:inherit;outline:none}.cin button{border:0;border-radius:12px;background:#0a84ff;color:#fff;width:42px;font-size:16px;cursor:pointer}
+.cin{display:flex;gap:6px;padding:10px;border-top:.5px solid rgba(255,255,255,.12)}.cin input{flex:1;min-width:0;border:0;border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.1);color:#fff;font-family:inherit;font-size:16px;outline:none}.cin button{border:0;border-radius:12px;background:#0a84ff;color:#fff;width:42px;font-size:16px;cursor:pointer}
 #ctog{display:none;position:fixed;right:14px;bottom:calc(90px + env(safe-area-inset-bottom,0px));width:46px;height:46px;border-radius:50%;font-size:19px;color:#fff;padding:0;cursor:pointer;z-index:7}#cbadge{position:absolute;top:-4px;right:-2px;background:#ff453a;border-radius:99px;font-size:11px;padding:0 6px}
 @media(max-width:899px){body.online{--cw:0px}#chat{transform:translateX(115%);transition:transform .4s var(--sp);top:70px}#chat.open{transform:none}body.online #ctog{display:block}}
 .in.bad{box-shadow:0 0 0 2px #ef4444;animation:shk .4s}@keyframes shk{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
@@ -73,7 +73,10 @@ h1{margin:0;font-size:60px;font-weight:800;letter-spacing:-2.5px;background:line
 /* ---- chat close button, soundboard mute, resume banner, logo ---- */
 .ch{display:flex;align-items:center}.ch small{flex:1}
 #cclose{border:0;background:rgba(255,255,255,.12);color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;padding:0;flex:none}#cclose:active{background:rgba(255,255,255,.25)}
-body.online.chat-off{--cw:0px}body.online.chat-off #chat{display:none}body.online.chat-off #ctog{display:block}
+body.online.chat-off{--cw:0px}body.online.chat-off #ctog{display:block}
+/* chat-off (closed by default) only hides the side panel on wide screens; phones slide it in and out with .open */
+@media(min-width:900px){body.online.chat-off #chat{display:none}}
+@media(max-width:899px){body.online.chat-open #ctog{display:none}}
 #sgrid .mute{flex:1 0 100%;background:rgba(255,255,255,.18)}#sgrid .mute.off{background:rgba(255,69,58,.85)}
 #resume{display:none;background:rgba(10,132,255,.2);box-shadow:inset 0 0 0 1px rgba(10,132,255,.6);margin:0 0 14px}
 .logo{display:block;width:84px;height:84px;margin:-4px auto 6px;filter:drop-shadow(0 8px 20px rgba(0,0,0,.45))}
