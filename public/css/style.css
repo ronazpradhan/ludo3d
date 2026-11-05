@@ -1,6 +1,6 @@
 :root{--bg1:#1d2144;--bg2:#05060e;--tx:#f5f5f7;--sp:cubic-bezier(.32,1.5,.5,1);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-html,body{height:100%;margin:0;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,var(--bg1),var(--bg2) 75%);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Inter,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,var(--bg1),var(--bg2) 75%);color:var(--tx);font-family:var(--body);-webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 canvas{display:block;width:100%;height:100%;touch-action:none;animation:fi 1.4s ease both}@keyframes fi{from{opacity:0}}
 .glass{background:rgba(28,30,46,.5);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);border:.5px solid rgba(255,255,255,.2);border-radius:24px;box-shadow:0 12px 40px rgba(0,0,0,.4),inset 0 .5px 0 rgba(255,255,255,.25)}
 #cards{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:0;right:0;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:0 8px;pointer-events:none}
@@ -10,7 +10,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none;animation:fi 1.4s 
 .card.on{opacity:1;transform:scale(1.1);box-shadow:0 0 0 1.5px var(--c),0 0 30px -4px var(--c),0 12px 30px rgba(0,0,0,.4)}
 #msg{position:fixed;top:calc(64px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);padding:10px 22px;font-weight:600;font-size:15px;white-space:nowrap;pointer-events:none;background:#000;border-radius:999px;border:.5px solid rgba(255,255,255,.18);box-shadow:0 8px 30px rgba(0,0,0,.5)}
 #msg.pop{animation:pop .55s var(--sp)}@keyframes pop{0%{transform:translateX(-50%) scale(.6);opacity:0}100%{transform:translateX(-50%) scale(1);opacity:1}}
-#roll{position:fixed;bottom:calc(28px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);border:0;border-radius:999px;padding:17px 58px;font:600 18px -apple-system,BlinkMacSystemFont,Inter,sans-serif;color:#111;background:rgba(255,255,255,.95);box-shadow:0 10px 40px rgba(255,255,255,.18),0 4px 14px rgba(0,0,0,.4);cursor:pointer;transition:all .4s var(--sp)}
+#roll{position:fixed;bottom:calc(28px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);border:0;border-radius:999px;padding:17px 58px;font:600 18px var(--body);color:#111;background:rgba(255,255,255,.95);box-shadow:0 10px 40px rgba(255,255,255,.18),0 4px 14px rgba(0,0,0,.4);cursor:pointer;transition:all .4s var(--sp)}
 #roll:disabled{opacity:.18;box-shadow:none;transform:translateX(-50%) scale(.92);cursor:default}
 #roll:not(:disabled){animation:pulse 1.6s ease-in-out infinite}@keyframes pulse{50%{transform:translateX(-50%) scale(1.06)}}
 #roll:not(:disabled):active{animation:none;transform:translateX(-50%) scale(.93)}
@@ -140,3 +140,8 @@ body.online.chat-off{--cw:0px}body.online.chat-off #ctog{display:block}
 /* line icons (js/icons.js): sized by the button's font-size, coloured by its text colour */
 .ico{width:1.15em;height:1.15em;display:block;margin:auto;flex:none;pointer-events:none}
 .mute .ico{display:inline-block;vertical-align:-.2em;margin:0 6px 0 0;width:1.1em;height:1.1em}
+/* fonts shared with Mimic: DM Sans for text, Bricolage Grotesque for headings, JetBrains Mono for room codes */
+:root{--body:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--display:'Bricolage Grotesque','DM Sans',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace}
+button,input,textarea,select{font-family:inherit}
+h1,h2,.ch,.cch{font-family:var(--display);letter-spacing:-.02em}
+#rcode{font-family:var(--mono);letter-spacing:.12em}

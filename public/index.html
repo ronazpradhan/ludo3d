@@ -1,10 +1,11 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Games</title>
 <link rel="icon" type="image/svg+xml" href="img/logo.svg">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=DM+Sans:opsz,wght@9..40,400..800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
 <style>
-:root{--sp:cubic-bezier(.32,1.5,.5,1)}
+:root{--sp:cubic-bezier(.32,1.5,.5,1);--body:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--display:'Bricolage Grotesque','DM Sans',system-ui,sans-serif}
+h1,h2{font-family:var(--display)}
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:radial-gradient(ellipse at 50% 20%,#262e63,#05060e 75%) fixed;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Inter,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:radial-gradient(ellipse at 50% 20%,#262e63,#05060e 75%) fixed;color:#f5f5f7;font-family:var(--body);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
 body{display:flex;align-items:center;justify-content:center;min-height:100vh;min-height:100dvh;padding:calc(24px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px));overflow-x:hidden}
 .blobs{position:fixed;inset:0;overflow:hidden;pointer-events:none}
 .blobs i{position:absolute;width:42vmax;height:42vmax;border-radius:50%;background:var(--c);filter:blur(100px);opacity:.28;animation:fl 12s ease-in-out infinite alternate}@keyframes fl{to{transform:translate(8vmax,6vmax) scale(1.2)}}
