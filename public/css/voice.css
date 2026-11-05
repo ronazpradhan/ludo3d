@@ -24,3 +24,6 @@ body:not(.jp) #vcbar #ctog{position:relative;right:auto;bottom:auto;z-index:auto
 body:not(.jp) #vctalk{left:50%;transform:translateX(-50%);bottom:calc(100% + 10px)}
 @media(max-width:899px){body.online.chat-open #vcbar{display:none}}
 .vci{display:contents}
+/* Ludo popups (lobby, game over…) leave room for the dock instead of running under it */
+body.vc-on:not(.jp) .ov{box-sizing:border-box;padding:12px 0 calc(88px + env(safe-area-inset-bottom,0px))}
+body.vc-on:not(.jp) .ov .box{max-height:100%;overflow:auto;box-sizing:border-box}
