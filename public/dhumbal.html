@@ -32,7 +32,6 @@
 <div class="ov" id="landing"><a class="back" href="index.html">‹ Games</a>
  <div class="blobs"><i style="--c:#0ea5e9;top:-10vmax;left:-8vmax"></i><i style="--c:#22c55e;top:-6vmax;right:-10vmax"></i><i style="--c:#f59e0b;bottom:-12vmax;right:-6vmax"></i><i style="--c:#6366f1;bottom:-10vmax;left:-10vmax"></i></div>
  <div class="box glass land"><img class="logo" src="img/dhumbal.svg" alt="" width="84" height="84"><h1>Dhumbal</h1>
-  <div class="sub">Jhyap · get your hand low · 2–5 players</div>
   <div class="rm" id="resume"><span id="rtxt"></span><button class="pill" id="rgo">Rejoin</button><button class="pill" id="rno" aria-label="Forget"><i data-icon="x"></i></button></div>
   <input class="in" id="nick" maxlength="14" placeholder="Your name" autocomplete="nickname">
   <button class="go" id="bCreate" disabled>Create Room</button>
@@ -42,8 +41,8 @@
    <p>Everyone gets 5 cards. Points: A = 1, 2–10 face value, J = 11, Q = 12, K = 13. Get your hand as low as you can.</p>
    <p>On your turn <b>throw first</b> — one card, a <b>set</b> (2+ of the same rank) or a <b>run</b> (3+ in a row, same suit) — <b>then draw</b>: the top of the deck or one of the cards the previous player threw.</p>
    <p>At the start of your turn, with <b>10 points or less</b>, call <b>Jhyap!</b> Everyone shows. Lowest hand? Everyone pays you their points. But if someone has the same or less, they win and you pay everyone's points to them.</p>
+   <p>Points are play money only, with no real-world value.</p>
   </details>
-  <div class="sub" style="margin:12px 0 0;font-size:12px">Points are play money only — no real-world value.</div>
   <div class="sub" id="onl" style="margin:8px 0 0">Connecting…</div>
  </div>
 </div>
@@ -51,7 +50,7 @@
 <!-- lobby -->
 <div class="ov" id="lobby" style="display:none"><div class="box glass">
  <div class="vis" id="lvis" role="group" aria-label="Who can join"><button type="button" data-l="1" title="Public: shown in open rooms" aria-label="Public"><i data-icon="globe"></i></button><button type="button" data-l="0" title="Friends only: join with the code" aria-label="Friends only"><i data-icon="users"></i></button></div>
- <div class="sub" style="margin:0">Dhumbal room code</div><div id="rcode">-----</div>
+ <div id="rcode">-----</div>
  <div class="row"><button class="pill" id="cCode">Copy code</button><button class="pill" id="cLink">Copy invite link</button></div>
  <div class="seats" id="lseats" style="margin-top:14px"></div>
  <button class="go alt" id="lready">I'm ready</button>
@@ -61,7 +60,7 @@
 </div></div>
 
 <!-- leave confirm -->
-<div class="ov" id="qconf" style="display:none"><div class="box glass"><h1 style="font-size:26px">Leave the table?</h1><div class="sub">Your cards go back into the deck and you leave the room.</div><div class="row"><button class="pill" id="qno">Stay</button><button class="go" id="qyes" style="padding:12px">Leave</button></div></div></div>
+<div class="ov" id="qconf" style="display:none"><div class="box glass"><h1 style="font-size:26px">Leave the table?</h1><div class="row"><button class="pill" id="qno">Stay</button><button class="go" id="qyes" style="padding:12px">Leave</button></div></div></div>
 
 <div id="toast"></div>
 <script src="js/icons.js"></script>

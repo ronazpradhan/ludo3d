@@ -114,7 +114,7 @@ function renderLobby() {
   $('lready').textContent = mine && mine.ready ? 'Ready ✓ (tap to undo)' : "I'm ready";
   const others = R.players.filter(p => p.pid !== R.hostPid), canStart = R.players.length >= R.minPlayers && others.every(p => p.ready && p.connected);
   $('lstart').style.display = host ? '' : 'none'; $('lstart').disabled = !canStart;
-  $('lnote').textContent = host ? (R.players.length < R.minPlayers ? 'Share the code — 2 to 5 players' : canStart ? 'Everyone is ready!' : 'Waiting for everyone to be ready…') : 'Waiting for the host to start…';
+  $('lnote').textContent = host ? '' : 'Waiting for the host…';
 }
 
 function renderTable() {
@@ -168,11 +168,7 @@ function renderTable() {
   // hint + throw button
   const hint = $('hint'); hint.textContent = '';
   if (over) hint.textContent = '';
-  else if (!myTurn) hint.textContent = `${nameOf(g.current)}'s turn…`;
-  else if (g.phase == 'throw') {
-    if (sel.size) { const b = document.createElement('button'); b.className = 'go'; b.id = 'throwBtn'; b.textContent = `Throw ${sel.size} card${sel.size > 1 ? 's' : ''}`; b.onclick = throwSel; hint.append(b, document.createTextNode(' or drag them up'));
-    } else hint.textContent = o.show ? 'Call Jhyap — or pick cards to throw: one card, a set or a run' : 'Pick cards to throw: one card, a set (same rank) or a run (3+ in a row, same suit)';
-  } else hint.textContent = 'Now take a card: tap the deck or one of the thrown cards';
+  else if (myTurn && g.phase == 'throw' && sel.size) { const b = document.createElement('button'); b.className = 'go'; b.id = 'throwBtn'; b.textContent = `Throw ${sel.size} card${sel.size > 1 ? 's' : ''}`; b.onclick = throwSel; hint.append(b); }
   renderReveal(g, R);
   const tk = g.turn + ':' + g.current + ':' + g.phase;
   if (tk !== turnKey) { turnKey = tk; if (myTurn && g.phase == 'throw') { sfx.chime(); buzz(20); } }

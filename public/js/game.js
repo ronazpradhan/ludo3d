@@ -171,7 +171,7 @@ async function moveToken(t,v){let cap=0;
 let gameNo=0,ended=false,againPend=false;
 function showEnd(){ended=true;forgetSession();const w=rank[0];$('etitle').textContent=(w!=null?PN(w):'')+' wins!';
  $('ranks').innerHTML=rank.map((i,k)=>`<div class="rk ${k==0?'w':''}" style="--c:${CS[i]};animation-delay:${k*.12}s"><span>${['🥇','🥈','🥉','4️⃣'][k]}</span><i></i><span class="n">${PN(i)}${seats[i]==2?' (CPU)':''}</span><small>${k<seats.filter(x=>x).length&&T[i].every(t=>t.p==FIN)?'Finished':pct(i)+'%'}</small></div>`).join('');
- $('enote').textContent=net?'Rematch starts for everyone in the room':'';$('end').style.display='flex';
+ $('enote').textContent='';$('end').style.display='flex';
  if(!ff)for(let i=0;i<7;i++)setTimeout(()=>burst((Math.random()-.5)*10,6,(Math.random()-.5)*10,[0xff5252,0xffd740,0x69f0ae,0x40c4ff,0xffffff],40,6),i*260);
  if(againPend){againPend=false;setTimeout(restartGame,600)}}
 function restartGame(){if(!ended)return;ended=false;$('end').style.display='none';rank=[];dn=0;Object.keys(inbox).forEach(k=>delete inbox[k]);Object.keys(waiters).forEach(k=>delete waiters[k]);lastDec=[];movable=[];gameNo++;

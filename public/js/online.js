@@ -64,7 +64,7 @@ function renderLobby(){const S=$('lseats');S.textContent='';ls.forEach((s,i)=>{c
   if(host&&s==0){const g=document.createElement('button');g.className='pill';g.textContent='+ CPU';g.onclick=ev=>{ev.stopPropagation();sfx.tick();ls[i]=2;bc()};b.append(g)}
   S.append(b)});
  {const z=$('lsize');z.textContent=(ls.length==6?'6-player board':'4-player board')+(host?' · tap for '+(ls.length==6?'4':'6'):'');z.disabled=!host}
- const cnt=ls.filter(x=>x==1||x==2).length;$('lstart').style.display=host?'':'none';$('lstart').disabled=cnt<2;$('lnote').textContent=host?'Share the code or invite link — friends join with one tap':'Waiting for the host to start…';$('cinfo').textContent=' · '+ls.filter(x=>x==1).length+' online'}
+ const cnt=ls.filter(x=>x==1||x==2).length;$('lstart').style.display=host?'':'none';$('lstart').disabled=cnt<2;$('lnote').textContent=host?'':'Waiting for the host…';$('cinfo').textContent=' · '+ls.filter(x=>x==1).length+' online'}
 function begin(a,b,c){if(started)return;clearInterval(lt);begun={ls:[...a],lo:[...b],ln:[...c]};seats=a.map(x=>x==1?1:x==2?2:0);owner=b;names=c.map(esc);$('lobby').style.display='none';if(host)lob.presence({lr:null});trapBack();startGame();saveSoon()}
 async function joinRoom(code,create,resume){if(!lob||net)return;if(!reqNick())return;roomCode=code;host=!!create;leaving=false;$('landing').style.display='none';
  try{net=await lob.join('ludo-'+code.toLowerCase())}catch(e){toast('Could not open the room');$('landing').style.display='flex';return}

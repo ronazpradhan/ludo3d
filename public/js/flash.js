@@ -134,7 +134,7 @@ function renderLobby() {
     b.append(i, n, e); L.append(b);
   });
   for (let k = R.players.length; k < R.minPlayers; k++) { const b = document.createElement('div'); b.className = 'seat off'; b.innerHTML = '<i></i><span>Waiting for a player…</span>'; L.append(b); }
-  $('lrules').textContent = `Each round: ${R.gamesPerRound} games · ${rs(R.startingChips)} each · boot ${rs(R.boot)}`;
+  $('lrules').textContent = '';
   $('lvis').classList.toggle('ro', !host);
   $('lvis').querySelectorAll('button').forEach(b => { const v = b.dataset.l == '1'; b.classList.toggle('on', v === !!R.listed); b.disabled = !host;
     b.onclick = () => { if (host && v !== !!R.listed) { sfx.tick(); send({ t: P + 'opts', listed: v }); toast(v ? 'Public — anyone can see this room' : 'Friends only — join with the code'); } }; });
@@ -142,7 +142,7 @@ function renderLobby() {
   $('lready').textContent = mine && mine.ready ? 'Ready ✓ (tap to undo)' : "I'm ready";
   const others = R.players.filter(p => p.pid !== R.hostPid), canStart = R.players.length >= R.minPlayers && others.every(p => p.ready && p.connected);
   $('lstart').style.display = host ? '' : 'none'; $('lstart').disabled = !canStart;
-  $('lnote').textContent = host ? (R.players.length < R.minPlayers ? 'Share the code — 2 to 6 players' : canStart ? 'Everyone is ready!' : 'Waiting for everyone to be ready…') : 'Waiting for the host to start…';
+  $('lnote').textContent = host ? '' : 'Waiting for the host…';
 }
 
 function renderTable() {
@@ -219,7 +219,7 @@ function renderTable() {
   // side show request for me
   show('sideq', !!(you && you.options.reply && !over));
   if (you && you.options.reply) {
-    $('sqs').textContent = nameOf(g.pending.from) + ' wants to compare cards with you privately. The lower hand packs (on a tie, they pack).';
+    $('sqs').textContent = nameOf(g.pending.from) + ' asks for a side show';
     $('sqyes').onclick = () => { sfx.tick(); act({ type: 'reply', accept: true }); };
     $('sqno').onclick = () => { sfx.tick(); act({ type: 'reply', accept: false }); };
   }
@@ -277,7 +277,7 @@ function renderEnd() {
   const fin = p => p.final ?? p.chips ?? 0;   // after sapati is paid back
   const st = R.players.slice().sort((a, b) => fin(b) - fin(a)), top = st.length ? fin(st[0]) : 0, winners = st.filter(p => fin(p) === top);
   $('etitle').textContent = winners.length > 1 ? 'Tie for the round!' : (winners[0] && winners[0].pid === me ? 'You win the round! 🎉' : (winners[0] ? winners[0].name + ' wins the round!' : 'Round over'));
-  $('esub').textContent = `Round ${R.round} · ${R.gamesPerRound} games · chips reset next round`;
+  $('esub').textContent = `Round ${R.round}`;
   const K = $('ranks'); K.textContent = '';
   st.forEach((p, i) => {
     const d = document.createElement('div'); d.className = 'rk' + (fin(p) === top ? ' w' : ''); d.style.animationDelay = i * .07 + 's'; d.style.setProperty('--c', colorOf(p.pid));
@@ -288,8 +288,7 @@ function renderEnd() {
   });
   $('again').textContent = mine && mine.ready ? 'Waiting… (tap to cancel)' : 'Next round';
   const sl = R.sapati && R.sapati.settlement || [];
-  $('enote').textContent = (sl.length ? 'Sapati paid back: ' + sl.map(l => `${nameOf(l.to)} → ${l.from === 'bank' ? 'bank' : nameOf(l.from)} ${rs(l.paid)}${l.paid < l.amount ? ' (short ' + rs(l.amount - l.paid) + ')' : ''}`).join(' · ') + '. ' : '') +
-    'Everyone starts the next round with ' + rs(R.startingChips) + '. It starts when everyone is ready.';
+  $('enote').textContent = (sl.length ? 'Sapati paid back: ' + sl.map(l => `${nameOf(l.to)} → ${l.from === 'bank' ? 'bank' : nameOf(l.from)} ${rs(l.paid)}${l.paid < l.amount ? ' (short ' + rs(l.amount - l.paid) + ')' : ''}`).join(' · ') + '' : '');
 }
 
 // ---------- sapati (borrowing) ----------
@@ -304,7 +303,7 @@ function renderSapati() {
   const q = running && SP.requests.find(r => r.to === me);
   show('sapq', !!q);
   if (q) {
-    $('sapqs').textContent = `${nameOf(q.from)} wants to borrow ${rs(q.amount)} from you. They pay it back at the end of the round. (${Math.ceil(q.left / 1000)}s)`;
+    $('sapqs').textContent = `${nameOf(q.from)} wants to borrow ${rs(q.amount)} · ${Math.ceil(q.left / 1000)}s`;
     $('sapqyes').onclick = () => { sfx.tick(); sap({ action: 'answer', id: q.id, accept: true }); };
     $('sapqno').onclick = () => { sfx.tick(); sap({ action: 'answer', id: q.id, accept: false }); };
   }

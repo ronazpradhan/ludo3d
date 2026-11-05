@@ -10,7 +10,7 @@ body{display:flex;align-items:center;justify-content:center;min-height:100vh;min
 .blobs{position:fixed;inset:0;overflow:hidden;pointer-events:none}
 .blobs i{position:absolute;width:42vmax;height:42vmax;border-radius:50%;background:var(--c);filter:blur(100px);opacity:.28;animation:fl 12s ease-in-out infinite alternate}@keyframes fl{to{transform:translate(8vmax,6vmax) scale(1.2)}}
 main{position:relative;width:min(440px,100%);text-align:center}
-h1{margin:0;font-size:44px;font-weight:800;letter-spacing:-1.8px;background:linear-gradient(180deg,#fff,#9aa0c0);-webkit-background-clip:text;background-clip:text;color:transparent}
+h1{margin:0 0 26px;font-size:44px;font-weight:800;letter-spacing:-1.8px;background:linear-gradient(180deg,#fff,#9aa0c0);-webkit-background-clip:text;background-clip:text;color:transparent}
 .sub{opacity:.55;margin:6px 0 26px;font-size:15px}
 .grid{display:flex;flex-direction:column;gap:14px}
 .game{display:flex;align-items:center;gap:16px;padding:16px;text-align:left;color:inherit;text-decoration:none;position:relative;background:rgba(28,30,46,.5);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);border:.5px solid rgba(255,255,255,.2);border-radius:24px;box-shadow:0 12px 40px rgba(0,0,0,.4),inset 0 .5px 0 rgba(255,255,255,.25);transition:transform .35s var(--sp);animation:up .7s var(--sp) both}
@@ -34,13 +34,13 @@ p{margin:4px 0 0;font-size:13px;line-height:1.35;opacity:.6}
 </style></head><body>
 <div class="blobs"><i style="--c:#fbc916;top:-10vmax;left:-8vmax"></i><i style="--c:#22c55e;top:-6vmax;right:-10vmax"></i><i style="--c:#ef4444;bottom:-12vmax;right:-6vmax"></i><i style="--c:#3b82f6;bottom:-10vmax;left:-10vmax"></i></div>
 <main>
-<h1>Pick a game</h1><div class="sub">Play with friends or against the computer</div>
+<h1>Pick a game</h1>
 <div class="grid">
  <a class="game" href="ludo.html"><div class="art"><img src="img/logo.svg" alt=""></div><div class="info"><h2>Ludo</h2></div><span class="act">Play</span></a>
- <a class="game" href="jutpatti.html"><div class="art"><img src="img/jutpatti.svg" alt=""></div><div class="info"><h2>Jutpatti</h2><p>Nepali pair-making card game · 2–6 players</p></div><span class="act">Play</span></a>
- <a class="game" href="flash.html" style="animation-delay:.16s"><div class="art"><img src="img/flash.svg" alt=""></div><div class="info"><h2>Flash</h2><p>3 cards · blind or seen · play-money chips</p></div><span class="act">Play</span></a>
- <a class="game" href="dhumbal.html" style="animation-delay:.24s"><div class="art"><img src="img/dhumbal.svg" alt=""></div><div class="info"><h2>Dhumbal</h2><p>Jhyap · get your hand low · 2–5 players</p></div><span class="act">Play</span></a>
- <a class="game" href="/mimic/" style="animation-delay:.32s"><div class="art"><img src="img/mimic.svg" alt=""></div><div class="info"><h2>Mimic</h2><p>Copy the sound with your mic · 2–10 players</p></div><span class="act">Play</span></a>
+ <a class="game" href="jutpatti.html"><div class="art"><img src="img/jutpatti.svg" alt=""></div><div class="info"><h2>Jutpatti</h2></div><span class="act">Play</span></a>
+ <a class="game" href="flash.html" style="animation-delay:.16s"><div class="art"><img src="img/flash.svg" alt=""></div><div class="info"><h2>Flash</h2></div><span class="act">Play</span></a>
+ <a class="game" href="dhumbal.html" style="animation-delay:.24s"><div class="art"><img src="img/dhumbal.svg" alt=""></div><div class="info"><h2>Dhumbal</h2></div><span class="act">Play</span></a>
+ <a class="game" href="/mimic/" style="animation-delay:.32s"><div class="art"><img src="img/mimic.svg" alt=""></div><div class="info"><h2>Mimic</h2></div><span class="act">Play</span></a>
 </div>
 </main>
 </body></html>

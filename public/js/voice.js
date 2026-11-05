@@ -160,4 +160,6 @@ function ludoVoice() {
     setMic: v => { if (cur) cur.presence({ mic: v ? 1 : 0 }); }, signal: (to, d) => { if (cur) cur.emit('v', { to, d }); },
     onSignal: f => { sig = f; }, onChange: f => { chg = f; },
   });
+  const bar = document.getElementById('vcbar'), chat = document.getElementById('ctog');
+  if (bar && chat) bar.append(chat);   // chat button joins the voice dock
 }

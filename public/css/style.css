@@ -145,3 +145,6 @@ body.online.chat-off{--cw:0px}body.online.chat-off #ctog{display:block}
 button,input,textarea,select{font-family:inherit}
 h1,h2,.ch,.cch{font-family:var(--display);letter-spacing:-.02em}
 #rcode{font-family:var(--mono);letter-spacing:.12em}
+/* Ludo: leave and sound in the top corners, out of the way of the board and the bottom dock */
+body:not(.jp) #qbtn,body:not(.jp) #snd{top:calc(12px + env(safe-area-inset-top,0px));bottom:auto;z-index:4}
+body.online:not(.jp) #botbar{bottom:calc(86px + env(safe-area-inset-bottom,0px))}

@@ -17,7 +17,10 @@ body.jp #vcbar{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
  body.jp #vcbar button{width:40px;height:40px;font-size:16px}
  body.jp #vctalk{left:48px;bottom:auto;top:0}
 }
-/* Ludo: a row beside the ✕ button, clear of the seat names */
-body:not(.jp) #vcbar{flex-direction:row;left:70px;bottom:calc(34px + env(safe-area-inset-bottom,0px))}
-body:not(.jp) #vctalk{left:0;bottom:56px}
+/* Ludo: mic, headphones and chat in one dock at the bottom centre (✕ and sound sit in the top corners) */
+body:not(.jp) #vcbar{left:calc((100% - var(--cw,0px)) / 2);transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));flex-direction:row;align-items:center;gap:10px;padding:6px;border-radius:999px;background:rgba(20,22,36,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:.5px solid rgba(255,255,255,.18);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+body:not(.jp) #vcbar button{background:rgba(255,255,255,.1);border:0;box-shadow:none}
+body:not(.jp) #vcbar #ctog{position:relative;right:auto;bottom:auto;z-index:auto}
+body:not(.jp) #vctalk{left:50%;transform:translateX(-50%);bottom:calc(100% + 10px)}
+@media(max-width:899px){body.online.chat-open #vcbar{display:none}}
 .vci{display:contents}

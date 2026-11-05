@@ -166,7 +166,7 @@ function renderLobby() {
   $('lvis').classList.toggle('ro', !host);
   $('lvis').querySelectorAll('button').forEach(b => { const v = b.dataset.l == '1'; b.classList.toggle('on', v === !!R.listed); b.disabled = !host;
     b.onclick = () => { if (host && v !== !!R.listed) { sfx.tick(); send({ t: 'jp:opts', listed: v }); toast(v ? 'Public — anyone can see this room' : 'Friends only — join with the code'); } }; });
-  $('lnote').textContent = host ? (R.players.length < R.minPlayers ? 'Share the code — 2 to 6 players' : canStart ? 'Everyone is ready!' : 'Waiting for everyone to be ready…') : 'Waiting for the host to start…';
+  $('lnote').textContent = host ? '' : 'Waiting for the host…';
 }
 
 function renderSeats(g) {
@@ -217,12 +217,7 @@ function renderTable() {
   if (canShow && showAlert !== g.turn) { showAlert = g.turn; sfx.chime(); buzz([20, 40, 20]); }
   $('showBtn').style.display = canShow ? 'block' : 'none';
   $('sortBtn').style.visibility = you && !deal && g.status == 'playing' ? 'visible' : 'hidden';
-  $('hint').textContent = deal || !you || g.status != 'playing' ? '' : pending ? '…'
-    : !myTurn ? 'Drag a card onto another to pair them · drag along the row to move it'
-    : g.phase == 'draw' ? 'Drag a card from the stock or discard pile into your hand'
-    : canShow ? 'All your cards make pairs! Tap Show to win'
-    : sel ? 'Tap it again — or drag it onto the table — to throw it'
-    : 'Drag a card up onto the table to throw it';
+  $('hint').textContent = '';
   const pairs = arr.filter(x => x.length == 2).length;
   $('mylabel').textContent = you ? (you.hand.length + ' cards · ' + pairs + ' pair' + (pairs == 1 ? '' : 's') + ' made · ' + ((R.players.find(p => p.pid === me) || {}).score || 0) + ' wins') : 'You are watching this game';
   renderLog();
@@ -325,7 +320,7 @@ function renderEnd() {
     d.append(document.createElement('i'), n, s); K.append(d);
   });
   $('again').textContent = mine && mine.ready ? 'Waiting… (tap to cancel)' : 'Rematch';
-  $('enote').textContent = R.players.length < R.minPlayers ? 'Waiting for more players to join (code ' + R.code + ')' : 'The next game starts when everyone taps Rematch';
+  $('enote').textContent = R.players.length < R.minPlayers ? 'Waiting for players…' : '';
 }
 
 // ---------- dealing animation ----------
