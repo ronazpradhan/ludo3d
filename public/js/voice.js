@@ -16,12 +16,20 @@ function voiceChat(T) {
   fetch('ice.json').then(r => r.json()).then(j => { if (Array.isArray(j.iceServers) && j.iceServers.length) ice = j.iceServers; }).catch(() => {});
 
   // ---------- connections ----------
+  // low delay: smallest receive buffer the browser allows, voice packets sent first, Opus never pauses on silence
+  const fast = rx => { try { if ('jitterBufferTarget' in rx) rx.jitterBufferTarget = 0; else rx.playoutDelayHint = 0; } catch (e) {} };
+  const prio = tx => { try { const p = tx.getParameters(); if (p.encodings && p.encodings.length) { p.encodings.forEach(x => { x.priority = 'high'; x.networkPriority = 'high'; }); tx.setParameters(p).catch(() => {}); } } catch (e) {} };
+  const opus = d => {
+    const m = /a=rtpmap:(\d+) opus\/48000/i.exec(d.sdp); if (!m) return d;
+    const sdp = d.sdp.replace(new RegExp('a=fmtp:' + m[1] + ' ([^\r\n]*)'), (x, f) => 'a=fmtp:' + m[1] + ' ' + f.split(';').filter(k => !/^(useinbandfec|usedtx|stereo)=/.test(k)).concat('useinbandfec=1', 'usedtx=0', 'stereo=0').join(';'));
+    return { type: d.type, sdp };
+  };
   const wanted = p => mic || p.mic;   // a link is only needed while one of the two is talking
   function make(id, offerer) {
     const pc = new RTCPeerConnection({ iceServers: ice }), c = { pc, tr: null, pend: [], audio: new Audio(), an: null };
     c.audio.autoplay = true; c.audio.setAttribute('playsinline', ''); c.audio.muted = !spk;
     if (offerer) { c.tr = pc.addTransceiver('audio', { direction: 'sendrecv' }); if (stream) c.tr.sender.replaceTrack(stream.getAudioTracks()[0]).catch(() => {}); }
-    pc.ontrack = e => { const s = e.streams[0] || new MediaStream([e.track]); c.audio.srcObject = s; c.audio.play().catch(() => {}); c.an = meter(s); };
+    pc.ontrack = e => { fast(e.receiver); const s = e.streams[0] || new MediaStream([e.track]); c.audio.srcObject = s; c.audio.play().catch(() => {}); c.an = meter(s); };
     pc.onicecandidate = e => { if (e.candidate) T.signal(id, { c: e.candidate.toJSON() }); };
     pc.onconnectionstatechange = () => { if (pc.connectionState == 'failed' && pcs.get(id) === c) { close(id); setTimeout(reconcile, 1500); } };
     pcs.set(id, c); return c;
@@ -32,7 +40,7 @@ function voiceChat(T) {
   }
   async function offer(id) {
     const c = make(id, true);
-    try { await c.pc.setLocalDescription(await c.pc.createOffer()); T.signal(id, { sdp: c.pc.localDescription.toJSON() }); } catch (e) { close(id); }
+    try { await c.pc.setLocalDescription(opus(await c.pc.createOffer())); prio(c.tr.sender); T.signal(id, { sdp: c.pc.localDescription.toJSON() }); } catch (e) { close(id); }
   }
   T.onSignal(async (from, d) => {
     if (!d || typeof d != 'object' || !T.members().some(p => p.id === from)) return;
@@ -44,7 +52,7 @@ function voiceChat(T) {
         await c.pc.setRemoteDescription(d.sdp);
         c.tr = c.pc.getTransceivers()[0]; c.tr.direction = 'sendrecv';
         if (stream) await c.tr.sender.replaceTrack(stream.getAudioTracks()[0]);
-        await c.pc.setLocalDescription(await c.pc.createAnswer());
+        await c.pc.setLocalDescription(opus(await c.pc.createAnswer())); prio(c.tr.sender);
         T.signal(from, { sdp: c.pc.localDescription.toJSON() });
       } else if (d.sdp && d.sdp.type == 'answer' && c && c.pc.signalingState == 'have-local-offer') await c.pc.setRemoteDescription(d.sdp);
       else if (d.c && c) { if (c.pc.remoteDescription) await c.pc.addIceCandidate(d.c); else c.pend.push(d.c); return; }

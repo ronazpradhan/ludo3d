@@ -12,6 +12,7 @@ const sfx={
  step(p){tone(520+Math.min(p,50)*8,0,.09,{v:.12,f2:380});noise(0,.03,{f:3000,v:.05})},
  out(){noise(0,.25,{f:1200,v:.1});[660,880,1320].forEach((f,i)=>tone(f,i*.06,.25,{v:.09}))},
  tick(){tone(900,0,.05,{v:.08,f2:700})},
+ shake(){noise(0,.12,{f:1800,q:.6,v:.04,ty:'highpass'});this.tok(.04,.08,210)},
  chime(){tone(784,0,.4,{v:.1});tone(1175,.09,.5,{v:.08})},
  six(){tone(1400,0,.12,{v:.04,f2:1800})},
  start(){tone(392,0,.3,{v:.1});tone(523,.1,.3,{v:.1});tone(784,.2,.5,{v:.1})},
@@ -26,9 +27,14 @@ const sfx={
 // ---- audio files (capture sound + soundboard) ----
 const SFILES={};let unl=0;
 const fileEl=src=>SFILES[src]||(SFILES[src]=Object.assign(new Audio(src),{preload:'auto'}));
-function playFile(src,vol=1,onfail){if(!src)return false;try{const a=fileEl(src);a.volume=vol;a.currentTime=0;const p=a.play();if(p&&p.catch)p.catch(()=>{if(onfail)onfail()});return true}catch(e){if(onfail)onfail();return false}}
+// files are decoded into Web Audio once, so they play the instant they're triggered (the <audio> element lags on phones)
+const BUF={};
+function loadBuf(src){if(!src||src in BUF)return;BUF[src]=null;fetch(src).then(r=>r.arrayBuffer()).then(a=>new Promise((res,rej)=>ac().decodeAudioData(a,res,rej))).then(b=>{BUF[src]=b}).catch(()=>{delete BUF[src]})}
+function playFile(src,vol=1,onfail){if(!src)return false;
+ if(BUF[src]){try{const A=ac(),s=A.createBufferSource(),g=A.createGain();g.gain.value=vol;s.buffer=BUF[src];s.connect(g);g.connect(MG);s.start();return true}catch(e){}}
+ loadBuf(src);try{const a=fileEl(src);a.volume=vol;a.currentTime=0;const p=a.play();if(p&&p.catch)p.catch(()=>{if(onfail)onfail()});return true}catch(e){if(onfail)onfail();return false}}
 // phones only allow audio after a tap, so unlock everything on the first touch
-function unlockAudio(){try{ac()}catch(e){}[AUDIO.capture,...AUDIO.board.map(x=>x.src)].filter(Boolean).forEach(s=>{const a=fileEl(s);a.muted=true;const p=a.play();if(p&&p.then)p.then(()=>{a.pause();a.currentTime=0;a.muted=false}).catch(()=>{a.muted=false});else a.muted=false})}
+function unlockAudio(){try{ac()}catch(e){}[AUDIO.capture,...AUDIO.board.map(x=>x.src)].filter(Boolean).forEach(s=>{loadBuf(s);const a=fileEl(s);a.muted=true;const p=a.play();if(p&&p.then)p.then(()=>{a.pause();a.currentTime=0;a.muted=false}).catch(()=>{a.muted=false});else a.muted=false})}
 ['pointerdown','keydown'].forEach(ev=>addEventListener(ev,()=>{if(unl)return;unl=1;unlockAudio()},{passive:true}));
 function playBoard(i,remote,who){const x=AUDIO.board[i];if(!x||!x.src)return;const hear=snd&&boardOn;if(hear)playFile(x.src);addChat('',(remote?who||'Someone':nick)+' played '+x.label+(hear?'':' (muted)'),0,1)}
 
