@@ -413,7 +413,7 @@ $('again').onclick = () => { const p = S.room.players.find(x => x.pid === me); s
 const leave = () => { send({ t: P + 'leave' }); clearSess(); S = null; show('qconf', false); render(); };
 $('lleave').onclick = $('home').onclick = leave;
 $('qbtn').onclick = () => show('qconf', true); $('qno').onclick = () => show('qconf', false); $('qyes').onclick = leave;
-const paintSnd = () => { $('snd').textContent = snd ? '🔊' : '🔇'; }; paintSnd();
+const paintSnd = () => { $('snd').innerHTML = snd ? ICON.vol : ICON.mute; }; paintSnd();
 $('snd').onclick = () => { snd = !snd; store.set('ludo3d.sfx', snd ? '1' : '0'); paintSnd(); };
 function showResume(s) { const r = $('resume'); r.style.display = 'flex'; $('rtxt').textContent = 'Table ' + s.code;
   $('rgo').onclick = () => { r.style.display = 'none'; kicked = false; wantResume = true; send({ t: P + 'resume', code: s.code, token: s.token }); };

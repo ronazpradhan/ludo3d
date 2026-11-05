@@ -8,11 +8,11 @@ function cardChat(P) {
   const PH = ['Good game! 🎉', 'GG', 'Well played 👏', 'Nice!', 'Good luck 🍀', 'Unlucky 😅', 'Hurry up ⏰', 'Your turn!', 'Thanks 🙏', 'One more game?', 'Wow! 😱', 'Oops 😬'];
   const PAL = typeof COLORS != 'undefined' ? COLORS : ['#fbc916', '#22c55e', '#ef4444', '#3b82f6', '#a855f7', '#f97316'];
   document.body.insertAdjacentHTML('beforeend',
-    '<button id="ccbtn" class="glass" type="button" aria-label="Chat">💬<b id="ccbadge"></b></button>' +
-    '<div id="ccpanel" class="glass" role="dialog" aria-label="Table chat"><div class="cch">Chat<button id="ccclose" type="button" aria-label="Close chat">✕</button></div>' +
+    '<button id="ccbtn" class="glass" type="button" aria-label="Chat">' + ICON.chat + '<b id="ccbadge"></b></button>' +
+    '<div id="ccpanel" class="glass" role="dialog" aria-label="Table chat"><div class="cch">Chat<button id="ccclose" type="button" aria-label="Close chat">' + ICON.x + '</button></div>' +
     '<div id="cclog"></div><div id="ccpick"></div>' +
-    '<form id="ccform"><button id="ccemo" type="button" aria-label="Emoji and quick messages">😀</button>' +
-    '<input id="cctext" maxlength="200" placeholder="Message…" autocomplete="off" enterkeyhint="send"><button id="ccsend" type="submit" aria-label="Send">➤</button></form></div>' +
+    '<form id="ccform"><button id="ccemo" type="button" aria-label="Emoji and quick messages">' + ICON.smile + '</button>' +
+    '<input id="cctext" maxlength="200" placeholder="Message…" autocomplete="off" enterkeyhint="send"><button id="ccsend" type="submit" aria-label="Send">' + ICON.send + '</button></form></div>' +
     '<div id="ccfloat"></div>');
   const btn = $('ccbtn'), panel = $('ccpanel'), log = $('cclog'), input = $('cctext'), pick = $('ccpick'), float = $('ccfloat');
   let me = null, names = {}, open = false, unread = 0, last = 0;

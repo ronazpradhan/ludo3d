@@ -142,7 +142,7 @@ function placeTags(){const tg=$('tags');if(!tg||!tg.children.length)return;const
   x=Math.max(w/2+6,Math.min(W-w/2-6,x));y=Math.max(h/2+44,Math.min(H-h/2-6,y));d.style.transform=`translate(${(x-w/2).toFixed(1)}px,${(y-h/2).toFixed(1)}px)`})}
 function drawSeats(){$('seats').innerHTML=seats.map((s,c)=>`<button class="seat ${s?'':'off'}" style="--c:${CS[c]}" onclick="seats[${c}]=(seats[${c}]+1)%3;sfx.tick();drawSeats()"><i></i><span>${CN[c]}</span><em>${['Off','You','CPU'][s]}</em></button>`).join('')}
 drawSeats();
-$('snd').textContent=snd?'🔊':'🔇';$('snd').onclick=()=>{snd=!snd;store.set('ludo3d.sfx',snd?'1':'0');$('snd').textContent=snd?'🔊':'🔇'};
+$('snd').innerHTML=snd?ICON.vol:ICON.mute;$('snd').onclick=()=>{snd=!snd;store.set('ludo3d.sfx',snd?'1':'0');$('snd').innerHTML=snd?ICON.vol:ICON.mute};
 function startGame(){setBoard(seats.length);caps=seats.map(()=>0);botFor=seats.map(()=>false);turnT=null;sfx.start();if(typeof updBotBar=='function')updBotBar();
  ALL.forEach(t=>{t.g.visible=seats[t.pl]>0;if(!t.g.visible)return;t.g.position.copy(wv(t));t.g.position.y=8;t.g.scale.setScalar(.01)});
  ALL.filter(t=>t.g.visible).forEach((t,k)=>sleep(k*60).then(()=>{beep(300+k*40,.08);tween(.5,k2=>{t.g.position.y=BY+8*(1-k2)*(1-k2);t.g.scale.setScalar(Math.max(.01,k2))},ease)}));

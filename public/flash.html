@@ -20,7 +20,7 @@
   <div id="hand"></div>
   <div id="acts"></div>
  </div>
- <button id="qbtn" class="glass" aria-label="Leave game">✕</button><button id="snd" class="glass" aria-label="Sound">🔊</button>
+ <button id="qbtn" class="glass" aria-label="Leave game"><i data-icon="x"></i></button><button id="snd" class="glass" aria-label="Sound"><i data-icon="vol"></i></button>
 </div>
 
 <!-- sapati (borrow) panel -->
@@ -46,7 +46,7 @@
  <div class="blobs"><i style="--c:#f59e0b;top:-10vmax;left:-8vmax"></i><i style="--c:#ef4444;top:-6vmax;right:-10vmax"></i><i style="--c:#a855f7;bottom:-12vmax;right:-6vmax"></i><i style="--c:#22c55e;bottom:-10vmax;left:-10vmax"></i></div>
  <div class="box glass land"><img class="logo" src="img/flash.svg" alt="" width="84" height="84"><h1>Flash</h1>
   <div class="sub">3 cards · blind or seen · 2–6 players</div>
-  <div class="rm" id="resume"><span id="rtxt"></span><button class="pill" id="rgo">Rejoin</button><button class="pill" id="rno" aria-label="Forget">✕</button></div>
+  <div class="rm" id="resume"><span id="rtxt"></span><button class="pill" id="rgo">Rejoin</button><button class="pill" id="rno" aria-label="Forget"><i data-icon="x"></i></button></div>
   <input class="in" id="nick" maxlength="14" placeholder="Your name" autocomplete="nickname">
   <button class="go" id="bCreate" disabled>Create Room</button>
   <div class="row" style="margin-top:10px"><input class="in" id="code" maxlength="5" placeholder="CODE" style="margin:0;text-transform:uppercase;letter-spacing:4px"><button class="go alt" id="bJoin" disabled style="margin:0;width:auto;padding:0 26px">Join</button></div>
@@ -64,7 +64,7 @@
 
 <!-- lobby -->
 <div class="ov" id="lobby" style="display:none"><div class="box glass">
- <div class="vis" id="lvis" role="group" aria-label="Who can join"><button type="button" data-l="1" title="Public: shown in open rooms" aria-label="Public">🌐</button><button type="button" data-l="0" title="Friends only: join with the code" aria-label="Friends only">👥</button></div>
+ <div class="vis" id="lvis" role="group" aria-label="Who can join"><button type="button" data-l="1" title="Public: shown in open rooms" aria-label="Public"><i data-icon="globe"></i></button><button type="button" data-l="0" title="Friends only: join with the code" aria-label="Friends only"><i data-icon="users"></i></button></div>
  <div class="sub" style="margin:0">Flash room code</div><div id="rcode">-----</div>
  <div class="row"><button class="pill" id="cCode">Copy code</button><button class="pill" id="cLink">Copy invite link</button></div>
  <div class="seats" id="lseats" style="margin-top:14px"></div>
@@ -85,6 +85,7 @@
 </div></div>
 
 <div id="toast"></div>
+<script src="js/icons.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/realtime.js"></script>
 <script src="js/config.js"></script>

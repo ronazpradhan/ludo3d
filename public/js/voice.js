@@ -7,8 +7,8 @@ function voiceChat(T) {
   const $ = id => document.getElementById(id);
   const say = t => { if (typeof toast == 'function') toast(t); };
   document.body.insertAdjacentHTML('beforeend',
-    '<div id="vcbar"><button id="vcmic" class="glass off" type="button" aria-label="Turn microphone on" aria-pressed="false">🎤</button>' +
-    '<button id="vcspk" class="glass" type="button" aria-label="Turn voice off" aria-pressed="true">🎧<b id="vcn"></b></button><div id="vctalk"></div></div>');
+    '<div id="vcbar"><button id="vcmic" class="glass off" type="button" aria-label="Turn microphone on" aria-pressed="false">' + ICON.micOff + '</button>' +
+    '<button id="vcspk" class="glass" type="button" aria-label="Turn voice off" aria-pressed="true"><span class="vci">' + ICON.phones + '</span><b id="vcn"></b></button><div id="vctalk"></div></div>');
   const micBtn = $('vcmic'), spkBtn = $('vcspk'), talk = $('vctalk');
   const pcs = new Map();   // peer id -> { pc, tr, pend, audio, an }
   let mic = false, spk = true, stream = null, busy = false, ctx = null, myAn = null, lastFix = 0;
@@ -106,11 +106,13 @@ function voiceChat(T) {
     if (!T.active()) return;
     micBtn.classList.toggle('live', mic && level(myAn) > 0.03);
     const names = spk ? T.members().filter(p => pcs.has(p.id) && level(pcs.get(p.id).an) > 0.03).map(p => p.name) : [];
-    const txt = names.length ? '🔊 ' + names.join(', ') : '';
-    if (talk.textContent !== txt) talk.textContent = txt;
+    const txt = names.join(', ');
+    if (talk.dataset.t !== txt) { talk.dataset.t = txt; talk.innerHTML = txt ? ICON.vol : ''; talk.append(txt); }
   }, 200);
 
   function ui() {
+    if (micBtn.dataset.on !== String(mic)) { micBtn.dataset.on = mic; micBtn.innerHTML = mic ? ICON.mic : ICON.micOff; }
+    if (spkBtn.dataset.on !== String(spk)) { spkBtn.dataset.on = spk; spkBtn.querySelector('.vci').innerHTML = spk ? ICON.phones : ICON.phonesOff; }
     micBtn.classList.toggle('off', !mic); micBtn.setAttribute('aria-pressed', mic); micBtn.setAttribute('aria-label', mic ? 'Turn microphone off' : 'Turn microphone on');
     micBtn.title = mic ? 'Mic on: tap to mute' : 'Mic off: tap to talk';
     spkBtn.classList.toggle('off', !spk); spkBtn.setAttribute('aria-pressed', spk); spkBtn.setAttribute('aria-label', spk ? 'Turn voice off' : 'Turn voice on');
