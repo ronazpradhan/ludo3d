@@ -10,7 +10,7 @@ body.fl .st{min-width:92px;gap:3px;padding:8px 12px 9px}
 .fl .st.on .av::before{opacity:1}.fl .st .av.hurry{--rc:#ff9f0a}
 .fl .st .chips{font-weight:800;font-size:13px;color:#fde68a;font-variant-numeric:tabular-nums}
 .fl .st .state{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.14)}
-.fl .st .state.seen{background:#0a84ff}.fl .st .state.packed{background:rgba(255,255,255,.08);opacity:.7}
+.fl .st .state.seen{background:var(--accent)}.fl .st .state.packed{background:rgba(255,255,255,.08);opacity:.7}
 .fl .st.packed{opacity:.45}
 .fl .st .mini{display:flex;margin-top:2px}.fl .st .mini .pc{--cardw:24px;margin-left:-8px}.fl .st .mini .pc:first-child{margin-left:0}
 .fl .st .bet{font-size:10px;opacity:.75}
@@ -28,7 +28,7 @@ body.fl #mine{gap:8px}
 #me{display:flex;gap:10px;align-items:center;font-size:13px}
 #mychips{font-weight:800;font-size:16px;color:#fde68a}
 #mystate{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:2px 9px;border-radius:999px;background:rgba(255,255,255,.14)}
-#mystate.seen{background:#0a84ff}
+#mystate.seen{background:var(--accent)}
 #myname{font-weight:700;color:#fbbf24}
 body.fl #hand{--cardw:clamp(66px,15vw,92px);display:flex;justify-content:center;gap:8px;min-height:calc(var(--cardw)*1.4 + 8px);padding:4px 0;perspective:700px}
 body.fl #hand .pc{cursor:pointer}
@@ -37,7 +37,7 @@ body.fl #hand.blind .pc:hover{transform:translateY(-6px)}
 #acts button{border:0;border-radius:14px;padding:11px 16px;font:700 14px inherit;font-family:inherit;color:#fff;cursor:pointer;background:rgba(255,255,255,.14);transition:transform .2s var(--sp)}
 #acts button:active{transform:scale(.94)}
 #acts button small{display:block;font-size:11px;font-weight:600;opacity:.85}
-#acts .bet{background:#0a84ff;box-shadow:0 6px 18px rgba(10,132,255,.4)}
+#acts .bet{background:var(--accent);box-shadow:0 6px 18px rgba(139,92,246,.4)}
 #acts .raise{background:#7c3aed}
 #acts .show{background:linear-gradient(180deg,#fde68a,#f59e0b);color:#3b2400}
 #acts .pack{background:rgba(239,68,68,.85)}

@@ -4,7 +4,7 @@ body.jp{--cardw:clamp(46px,8.4vw,74px);--red:#e11d48;--gold:#ffd740}
 
 /* status line */
 #jstatus{padding:9px 20px;font-weight:600;font-size:15px;background:#000;border-radius:999px;border:.5px solid rgba(255,255,255,.18);box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:92vw;text-align:center;min-height:38px;transition:background .3s}
-#jstatus.me{background:#0a84ff;box-shadow:0 8px 30px rgba(10,132,255,.45)}
+#jstatus.me{background:var(--accent);box-shadow:0 8px 30px rgba(139,92,246,.45)}
 #jstatus.pop{animation:jpop .5s var(--sp)}@keyframes jpop{from{transform:scale(.7);opacity:0}}
 
 /* felt + seats */
@@ -37,7 +37,7 @@ body.jp{--cardw:clamp(46px,8.4vw,74px);--red:#e11d48;--gold:#ffd740}
 .pc.sm{--cardw:clamp(38px,6vw,54px)}
 .pc.stack{box-shadow:2px 2px 0 -1px #fff,2px 3px 6px rgba(0,0,0,.35),4px 4px 0 -1px #fff,4px 5px 8px rgba(0,0,0,.35)}
 #disc.stack{box-shadow:-3px 2px 0 -1px #e8eaf2,-3px 3px 6px rgba(0,0,0,.3),3px 4px 0 -1px #dfe2ec,3px 5px 8px rgba(0,0,0,.35)}
-button.pc.can{cursor:grab;animation:glow 1.6s ease-in-out infinite}@keyframes glow{50%{box-shadow:0 0 0 3px #0a84ff,0 0 26px #0a84ff}}
+button.pc.can{cursor:grab;animation:glow 1.6s ease-in-out infinite}@keyframes glow{50%{box-shadow:0 0 0 3px var(--accent),0 0 26px var(--accent)}}
 button.pc.can:active{transform:scale(.93)}
 
 /* my hand: one fanned, overlapping row (layout + fan angles are set by jutpatti.js) */
@@ -54,12 +54,12 @@ button.pc.can:active{transform:scale(.93)}
 #hand .grp.bad{animation:shk .45s 2}
 #hand .pc{cursor:grab;top:0}
 #hand:not(.wait) .pc:hover{top:-8px}
-#hand .pc.sel{top:-18px;box-shadow:0 0 0 3px #0a84ff,0 10px 24px rgba(10,132,255,.55)}
+#hand .pc.sel{top:-18px;box-shadow:0 0 0 3px var(--accent),0 10px 24px rgba(139,92,246,.55)}
 #hand .pc.pt{top:-10px;box-shadow:0 0 0 3px var(--gold),0 0 26px var(--gold)}
 #hand .pc.undealt{visibility:hidden}
-#hand .pc.new::before{content:'NEW';position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);font-size:9px;font-weight:800;color:#fff;background:#0a84ff;border-radius:999px;padding:1px 6px;z-index:2}
+#hand .pc.new::before{content:'NEW';position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);font-size:9px;font-weight:800;color:#fff;background:var(--accent);border-radius:999px;padding:1px 6px;z-index:2}
 #hint{font-size:13px;opacity:.7;min-height:18px;text-align:center;padding:0 12px}
-#caret{display:none;position:fixed;z-index:39;width:4px;margin-left:-2px;border-radius:4px;background:#0a84ff;box-shadow:0 0 14px #0a84ff;pointer-events:none}
+#caret{display:none;position:fixed;z-index:39;width:4px;margin-left:-2px;border-radius:4px;background:var(--accent);box-shadow:0 0 14px var(--accent);pointer-events:none}
 
 /* Show button: only appears once every card is in a pair you made */
 #showBtn{display:none;width:auto;padding:12px 28px;font-size:17px;color:#2a1d00;background:linear-gradient(180deg,#ffe58a,#ffc400);box-shadow:0 8px 28px rgba(255,196,0,.5);animation:showp 1.4s ease-in-out infinite}
@@ -72,7 +72,7 @@ button.pc.can:active{transform:scale(.93)}
 .pc.fly{position:fixed;z-index:35;pointer-events:none;margin:0;transition:none}
 #felt.hot{box-shadow:inset 0 0 0 4px rgba(34,197,94,.55),inset 0 0 60px rgba(0,0,0,.55),0 24px 60px rgba(0,0,0,.5)}
 #felt.hot #disc{box-shadow:0 0 0 3px #22c55e,0 0 32px #22c55e}
-#mine.hot #hand{background:rgba(10,132,255,.12);box-shadow:inset 0 0 0 2px rgba(10,132,255,.55)}
+#mine.hot #hand{background:rgba(139,92,246,.12);box-shadow:inset 0 0 0 2px rgba(139,92,246,.55)}
 
 /* winner lays their pairs face up on the table */
 #reveal{position:absolute;inset:8% 6%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-radius:30px;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:3;animation:fi .4s ease both;perspective:800px}
@@ -88,7 +88,7 @@ button.pc.can:active{transform:scale(.93)}
 
 /* lobby + end */
 #hsize{display:flex;align-items:center;gap:6px;justify-content:center;margin:-6px 0 14px;font-size:13px;flex-wrap:wrap}
-#hsize .pill{padding:6px 12px}#hsize .pill.on{background:#0a84ff}
+#hsize .pill{padding:6px 12px}#hsize .pill.on{background:var(--accent)}
 #lready.on{background:#22c55e;box-shadow:0 8px 24px rgba(34,197,94,.4)}
 .seat .host{font-size:12px;opacity:.7;margin-left:4px}
 #whand{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:12px 0 0;--cardw:40px;perspective:600px}
@@ -120,7 +120,7 @@ button.pc.can:active{transform:scale(.93)}
 #lobby .box{position:relative}
 .vis{position:absolute;top:12px;right:12px;display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(255,255,255,.08)}
 .vis button{width:30px;height:30px;border:0;border-radius:50%;background:none;font-size:15px;line-height:1;cursor:pointer;opacity:.4;filter:grayscale(1);transition:all .25s var(--sp);padding:0}
-.vis button.on{opacity:1;filter:none;background:rgba(10,132,255,.35);box-shadow:inset 0 0 0 1.5px #0a84ff}
+.vis button.on{opacity:1;filter:none;background:rgba(139,92,246,.35);box-shadow:inset 0 0 0 1.5px var(--accent)}
 .vis button:not(:disabled):active{transform:scale(.88)}
 .vis.ro button{cursor:default}.vis.ro button:not(.on){display:none}
 #rooms .rm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

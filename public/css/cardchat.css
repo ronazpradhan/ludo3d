@@ -16,7 +16,7 @@ body.cc-on #ccpanel{display:flex}#ccpanel.open{transform:none}
 .ccquick button:active,.ccemos button:active{background:rgba(255,255,255,.22)}
 #ccform{display:flex;gap:6px;padding:10px;border-top:.5px solid rgba(255,255,255,.12)}
 #ccform button{flex:none;border:0;width:40px;height:40px;border-radius:12px;font-size:18px;cursor:pointer;color:#fff;background:rgba(255,255,255,.12)}
-#ccform #ccsend{background:#0a84ff}
+#ccform #ccsend{background:var(--accent)}
 /* 16px: below that iPhones zoom in when you tap the box */
 #cctext{flex:1;min-width:0;height:40px;border:0;border-radius:12px;padding:0 12px;background:rgba(255,255,255,.1);color:#fff;font:inherit;font-size:16px;outline:none}
 /* new messages pop up briefly while the panel is closed */

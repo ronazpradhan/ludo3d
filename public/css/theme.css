@@ -1,0 +1,93 @@
+/* Site theme: premium gaming look, solid panels (no frosted glass), purple lead, lime highlight, chunky buttons.
+   Loaded last on every page so it restyles the shared pieces without touching game layouts. */
+:root{
+  --bg:#0e1022;--bg-2:#14173a;--surface:#191c3f;--surface-2:#20244d;
+  --line:rgba(255,255,255,.09);--line-2:rgba(255,255,255,.16);
+  --text:#f3f1ff;--muted:#a6a3c7;
+  --accent:#8b5cf6;--accent-hi:#a78bfa;--accent-lo:#6d3fe0;
+  --lime:#c8f560;--coral:#ff7a59;
+  --shadow:0 10px 30px rgba(3,4,18,.45);
+  --bg1:#191c3f;--bg2:#0e1022;--tx:#f3f1ff;
+  color-scheme:dark;
+}
+html{background:
+  radial-gradient(60rem 40rem at 110% -10%,rgba(139,92,246,.16),transparent 60%),
+  radial-gradient(40rem 30rem at -20% 110%,rgba(200,245,96,.06),transparent 60%),
+  var(--bg) fixed;color:var(--text)}
+body{background:transparent;color:var(--text)}
+/* faint launcher grid behind menus, fading out from the top */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:44px 44px;-webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 30%,transparent 75%);mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 30%,transparent 75%)}
+.blobs{display:none}
+/* no frosted glass anywhere */
+*,*::before,*::after{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
+
+/* panels */
+.glass{background:linear-gradient(180deg,#1b1e44,#13152f);border:1px solid rgba(255,255,255,.08);box-shadow:0 18px 40px rgba(3,4,18,.55),inset 0 1px 0 rgba(255,255,255,.07)}
+.ov{background:rgba(6,7,18,.84)}
+.ov .box{border-radius:20px;position:relative}
+.ov .box::before{content:'';position:absolute;left:22px;right:22px;top:-1px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--accent),var(--lime),transparent);opacity:.8}
+.ov h1{font-family:var(--display);letter-spacing:-.03em}
+.sub{color:var(--muted);opacity:1}
+
+/* buttons: solid purple that presses down */
+.go{border-radius:12px;font-family:var(--display);font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:16px;background:linear-gradient(180deg,#9d72ff,#7c4dff);box-shadow:0 5px 0 var(--accent-lo),0 12px 26px rgba(139,92,246,.32);transition:transform .15s,box-shadow .15s,background .2s}
+.go:hover:not(:disabled){background:linear-gradient(180deg,#ab86ff,#8a5cff)}
+.go:active:not(:disabled){transform:translateY(4px);box-shadow:0 1px 0 var(--accent-lo),0 4px 12px rgba(139,92,246,.25)}
+.go:disabled{opacity:1;background:#34305e;color:#9d98c7;box-shadow:0 5px 0 #26224a}
+.go.alt{background:linear-gradient(180deg,#252a58,#1c2047);color:var(--text);box-shadow:0 5px 0 #0b0d22,inset 0 0 0 1px var(--line-2)}
+.go.alt:hover:not(:disabled){background:#272c5c}
+.go.alt:active:not(:disabled){box-shadow:0 1px 0 #0b0d22,inset 0 0 0 1px var(--line-2)}
+.pill{border-radius:10px;font-weight:700;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px var(--line-2);color:var(--text);transition:background .2s,transform .15s}
+.pill:hover{background:rgba(255,255,255,.11)}
+.pill:active{transform:scale(.96)}
+
+/* inputs */
+.in{background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px var(--line-2);border-radius:14px;transition:box-shadow .2s,background .2s}
+.in::placeholder{color:var(--muted);opacity:.8}
+.in:focus{background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 2px var(--accent),0 0 0 4px rgba(139,92,246,.22)}
+
+/* lobby */
+#rcode{color:var(--lime);font-weight:700;text-shadow:0 0 30px rgba(200,245,96,.25)}
+.seat{background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px var(--line)}
+.seat em{background:rgba(255,255,255,.08);color:var(--text)}
+.rm{background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px var(--line)}
+
+/* round buttons on the table and the voice dock */
+#qbtn,#snd,#ctog,#ccbtn,#vcbar button{transition:transform .15s,background .2s}
+#qbtn:hover,#snd:hover,#ctog:hover,#ccbtn:hover{background:rgba(40,44,90,.9)}
+#vcmic:not(.off){background:rgba(200,245,96,.18);box-shadow:0 0 0 2px var(--lime);color:var(--lime)}
+#vcmic.live{box-shadow:0 0 0 3px var(--lime),0 0 18px 4px rgba(200,245,96,.45)}
+#vcn{background:var(--lime);color:var(--bg)}
+#cbadge,#ccbadge{background:var(--coral);color:var(--bg);font-weight:800}
+
+/* chat */
+.cin input,#cctext{background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px var(--line)}
+.ccquick button,.etabs button{background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px var(--line)}
+
+/* toasts */
+#toast{background:var(--surface-2);box-shadow:var(--shadow),inset 0 0 0 1px var(--line-2);color:var(--text)}
+
+/* "How to play" */
+.how summary{color:var(--muted)}
+.how p{color:var(--muted)}
+.how b{color:var(--text)}
+
+@media(prefers-reduced-motion:reduce){.go,.pill,#qbtn,#snd{transition:none}}
+
+/* home page: a game library, each card glowing in its game's colour */
+h1,main h1{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--text);letter-spacing:-.04em}
+main h1{font-size:46px;text-transform:uppercase;letter-spacing:-.01em;line-height:1}
+.grid .game:nth-child(1){--g:#f5b70a}.grid .game:nth-child(2){--g:#22c55e}.grid .game:nth-child(3){--g:#ef4444}.grid .game:nth-child(4){--g:#0ea5e9}.grid .game:nth-child(5){--g:#a78bfa}
+.game{--g:var(--accent);border-radius:18px;overflow:hidden;background:radial-gradient(120% 140% at 0% 50%,color-mix(in srgb,var(--g) 22%,transparent),transparent 55%),linear-gradient(180deg,#1b1e44,#13152f);border:1px solid rgba(255,255,255,.08);box-shadow:0 14px 34px rgba(3,4,18,.5),inset 0 1px 0 rgba(255,255,255,.07);transition:transform .25s var(--sp),border-color .25s,box-shadow .25s}
+.game::after{content:'';position:absolute;left:0;top:18%;bottom:18%;width:3px;border-radius:0 3px 3px 0;background:var(--g);box-shadow:0 0 16px var(--g)}
+a.game:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--g) 55%,transparent);box-shadow:0 18px 40px rgba(3,4,18,.6),0 0 0 1px color-mix(in srgb,var(--g) 30%,transparent),0 0 30px color-mix(in srgb,var(--g) 22%,transparent)}
+a.game:active{transform:scale(.98)}
+.game .art{box-shadow:0 10px 26px color-mix(in srgb,var(--g) 35%,transparent);filter:none}
+.game h2{font-family:var(--display);font-weight:800;letter-spacing:-.02em;font-size:23px}
+.act{font-family:var(--display);font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:13px;border-radius:10px;padding:10px 18px;background:linear-gradient(180deg,#9d72ff,#7c4dff);box-shadow:0 4px 0 var(--accent-lo);transition:transform .15s,box-shadow .15s}
+a.game:active .act{transform:translateY(3px);box-shadow:0 1px 0 var(--accent-lo)}
+@media(min-width:720px){
+ .game{background:radial-gradient(90% 80% at 50% 0%,color-mix(in srgb,var(--g) 24%,transparent),transparent 65%),linear-gradient(180deg,#1b1e44,#13152f)}
+ .game::after{left:22%;right:22%;top:0;bottom:auto;width:auto;height:3px;border-radius:0 0 3px 3px}
+}
